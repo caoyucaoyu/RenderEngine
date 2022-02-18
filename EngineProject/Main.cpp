@@ -378,7 +378,7 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE prevInstance,PSTR cmdLine, int
 			CommandList->RSSetViewports(1, &ScreenViewport);
 			CommandList->RSSetScissorRects(1, &ScissorRect);
 
-			CommandList->ClearRenderTargetView(CurrentBackBufferView(),Colors::GreenYellow, 0, nullptr);
+			CommandList->ClearRenderTargetView(CurrentBackBufferView(),Colors::Black, 0, nullptr);
 			CommandList->ClearDepthStencilView(DepthStencilView(),D3D12_CLEAR_FLAG_DEPTH | D3D12_CLEAR_FLAG_STENCIL,1.0f, 0, 0, nullptr);
 
 			CommandList->OMSetRenderTargets(1, &CurrentBackBufferView(),true, &DepthStencilView());
