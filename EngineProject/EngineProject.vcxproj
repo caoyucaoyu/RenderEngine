@@ -19,24 +19,30 @@
     </ProjectConfiguration>
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="D3DInit.h" />
-    <ClInclude Include="D3DUtil.h" />
-    <ClInclude Include="FrameResource.h" />
-    <ClInclude Include="GameTimer.h" />
-    <ClInclude Include="Head.h" />
-    <ClInclude Include="d3dx12.h" />
-    <ClInclude Include="D3DApp.h" />
-    <ClInclude Include="MathHelper.h" />
-    <ClInclude Include="UploadBuffer.h" />
+    <ClCompile Include="Source\Camera.cpp" />
+    <ClCompile Include="Source\D3DApp.cpp" />
+    <ClCompile Include="Source\D3DInit.cpp" />
+    <ClCompile Include="Source\D3DUtil.cpp" />
+    <ClCompile Include="Source\FrameResource.cpp" />
+    <ClCompile Include="Source\GameTimer.cpp" />
+    <ClCompile Include="Source\stdafx.cpp">
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Create</PrecompiledHeader>
+    </ClCompile>
+    <ClCompile Include="Source\Main.cpp" />
+    <ClCompile Include="Source\MathHelper.cpp" />
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="D3DApp.cpp" />
-    <ClCompile Include="D3DInit.cpp" />
-    <ClCompile Include="D3DUtil.cpp" />
-    <ClCompile Include="FrameResource.cpp" />
-    <ClCompile Include="GameTimer.cpp" />
-    <ClCompile Include="Main.cpp" />
-    <ClCompile Include="MathHelper.cpp" />
+    <ClInclude Include="Source\Camera.h" />
+    <ClInclude Include="Source\D3DApp.h" />
+    <ClInclude Include="Source\D3DInit.h" />
+    <ClInclude Include="Source\D3DUtil.h" />
+    <ClInclude Include="Source\d3dx12.h" />
+    <ClInclude Include="Source\FrameResource.h" />
+    <ClInclude Include="Source\GameTimer.h" />
+    <ClInclude Include="Source\stdafx.h" />
+    <ClInclude Include="Source\MathHelper.h" />
+    <ClInclude Include="Source\Mesh.h" />
+    <ClInclude Include="Source\UploadBuffer.h" />
   </ItemGroup>
   <PropertyGroup Label="Globals">
     <VCProjectVersion>16.0</VCProjectVersion>
@@ -135,8 +141,11 @@
     <ClCompile>
       <WarningLevel>Level3</WarningLevel>
       <SDLCheck>true</SDLCheck>
-      <PreprocessorDefinitions>_DEBUG;_WINDOWS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions>PLATFORM_WINDOWS=1;_DEBUG;_WINDOWS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>false</ConformanceMode>
+      <AdditionalIncludeDirectories>eigen-3.4.0\Eigen;glm;</AdditionalIncludeDirectories>
+      <PrecompiledHeaderFile>stdafx.h</PrecompiledHeaderFile>
+      <PrecompiledHeader>Use</PrecompiledHeader>
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
