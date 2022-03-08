@@ -15,32 +15,36 @@ cbuffer cbPass : register(b1)
 struct VertexIn
 {
 	float3 PosL  : POSITION;
-    float4 Normal : NORMAL;
+	float4 Normal : NORMAL;
 };
 
 struct VertexOut
 {
 	float4 PosH  : SV_POSITION;
-    float4 Normal : NORMAL;
+	float4 Normal : NORMAL;
 };
 
 VertexOut VS(VertexIn vin)
 {
 	VertexOut vout;
-	float4x4 gWorld = mul(mul(gScale,gRotation), gLocation);
+	float4x4 gWorld = mul(mul(gScale, gRotation), gLocation);
 	float3 PosW = mul(float4(vin.PosL, 1.0f), gWorld).xyz;
 
-	
+	vout.Normal = mul(vin.Normal, gRotation);
+	float Speed = 3.4f;
+	float Tr = 10.0f;
+	PosW.x += sin(gTime* Speed) * vout.Normal.x * Tr;
+	PosW.y += sin(gTime* Speed) * vout.Normal.y * Tr;
+	PosW.z += sin(gTime* Speed) * vout.Normal.z * Tr;
+
 	vout.PosH = mul(float4(PosW, 1.0f), gViewProj);
 
-    vout.Normal = mul(vin.Normal, gRotation);
-    
-    return vout;
+
+	return vout;
 }
 
 float4 PS(VertexOut pin) : SV_Target
 {
-	return (pin.Normal + 1) * 0.5 ;
+	return (pin.Normal + 1) * 0.5;
 }
-
 

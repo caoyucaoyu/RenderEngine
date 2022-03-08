@@ -7,6 +7,8 @@
 #include "MathHelper.h"
 #include <DirectXMath.h>
 
+using Microsoft::WRL::ComPtr;
+
 struct Float3
 {
 	float X;
@@ -182,6 +184,7 @@ public:
 				//Vert.Color = DirectX::XMFLOAT4(float(i + 1) / VCount * 2, float(i + 1) / VCount, 0, 1.0f);
 				Vert.Normal.x = Normal.X; Vert.Normal.y = Normal.Y; Vert.Normal.z = Normal.Z; Vert.Normal.w = Normal.W;
 				Vert.Color = DirectX::XMFLOAT4(Normal.X,Normal.Y,Normal.Z,1.0f);
+
 				Mesh.Vertices.push_back(Vert);				
 			}
 
@@ -204,6 +207,50 @@ public:
 		readFile.close();
 	}
 
+	static ComPtr<ID3D12Resource> CreateDefaultBuffer(ID3D12Device* Device, ID3D12GraphicsCommandList* CmdList, const void* InitData, UINT64 ByteSize, ComPtr<ID3D12Resource>& UploadBuffer)
+	{
+		ComPtr<ID3D12Resource> DefaultBuffer;
+
+		//Create Default Buffer
+		Device->CreateCommittedResource(
+			&CD3DX12_HEAP_PROPERTIES(D3D12_HEAP_TYPE_DEFAULT),
+			D3D12_HEAP_FLAG_NONE,
+			&CD3DX12_RESOURCE_DESC::Buffer(ByteSize),
+			D3D12_RESOURCE_STATE_COMMON,
+			nullptr,
+			IID_PPV_ARGS(DefaultBuffer.GetAddressOf()));
+
+		//Create Upload Heap,  for Copy CPU into Default Buffer
+		Device->CreateCommittedResource(
+			&CD3DX12_HEAP_PROPERTIES(D3D12_HEAP_TYPE_UPLOAD),
+			D3D12_HEAP_FLAG_NONE,
+			&CD3DX12_RESOURCE_DESC::Buffer(ByteSize),
+			D3D12_RESOURCE_STATE_GENERIC_READ,
+			nullptr,
+			IID_PPV_ARGS(UploadBuffer.GetAddressOf()));
+
+		D3D12_SUBRESOURCE_DATA SubResourceData = {};
+		SubResourceData.pData = InitData;
+		SubResourceData.RowPitch = ByteSize;
+		SubResourceData.SlicePitch = SubResourceData.RowPitch;
+
+		CmdList->ResourceBarrier(1, &CD3DX12_RESOURCE_BARRIER::Transition(DefaultBuffer.Get(),
+			D3D12_RESOURCE_STATE_COMMON,
+			D3D12_RESOURCE_STATE_COPY_DEST));
+		UpdateSubresources<1>(CmdList, DefaultBuffer.Get(), UploadBuffer.Get(), 0, 0, 1, &SubResourceData);
+		CmdList->ResourceBarrier(1,
+			&CD3DX12_RESOURCE_BARRIER::Transition(DefaultBuffer.Get(), D3D12_RESOURCE_STATE_COPY_DEST, D3D12_RESOURCE_STATE_GENERIC_READ));
+
+		return DefaultBuffer;
+	}
+
+	static ComPtr<ID3DBlob> CompileShader(const std::wstring& Filename, const D3D_SHADER_MACRO* Defines, const std::string& EntryPoint, const std::string& Target)
+	{
+		ComPtr<ID3DBlob> ByteCode;
+		ComPtr<ID3DBlob> Errors;
+		D3DCompileFromFile(Filename.c_str(), Defines, D3D_COMPILE_STANDARD_FILE_INCLUDE, EntryPoint.c_str(), Target.c_str(), 0, 0, &ByteCode, &Errors);
+		return ByteCode;
+	}
 };
 
 

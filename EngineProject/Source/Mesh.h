@@ -53,22 +53,22 @@ struct MeshGeometry
 
 	D3D12_VERTEX_BUFFER_VIEW VertexBufferView()const
 	{
-		D3D12_VERTEX_BUFFER_VIEW vbv;
-		vbv.BufferLocation = VertexBufferGPU->GetGPUVirtualAddress();
-		vbv.StrideInBytes = VertexByteStride;
-		vbv.SizeInBytes = VbByteSize;
+		D3D12_VERTEX_BUFFER_VIEW Vbv;
+		Vbv.BufferLocation = VertexBufferGPU->GetGPUVirtualAddress();
+		Vbv.StrideInBytes = VertexByteStride;
+		Vbv.SizeInBytes = VbByteSize;
 
-		return vbv;
+		return Vbv;
 	}
 
 	D3D12_INDEX_BUFFER_VIEW IndexBufferView()const
 	{
-		D3D12_INDEX_BUFFER_VIEW ibv;
-		ibv.BufferLocation = IndexBufferGPU->GetGPUVirtualAddress();
-		ibv.Format = DXGI_FORMAT_R16_UINT;
-		ibv.SizeInBytes = IbByteSize;
+		D3D12_INDEX_BUFFER_VIEW Ibv;
+		Ibv.BufferLocation = IndexBufferGPU->GetGPUVirtualAddress();
+		Ibv.Format = DXGI_FORMAT_R16_UINT;
+		Ibv.SizeInBytes = IbByteSize;
 
-		return ibv;
+		return Ibv;
 	}
 
 	void DisposeUploaders()

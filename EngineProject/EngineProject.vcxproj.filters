@@ -13,69 +13,108 @@
       <UniqueIdentifier>{67DA6AB6-F800-4c08-8B7A-83BB121AAD01}</UniqueIdentifier>
       <Extensions>rc;ico;cur;bmp;dlg;rc2;rct;bin;rgs;gif;jpg;jpeg;jpe;resx;tiff;tif;png;wav;mfcribbon-ms</Extensions>
     </Filter>
+    <Filter Include="Source Files\Source">
+      <UniqueIdentifier>{0e3a2572-9b96-4fa6-b251-31725f9a4306}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\Other">
+      <UniqueIdentifier>{270f7e0f-a370-4279-be9a-437aa31aafba}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\DX">
+      <UniqueIdentifier>{cf163ae1-6c13-46c4-a259-b512af3c81b2}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="Source\Camera.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="Source\D3DApp.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="Source\D3DInit.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="Source\D3DUtil.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="Source\FrameResource.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="Source\GameTimer.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="Source\Main.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="Source\MathHelper.cpp">
-      <Filter>Source Files</Filter>
+    <ClCompile Include="Source\AppWin32.cpp">
+      <Filter>Source Files\Source</Filter>
     </ClCompile>
     <ClCompile Include="Source\stdafx.cpp">
-      <Filter>Source Files</Filter>
+      <Filter>Source Files\Source</Filter>
+    </ClCompile>
+    <ClCompile Include="Source\Scene.cpp">
+      <Filter>Source Files\Source</Filter>
+    </ClCompile>
+    <ClCompile Include="Source\App.cpp">
+      <Filter>Source Files\Source</Filter>
+    </ClCompile>
+    <ClCompile Include="Source\Main.cpp">
+      <Filter>Source Files\Source</Filter>
+    </ClCompile>
+    <ClCompile Include="Source\DxRenderer.cpp">
+      <Filter>Source Files\Source</Filter>
+    </ClCompile>
+    <ClCompile Include="Source\Engine.cpp">
+      <Filter>Source Files\Source</Filter>
+    </ClCompile>
+    <ClCompile Include="Source\Camera.cpp">
+      <Filter>Source Files\DX</Filter>
+    </ClCompile>
+    <ClCompile Include="Source\old.cpp">
+      <Filter>Source Files\Other</Filter>
+    </ClCompile>
+    <ClCompile Include="Source\Input.cpp">
+      <Filter>Source Files\Source</Filter>
+    </ClCompile>
+    <ClCompile Include="Source\FrameResource.cpp">
+      <Filter>Source Files\DX</Filter>
+    </ClCompile>
+    <ClCompile Include="Source\MathHelper.cpp">
+      <Filter>Source Files\DX</Filter>
+    </ClCompile>
+    <ClCompile Include="Source\GameTimer.cpp">
+      <Filter>Source Files\DX</Filter>
+    </ClCompile>
+    <ClCompile Include="Source\D3DUtil.cpp">
+      <Filter>Source Files\DX</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="Source\Camera.h">
-      <Filter>Source Files</Filter>
-    </ClInclude>
-    <ClInclude Include="Source\D3DApp.h">
-      <Filter>Source Files</Filter>
-    </ClInclude>
-    <ClInclude Include="Source\D3DInit.h">
-      <Filter>Source Files</Filter>
-    </ClInclude>
-    <ClInclude Include="Source\D3DUtil.h">
-      <Filter>Source Files</Filter>
-    </ClInclude>
-    <ClInclude Include="Source\d3dx12.h">
-      <Filter>Source Files</Filter>
-    </ClInclude>
-    <ClInclude Include="Source\FrameResource.h">
-      <Filter>Source Files</Filter>
-    </ClInclude>
-    <ClInclude Include="Source\GameTimer.h">
-      <Filter>Source Files</Filter>
+    <ClInclude Include="Source\AppWin32.h">
+      <Filter>Source Files\Source</Filter>
     </ClInclude>
     <ClInclude Include="Source\stdafx.h">
-      <Filter>Source Files</Filter>
+      <Filter>Source Files\Source</Filter>
+    </ClInclude>
+    <ClInclude Include="Source\Scene.h">
+      <Filter>Source Files\Source</Filter>
+    </ClInclude>
+    <ClInclude Include="Source\App.h">
+      <Filter>Source Files\Source</Filter>
+    </ClInclude>
+    <ClInclude Include="Source\DxRenderer.h">
+      <Filter>Source Files\Source</Filter>
+    </ClInclude>
+    <ClInclude Include="Source\Engine.h">
+      <Filter>Source Files\Source</Filter>
+    </ClInclude>
+    <ClInclude Include="Source\Camera.h">
+      <Filter>Source Files\DX</Filter>
+    </ClInclude>
+    <ClInclude Include="Source\old.h">
+      <Filter>Source Files\Other</Filter>
+    </ClInclude>
+    <ClInclude Include="Source\Input.h">
+      <Filter>Source Files\Source</Filter>
+    </ClInclude>
+    <ClInclude Include="Source\FrameResource.h">
+      <Filter>Source Files\DX</Filter>
     </ClInclude>
     <ClInclude Include="Source\MathHelper.h">
-      <Filter>Source Files</Filter>
+      <Filter>Source Files\DX</Filter>
     </ClInclude>
     <ClInclude Include="Source\UploadBuffer.h">
-      <Filter>Source Files</Filter>
+      <Filter>Source Files\DX</Filter>
+    </ClInclude>
+    <ClInclude Include="Source\GameTimer.h">
+      <Filter>Source Files\DX</Filter>
+    </ClInclude>
+    <ClInclude Include="Source\D3DUtil.h">
+      <Filter>Source Files\DX</Filter>
+    </ClInclude>
+    <ClInclude Include="Source\d3dx12.h">
+      <Filter>Source Files\DX</Filter>
     </ClInclude>
     <ClInclude Include="Source\Mesh.h">
-      <Filter>Source Files</Filter>
+      <Filter>Source Files\DX</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>

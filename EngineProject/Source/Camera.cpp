@@ -5,12 +5,45 @@ using namespace DirectX;
 
 Camera::Camera()
 {
-	SetLens(0.25f * MathHelper::Pi, 1.0f, 1.0f, 1000.0f);
+	SetLens(0.25f * MathHelper::Pi, 1.0f, 1.0f, 10000.0f);
 }
 
 Camera::~Camera()
 {
 
+}
+
+void Camera::Update()
+{	
+	static float Lastx = 0;
+	static float Lasty = 0;
+
+	if (Input::MouseDown())
+	{
+		float dx = DirectX::XMConvertToRadians(0.25f * static_cast<float>(Input::GetMousePose().x - Lastx));
+		float dy = DirectX::XMConvertToRadians(0.25f * static_cast<float>(Input::GetMousePose().y - Lasty));
+		Pitch(dy);
+		RotateZ(dx);
+	}
+
+	Lastx= Input::GetMousePose().x;
+	Lasty= Input::GetMousePose().y;
+
+	float Speed = 5;
+
+	if (GetAsyncKeyState('W') & 0x8000)
+		Walk(Speed);
+
+	if (GetAsyncKeyState('S') & 0x8000)
+		Walk(-Speed);
+
+	if (GetAsyncKeyState('A') & 0x8000)
+		Strafe(-Speed);
+
+	if (GetAsyncKeyState('D') & 0x8000)
+		Strafe(Speed);
+
+	UpdateViewMatrix();
 }
 
 void Camera::SetPosition(float x, float y, float z)

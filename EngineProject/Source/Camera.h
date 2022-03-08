@@ -4,9 +4,10 @@
 class Camera
 {
 public:
-
 	Camera();
 	~Camera();
+
+	void Update();
 
 	void SetPosition(float x, float y, float z);
 

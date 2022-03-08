@@ -19,10 +19,15 @@
     </ProjectConfiguration>
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="Source\DxRenderer.cpp" />
+    <ClCompile Include="Source\Input.cpp" />
+    <ClCompile Include="Source\Scene.cpp" />
+    <ClCompile Include="Source\App.cpp" />
     <ClCompile Include="Source\Camera.cpp" />
-    <ClCompile Include="Source\D3DApp.cpp" />
-    <ClCompile Include="Source\D3DInit.cpp" />
+    <ClCompile Include="Source\AppWin32.cpp" />
+    <ClCompile Include="Source\old.cpp" />
     <ClCompile Include="Source\D3DUtil.cpp" />
+    <ClCompile Include="Source\Engine.cpp" />
     <ClCompile Include="Source\FrameResource.cpp" />
     <ClCompile Include="Source\GameTimer.cpp" />
     <ClCompile Include="Source\stdafx.cpp">
@@ -32,11 +37,16 @@
     <ClCompile Include="Source\MathHelper.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="Source\DxRenderer.h" />
+    <ClInclude Include="Source\Input.h" />
+    <ClInclude Include="Source\Scene.h" />
+    <ClInclude Include="Source\App.h" />
     <ClInclude Include="Source\Camera.h" />
-    <ClInclude Include="Source\D3DApp.h" />
-    <ClInclude Include="Source\D3DInit.h" />
+    <ClInclude Include="Source\AppWin32.h" />
+    <ClInclude Include="Source\old.h" />
     <ClInclude Include="Source\D3DUtil.h" />
     <ClInclude Include="Source\d3dx12.h" />
+    <ClInclude Include="Source\Engine.h" />
     <ClInclude Include="Source\FrameResource.h" />
     <ClInclude Include="Source\GameTimer.h" />
     <ClInclude Include="Source\stdafx.h" />
