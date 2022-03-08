@@ -60,7 +60,8 @@ void Engine::Init()
 {
 	assert(MApp==nullptr);
 	MApp = App::CreateApp();
-
+	Timer.Reset();
+	//Timer.Start();
 	MScene.MainCamera.UpdateViewMatrix();
 	MScene.MainCamera.SetPosition(0.f, -4000.0f, 1000.0f);
 	Render.Init();
