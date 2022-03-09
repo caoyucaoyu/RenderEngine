@@ -31,7 +31,7 @@ VertexOut VS(VertexIn vin)
 	float3 PosW = mul(float4(vin.PosL, 1.0f), gWorld).xyz;
 
 	vout.Normal = mul(vin.Normal, gRotation);
-	float Speed = 3.4f;
+	float Speed = 2.4f;
 	float Tr = 10.0f;
 	PosW.x += sin(gTime* Speed) * vout.Normal.x * Tr;
 	PosW.y += sin(gTime* Speed) * vout.Normal.y * Tr;

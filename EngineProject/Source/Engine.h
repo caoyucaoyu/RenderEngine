@@ -2,6 +2,7 @@
 #include "App.h"
 #include "DxRenderer.h"
 #include "Scene.h"
+#include "ResourceManager.h"
 
 class Engine
 {
@@ -14,12 +15,13 @@ public:
 	static void InitEngine();
 	static void Destroy();
 	static Engine* Get();
-	void Start();
-	void Shutdown();
+	void Run();
 
 	App* GetApp();
-	Scene GetScene();
+	Scene* GetScene();
+	ResourceManager* GetResourceManager();
 	GameTimer GetTimer();
+
 
 private:
 	void Init();
@@ -27,9 +29,9 @@ private:
 	
 private:
 	App* MApp;
-	DxRenderer Render;
-	Scene MScene;
-	
+	DxRenderer* MRender;
+	Scene* MScene;
+	ResourceManager* MResourceManager;
 	GameTimer Timer;
 	bool IsRunning;
 };

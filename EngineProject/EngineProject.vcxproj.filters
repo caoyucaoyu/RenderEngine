@@ -66,6 +66,9 @@
     <ClCompile Include="Source\D3DUtil.cpp">
       <Filter>Source Files\DX</Filter>
     </ClCompile>
+    <ClCompile Include="Source\ResourceManager.cpp">
+      <Filter>Source Files\Source</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Source\AppWin32.h">
@@ -115,6 +118,9 @@
     </ClInclude>
     <ClInclude Include="Source\Mesh.h">
       <Filter>Source Files\DX</Filter>
+    </ClInclude>
+    <ClInclude Include="Source\ResourceManager.h">
+      <Filter>Source Files\Source</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>

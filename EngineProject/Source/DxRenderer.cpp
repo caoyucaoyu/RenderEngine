@@ -10,7 +10,7 @@ DxRenderer::DxRenderer()
 bool DxRenderer::Init()
 {
 	InitDirect3D();
-	InitDraw();
+	//InitDraw();
 	return true;
 }
 
@@ -49,10 +49,10 @@ bool DxRenderer::InitDirect3D()
 	//for (int i = 0; i < SwapChainBufferCount; ++i)
 	//	SwapChainBuffer[i].Reset();
 	//DepthStencilBuffer.Reset();
-	// 
+
 	//SwapChain->ResizeBuffers(SwapChainBufferCount, ClientWidth, ClientHight, DXGI_FORMAT_R8G8B8A8_UNORM, DXGI_SWAP_CHAIN_FLAG_ALLOW_MODE_SWITCH);
 	//CurrBackBuffer = 0;
-	// 
+
 	//ThrowIfFailed(CommandList->Close());
 	//ID3D12CommandList* cmdsLists[] = { CommandList.Get() };
 	//CommandQueue->ExecuteCommandLists(_countof(cmdsLists), cmdsLists);
@@ -66,7 +66,8 @@ bool DxRenderer::InitDraw()
 {
 	CommandList->Reset(CommandListAlloc.Get(), nullptr);
 
-	BuildGeometry();
+	BuildRenderData();
+	//BuildGeometry();
 	BuildFrameResource();
 	BuildDescriptorHeaps();
 	BuildConstantBuffers();
@@ -83,6 +84,7 @@ bool DxRenderer::InitDraw()
 	return true;
 }
 
+
 void DxRenderer::Update(const GameTimer& Gt)
 {
 	CurrFrameResourceIndex = (CurrFrameResourceIndex + 1) % FrameResourcesCount;
@@ -95,9 +97,8 @@ void DxRenderer::Update(const GameTimer& Gt)
 		CloseHandle(EventHandle);
 	}
 
-
-	DirectX::XMMATRIX v = Engine::Get()->GetScene().MainCamera.GetView();
-	DirectX::XMMATRIX p = Engine::Get()->GetScene().MainCamera.GetProj();
+	DirectX::XMMATRIX v = Engine::Get()->GetScene()->GetMainCamera().GetView();
+	DirectX::XMMATRIX p = Engine::Get()->GetScene()->GetMainCamera().GetProj();
 	DirectX::XMMATRIX VP_Matrix = v * p;
 	PassConstants PasConstant;
 	PasConstant.Time = Gt.TotalTime();
@@ -109,9 +110,14 @@ void DxRenderer::Update(const GameTimer& Gt)
 	for (int i = 0; i < DrawCount; i++)
 	{
 		ObjectConstants ObjConstant;
-		DirectX::XMMATRIX L = XMLoadFloat4x4(&DrawList[i]->Location_Matrix);
-		DirectX::XMMATRIX R = XMLoadFloat4x4(&DrawList[i]->Rotation_Matrix);
-		DirectX::XMMATRIX S = XMLoadFloat4x4(&DrawList[i]->Scale3D_Matrix);
+		DirectX::XMMATRIX L = XMLoadFloat4x4(&NDrawList[i].Location_Matrix);
+		DirectX::XMMATRIX R = XMLoadFloat4x4(&NDrawList[i].Rotation_Matrix);
+		DirectX::XMMATRIX S = XMLoadFloat4x4(&NDrawList[i].Scale3D_Matrix);
+
+		//DirectX::XMMATRIX L = XMLoadFloat4x4(&DrawList[i]->Location_Matrix);
+		//DirectX::XMMATRIX R = XMLoadFloat4x4(&DrawList[i]->Rotation_Matrix);
+		//DirectX::XMMATRIX S = XMLoadFloat4x4(&DrawList[i]->Scale3D_Matrix);
+
 		//DirectX::XMMATRIX W_Matrix = w ;//* DirectX::XMMatrixTranslation(i*300, i*300, 0.0f);
 		//float trans=120;
 		//L*= DirectX::XMMatrixTranslation(sin(Gt.TotalTime()) * trans, sin(Gt.TotalTime()) * trans, 0.0f);
@@ -152,12 +158,23 @@ void DxRenderer::Draw()
 	Handle.Offset(PasCbvIndex, CbvSrvUavDescriptorSize);
 	CommandList->SetGraphicsRootDescriptorTable(1, Handle);
 
-	for (int i = 0; i < DrawList.size(); i++)
-	{
-		if (i == DrawList.size() / 2)
+	//for (int i = 0; i < DrawList.size(); i++)
+	for (int i = 0; i < DrawCount; i++)
+	{	
+		RenderMesh DrawMesh= FindRMesh(NDrawList[i].MeshName);//new
+
+		CommandList->SetPipelineState(PSOs[0].Get());
+
+		//if(DrawList[i]->Indices.size() ==2304)	
+		if (DrawMesh.Indices.size() == 2304)//new
 			CommandList->SetPipelineState(PSOs[1].Get());
-		CommandList->IASetVertexBuffers(0, 1, &DrawList[i]->VertexBufferView());
-		CommandList->IASetIndexBuffer(&DrawList[i]->IndexBufferView());
+
+		//CommandList->IASetVertexBuffers(0, 1, &DrawList[i]->VertexBufferView());	//换为 绘制项 对应 Mesh 的VBV
+		//CommandList->IASetIndexBuffer(&DrawList[i]->IndexBufferView());				//换为 同理
+
+		CommandList->IASetVertexBuffers(0, 1, &DrawMesh.VertexBufferView());
+		CommandList->IASetIndexBuffer(&DrawMesh.IndexBufferView());
+
 		CommandList->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
 
 		CD3DX12_GPU_DESCRIPTOR_HANDLE ObjCbvHandle;
@@ -166,7 +183,7 @@ void DxRenderer::Draw()
 		ObjCbvHandle.Offset(ObjCbvIndex, CbvSrvUavDescriptorSize);
 		CommandList->SetGraphicsRootDescriptorTable(0, ObjCbvHandle);
 
-		CommandList->DrawIndexedInstanced((UINT)DrawList[i]->OutIndexBuffer.size(), 1, 0, 0, 0);
+		CommandList->DrawIndexedInstanced((UINT)DrawMesh.Indices.size(), 1, 0, 0, 0);//换为 同理
 	}
 	//---
 
@@ -184,6 +201,7 @@ void DxRenderer::Draw()
 	CommandQueue->Signal(Fence.Get(), CurrentFence);
 
 }
+
 
 void DxRenderer::CreateDevice()
 {
@@ -369,6 +387,42 @@ D3D12_CPU_DESCRIPTOR_HANDLE DxRenderer::CurrentBackBufferView()
 
 
 
+void DxRenderer::BuildGeometry()
+{
+	//std::vector<MapItem> MeshsData;
+	//D3DUtil::ReadMapFile("StaticMesh\\Map1.Usmh", MeshsData);
+
+	//for (auto MeshData : MeshsData)
+	//{
+	//	auto OMesh = std::make_shared<RenderMesh>(MeshData);
+
+	//	OMesh->BuildDefaultBuffer(D3dDevice.Get(), CommandList.Get());
+
+	//	DrawList.push_back(OMesh);//绘制项 
+	//	DrawCount++;
+	//}
+}
+
+void DxRenderer::BuildRenderData()
+{
+	NDrawList = Engine::Get()->GetScene()->GetSceneMeshActors();
+	DrawCount = NDrawList.size();
+
+	for (auto DrawListActor : NDrawList)
+	{
+		Mesh AMesh;
+		Engine::Get()->GetResourceManager()->FindMesh(DrawListActor.MeshName,AMesh);
+
+		if (DrawMeshList.count(DrawListActor.MeshName))
+			continue;		
+
+		RenderMesh ARenderMesh(AMesh);
+	
+		ARenderMesh.BuildDefaultBuffer(D3dDevice.Get(), CommandList.Get());
+		DrawMeshList.insert(std::make_pair<>(DrawListActor.MeshName,ARenderMesh));//std::string,RenderMesh
+	}
+}
+
 void DxRenderer::BuildFrameResource()
 {
 	for (int i = 0; i < FrameResourcesCount; i++)
@@ -475,30 +529,6 @@ void DxRenderer::BuildShadersAndInputLayout()
 	};
 }
 
-void DxRenderer::BuildGeometry()
-{
-	std::vector<MeshInfo> MeshsData;
-	D3DUtil::ReadMapFile("StaticMesh\\Map1.Usmh", MeshsData);
-
-	for (auto MeshData : MeshsData)
-	{
-		auto Mesh = std::make_shared<MeshGeometry>(MeshData);
-
-		D3DCreateBlob(Mesh->VbByteSize, &Mesh->VertexBufferCPU);
-		D3DCreateBlob(Mesh->IbByteSize, &Mesh->IndexBufferCPU);
-
-		CopyMemory(Mesh->IndexBufferCPU->GetBufferPointer(), MeshData.Indices.data(), Mesh->IbByteSize);
-		CopyMemory(Mesh->VertexBufferCPU->GetBufferPointer(), MeshData.Vertices.data(), Mesh->VbByteSize);
-
-		Mesh->VertexBufferGPU = D3DUtil::CreateDefaultBuffer(D3dDevice.Get(), CommandList.Get(), MeshData.Vertices.data(), Mesh->VbByteSize, Mesh->VertexBufferUploader);
-		Mesh->IndexBufferGPU = D3DUtil::CreateDefaultBuffer(D3dDevice.Get(), CommandList.Get(), MeshData.Indices.data(), Mesh->IbByteSize, Mesh->IndexBufferUploader);
-
-		DrawList.push_back(Mesh);
-		DrawCount++;
-	}
-
-}
-
 void DxRenderer::BuildPSO()
 {
 	D3D12_GRAPHICS_PIPELINE_STATE_DESC PsoDesc;
@@ -526,7 +556,7 @@ void DxRenderer::BuildPSO()
 	PSOs.push_back(Pso);
 	D3dDevice->CreateGraphicsPipelineState(&PsoDesc, IID_PPV_ARGS(&PSOs[0]));
 
-	PsoDesc.RasterizerState.FillMode = D3D12_FILL_MODE_WIREFRAME;  //线框模式
+	//PsoDesc.RasterizerState.FillMode = D3D12_FILL_MODE_WIREFRAME;  //线框模式
 	PsoDesc.VS = { reinterpret_cast<BYTE*>(MvsByteCode[1]->GetBufferPointer()),MvsByteCode[1]->GetBufferSize() };
 	PsoDesc.PS = { reinterpret_cast<BYTE*>(MpsByteCode[1]->GetBufferPointer()),MpsByteCode[1]->GetBufferSize() };
 

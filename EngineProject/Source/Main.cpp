@@ -7,10 +7,11 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE prevInstance,PSTR cmdLine, int
 {
 	Engine::InitEngine();
 
-	Engine::Get()->GetScene().LoadMap("StaticMesh\\Map1.Usmh");
+	Engine::Get()->GetResourceManager()->LoadMap("StaticMesh\\Map1.Usmh");
 
-	Engine::Get()->Start();
+	Engine::Get()->Run();
 
 	Engine::Destroy();
+
 	return 0;
 }

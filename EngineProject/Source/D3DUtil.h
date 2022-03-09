@@ -31,7 +31,9 @@ struct Vertex
 	DirectX::XMFLOAT4 Normal;
 };
 
-struct MeshInfo
+
+//读取文件，得到的数据项
+struct MapItem
 {
 	std::string MeshName;
 	Float3 Location;
@@ -141,7 +143,7 @@ public:
 		readFile.close();
 	}
 
-	static void ReadMapFile(const std::string& filePath, std::vector<MeshInfo>& MeshData)
+	static void ReadMapFile(const std::string& filePath, std::vector<MapItem>& MeshData)
 	{
 		std::ifstream readFile;
 		readFile.open(filePath, std::ios::in | std::ios::binary);
@@ -156,12 +158,19 @@ public:
 		int Num;
 		readFile.read((char*)&Num, sizeof(int));
 
+		//场景中Mesh数量
 		std::stringstream ss;
 		ss << Num << "\n";
 
 		for (int j = 0; j < Num; j++)
 		{
-			MeshInfo Mesh;
+			MapItem Mesh;
+			int32_t NameLength;
+			readFile.read((char*)&NameLength, sizeof(int32_t));
+			Mesh.MeshName.resize(NameLength);
+			readFile.read((char*)Mesh.MeshName.data(), sizeof(char)*NameLength);
+
+			//ss << Mesh.MeshName.c_str() << "\n";
 
 			//Transform
 			readFile.read((char*)&Mesh.Location, sizeof(Float3));

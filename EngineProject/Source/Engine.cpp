@@ -27,10 +27,12 @@ void Engine::Destroy()
 {
 	if (MEngine)
 	{
+		delete MEngine->MRender;
+		delete MEngine->MScene;
+		delete MEngine->MResourceManager;
 		delete MEngine;
 		MEngine = nullptr;
 	}
-
 }
 
 Engine* Engine::Get()
@@ -38,13 +40,15 @@ Engine* Engine::Get()
 	return MEngine;
 }
 
-void Engine::Start()
+void Engine::Run()
 {
 	IsRunning=true;
 
+	MScene->LoadMapActors();
+	MRender->InitDraw();
+
 	while (IsRunning&&MApp->Run())
 	{
-		//Timer.Tick();
 		Tick();
 	}
 	//Engine::Destroy();
@@ -60,25 +64,23 @@ void Engine::Init()
 {
 	assert(MApp==nullptr);
 	MApp = App::CreateApp();
+	MScene = new Scene();
+	MRender = new DxRenderer();
+	MResourceManager = new ResourceManager();
+
 	Timer.Reset();
-	//Timer.Start();
-	MScene.MainCamera.UpdateViewMatrix();
-	MScene.MainCamera.SetPosition(0.f, -4000.0f, 1000.0f);
-	Render.Init();
+	Timer.Start();
+
+	MScene->Init();
+	MRender->Init();
 }
 
 
 void Engine::Tick()
 {
 	Timer.Tick();
-
-	MScene.MainCamera.Update();
-	Render.Run();
-}
-
-void Engine::Shutdown()
-{
-
+	MScene->Update();
+	MRender->Run();
 }
 
 
@@ -88,9 +90,14 @@ App* Engine::GetApp()
 	return MApp;
 }
 
-Scene Engine::GetScene()
+Scene* Engine::GetScene()
 {
 	return MScene;
+}
+
+ResourceManager* Engine::GetResourceManager()
+{
+	return MResourceManager;
 }
 
 GameTimer Engine::GetTimer()

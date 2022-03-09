@@ -5,7 +5,7 @@ using namespace DirectX;
 
 Camera::Camera()
 {
-	SetLens(0.25f * MathHelper::Pi, 1.0f, 1.0f, 10000.0f);
+	SetLens(0.25f * MathHelper::Pi, 16.0f/9.0f, 1.0f, 10000.0f);
 }
 
 Camera::~Camera()
@@ -42,6 +42,7 @@ void Camera::Update()
 
 	if (GetAsyncKeyState('D') & 0x8000)
 		Strafe(Speed);
+
 
 	UpdateViewMatrix();
 }
@@ -124,6 +125,7 @@ void Camera::RotateZ(float angle)
 
 void Camera::UpdateViewMatrix()
 {
+	
 	if (ViewDirty)
 	{
 		XMVECTOR R = XMLoadFloat3(&Right);

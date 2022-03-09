@@ -2,6 +2,7 @@
 #include "FrameResource.h"
 #include "Mesh.h"
 #include "Camera.h"
+#include "Scene.h"
 #include <dxgi.h>
 
 using Microsoft::WRL::ComPtr;
@@ -18,8 +19,10 @@ public:
 	bool Init();
 	bool InitDirect3D();
 	bool InitDraw();
+
 	void Update(const GameTimer& Gt);
 	void Draw();
+
 	void CreateDevice();
 	void CreateFence();
 	void GetDescriptorSize();
@@ -34,16 +37,14 @@ public:
 	D3D12_CPU_DESCRIPTOR_HANDLE DepthStencilView();
 	D3D12_CPU_DESCRIPTOR_HANDLE CurrentBackBufferView();
 
-
+	void BuildGeometry();
+	void BuildRenderData();//New
 	void BuildFrameResource();
 	void BuildDescriptorHeaps();
 	void BuildConstantBuffers();
 	void BuildRootSignature();
 	void BuildShadersAndInputLayout();
-	void BuildGeometry();
 	void BuildPSO();
-
-
 
 protected:
 	ComPtr<IDXGIFactory> DxgiFactory;
@@ -88,8 +89,20 @@ protected:
 	FrameResource* CurrFrameResource = nullptr;
 	int CurrFrameResourceIndex = 0;
 
+
 private:
 	int DrawCount = 0;
-	std::vector<std::shared_ptr<MeshGeometry>> DrawList;
+
+	//std::vector<std::shared_ptr<RenderMesh>> DrawList;
+
+	std::vector<MeshActor> NDrawList;
+	std::unordered_map<std::string,RenderMesh> DrawMeshList; //ok
+
+public:
+	RenderMesh FindRMesh(std::string MeshName)
+	{
+		//DrawMeshList.count(MeshName);
+		return DrawMeshList.at(MeshName);
+	}
 };
 
