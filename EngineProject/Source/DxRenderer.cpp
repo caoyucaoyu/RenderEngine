@@ -1,4 +1,5 @@
 #include "stdafx.h"
+#include "Engine.h"
 #include "DxRenderer.h"
 
 
@@ -14,7 +15,7 @@ bool DxRenderer::Init()
 	return true;
 }
 
-void DxRenderer::Run()
+void DxRenderer::Render()
 {	
 	Update(Engine::Get()->GetTimer());
 	Draw();
@@ -142,7 +143,7 @@ void DxRenderer::Draw()
 	CommandList->RSSetViewports(1, &ScreenViewport);
 	CommandList->RSSetScissorRects(1, &ScissorRect);
 
-	CommandList->ClearRenderTargetView(CurrentBackBufferView(), DirectX::Colors::LightSkyBlue, 0, nullptr);
+	CommandList->ClearRenderTargetView(CurrentBackBufferView(), DirectX::Colors::Black, 0, nullptr);
 	CommandList->ClearDepthStencilView(DepthStencilView(), D3D12_CLEAR_FLAG_DEPTH | D3D12_CLEAR_FLAG_STENCIL, 1.0f, 0, 0, nullptr);
 
 	CommandList->OMSetRenderTargets(1, &CurrentBackBufferView(), true, &DepthStencilView());
@@ -202,6 +203,33 @@ void DxRenderer::Draw()
 
 }
 
+void DxRenderer::Reset()
+{
+	OutputDebugStringA("Render Reset \n");
+	assert(D3dDevice);
+	assert(SwapChain);
+	assert(CommandListAlloc);
+
+	FlushCommandQueue();
+
+	CommandList->Reset(CommandListAlloc.Get(), nullptr);
+
+	for (int i = 0; i < SwapChainBufferCount; ++i)
+		SwapChainBuffers[i].Reset();
+	DepthStencilBuffer.Reset();
+
+	SwapChain->ResizeBuffers(SwapChainBufferCount, ClientWidth, ClientHight, DXGI_FORMAT_R8G8B8A8_UNORM, DXGI_SWAP_CHAIN_FLAG_ALLOW_MODE_SWITCH);
+	CurrBackBuffer = 0;
+
+	CreateRTV();
+	CreateDSV();
+	CreateViewPortAndScissorRect();
+
+	ThrowIfFailed(CommandList->Close());
+	ID3D12CommandList* cmdsLists[] = { CommandList.Get() };
+	CommandQueue->ExecuteCommandLists(_countof(cmdsLists), cmdsLists);
+	FlushCommandQueue();
+}
 
 void DxRenderer::CreateDevice()
 {

@@ -4,12 +4,12 @@
 
 App::App()
 {
-	Inputv = new Input;
+	MInput =Input::CreateInput();
 }
 
 App::~App()
 {
-	delete Inputv;
+	delete MInput;
 }
 
 App* App::CreateApp()
@@ -19,7 +19,7 @@ App* App::CreateApp()
 	NApp = new AppWin32;
 #elif PLATFORM_IOS
 
-#else
+#elif PLATFORM_ANDROID
 
 #endif
 	return NApp;
@@ -32,7 +32,7 @@ void App::DestroyApp(App* DApp)
 
 Input* App::GetInput()
 {
-	return Inputv;
+	return MInput;
 }
 
 

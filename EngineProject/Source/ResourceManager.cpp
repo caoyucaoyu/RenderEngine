@@ -1,4 +1,6 @@
 #include "stdafx.h"
+#include "D3DUtil.h"
+#include "Mesh.h"
 #include "ResourceManager.h"
 
 ResourceManager::ResourceManager()

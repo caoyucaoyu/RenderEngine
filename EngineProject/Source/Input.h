@@ -1,24 +1,60 @@
 #pragma once
 #include "GameTimer.h"
 
-class Input
+struct IPOINT 
 {
-public:
-	Input();
-	~Input();
+	float x;
+	float y;
+};
 
-	virtual void OnMouseDown(WPARAM btnState, int x, int y);
-	virtual void OnMouseUp(WPARAM btnState, int x, int y);
-	virtual void OnMouseMove(WPARAM btnState, int x, int y);
-	virtual void OnKeyboardInput();
+enum class KeyState
+{
+	None = 0,
+	BtnDown = 1,
+	BtnUp = 2,
+	BtnHold = 4,
+};
 
-	static POINT GetMousePose();
-	static bool MouseDown();
-
-private:
-	static POINT MousePos;
-	static bool RMouseDown;
+enum class Key
+{
+	RM,
+	W,
+	S,
+	A,
+	D,
 };
 
 
+class Input
+{
+public:
+	static Input* CreateInput();
+
+	virtual void Update()=0;
+	virtual void OnMouseDown(Key key, int x, int y)=0;
+	virtual void OnMouseUp(Key key, int x, int y)=0;
+	virtual void OnMouseMove(int x, int y)=0;
+	
+
+	static IPOINT GetMousePose();
+	static KeyState GetKeyState(Key k);
+protected:
+	static IPOINT MousePos;
+	static std::array<KeyState,5> AllKeyState;
+};
+
+
+
+class InputWin32 : public Input
+{
+public:
+	InputWin32();
+	~InputWin32();
+
+	virtual void Update()override;
+	virtual void OnMouseDown(Key key, int x, int y)override;
+	virtual void OnMouseUp(Key key, int x, int y)override;
+	virtual void OnMouseMove(int x, int y) override;
+	
+};
 

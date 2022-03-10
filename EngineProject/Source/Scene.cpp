@@ -1,4 +1,5 @@
 #include "stdafx.h"
+#include "Engine.h"
 #include "Scene.h"
 
 Scene::Scene()
@@ -11,7 +12,7 @@ Scene::~Scene()
 
 }
 
-void Scene::Update()
+void Scene::Tick()
 {
 	MainCamera.Update();
 }
@@ -45,4 +46,9 @@ std::vector<MeshActor> Scene::GetSceneMeshActors()
 Camera& Scene::GetMainCamera()
 {
 	return MainCamera;
+}
+
+void Scene::AddActor()
+{
+	ActorNum++;
 }

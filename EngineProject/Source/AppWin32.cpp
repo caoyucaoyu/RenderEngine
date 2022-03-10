@@ -1,5 +1,6 @@
 #include "stdafx.h"
 #include "AppWin32.h"
+#include "Engine.h"
 
 static AppWin32* AAppWin32 =nullptr;
 
@@ -15,69 +16,71 @@ LRESULT CALLBACK MainWindowProc(HWND Window, UINT Msg, WPARAM wParam, LPARAM lPa
 		PostQuitMessage(0);
 		return 0;
 	case WM_GETMINMAXINFO:
-		((MINMAXINFO*)lParam)->ptMinTrackSize.x = 400;
-		((MINMAXINFO*)lParam)->ptMinTrackSize.y = 400;
+		((MINMAXINFO*)lParam)->ptMinTrackSize.x = 500;
+		((MINMAXINFO*)lParam)->ptMinTrackSize.y = 300;
 		return 0;
-	case WM_LBUTTONDOWN:
-	case WM_MBUTTONDOWN:
 	case WM_RBUTTONDOWN:
-		Inputv->OnMouseDown(wParam, GET_X_LPARAM(lParam), GET_Y_LPARAM(lParam));
+		Engine::Get()->GetApp()->GetInput()->OnMouseDown(Key::RM, GET_X_LPARAM(lParam), GET_Y_LPARAM(lParam));
 		SetCapture(AAppWin32->GetWnd());
 		return 0;
-	case WM_LBUTTONUP:
-	case WM_MBUTTONUP:
 	case WM_RBUTTONUP:
-		Inputv->OnMouseUp(wParam, GET_X_LPARAM(lParam), GET_Y_LPARAM(lParam));
+		ReleaseCapture();
+		Engine::Get()->GetApp()->GetInput()->OnMouseUp(Key::RM, GET_X_LPARAM(lParam), GET_Y_LPARAM(lParam));
 		return 0;
 	case WM_MOUSEMOVE:
-		Inputv->OnMouseMove(wParam, GET_X_LPARAM(lParam), GET_Y_LPARAM(lParam));
+		Engine::Get()->GetApp()->GetInput()->OnMouseMove(GET_X_LPARAM(lParam), GET_Y_LPARAM(lParam));
 		return 0;
-	case WM_SIZE:
-		/*ClientWidth = LOWORD(lParam);
-		ClientHight = HIWORD(lParam);
-		if (D3dDevice)
-		{
-			if (wParam == SIZE_MINIMIZED)
-			{
-				IsAppPaused=true;
-				IsMinimized=true;
-				IsMaximized=false;
-			}
-			else if (wParam == SIZE_MAXIMIZED)
-			{
-				IsAppPaused=false;
-				IsMinimized=false;
-				IsMaximized=true;
-				OnResize();
-			}
-			else if (wParam == SIZE_RESTORED)
-			{
-				if (IsMinimized)
-				{
-					IsAppPaused = false;
-					IsMinimized = false;
-					OnResize();
-				}
-				else if (IsMaximized)
-				{
-					IsAppPaused = false;
-					IsMaximized = false;
-					OnResize();
-				}
-				else if (IsResizing)
-				{
-
-				}
-				else
-				{
-					OnResize();
-				}
-			}
-		}*/
+	//case WM_SIZE:
+		//ClientWidth = LOWORD(lParam);
+		//ClientHight = HIWORD(lParam);
+		//if (D3dDevice)
+		//{
+			//if (wParam == SIZE_MINIMIZED)
+			//{
+				//IsAppPaused=true;
+				//IsMinimized=true;
+				//IsMaximized=false;
+			//}
+			//else if (wParam == SIZE_MAXIMIZED)
+			//{
+				//IsAppPaused=false;
+				//IsMinimized=false;
+				//IsMaximized=true;
+				//AAppWin32->OnResize();
+			//}
+			//else if (wParam == SIZE_RESTORED)
+			//{
+				//AAppWin32->OnResize();
+				//if (IsMinimized)
+				//{
+				//	IsAppPaused = false;
+				//	IsMinimized = false;
+				//	AAppWin32->OnResize();
+				//}
+				//else if (IsMaximized)
+				//{
+				//	IsAppPaused = false;
+				//	IsMaximized = false;
+				//	AAppWin32->OnResize();
+				//}
+				//else if (IsResizing)
+				//{
+				//
+				//}
+				//else
+				//{
+				//	AAppWin32->OnResize();
+				//}
+			//}
+		//}
 	default:
 		break;
 	}
 	return DefWindowProc(Window, Msg, wParam, lParam);
+
+	//Inputv->OnMouseDown(wParam, GET_X_LPARAM(lParam), GET_Y_LPARAM(lParam));
+	//Inputv->OnMouseUp(wParam, GET_X_LPARAM(lParam), GET_Y_LPARAM(lParam));
+	//Inputv->OnMouseMove(wParam, GET_X_LPARAM(lParam), GET_Y_LPARAM(lParam));
 }
 
 AppWin32::AppWin32()
@@ -89,7 +92,6 @@ AppWin32::AppWin32()
 bool AppWin32::Init(HINSTANCE hInstance)
 {
 	InitWindow();
-	//OnResize();
 	return true;
 }
 
@@ -137,29 +139,35 @@ AppWin32::~AppWin32()
 
 void AppWin32::OnResize()
 {
+	RECT r;
+	GetWindowRect(HMainWnd, &r);
+	MoveWindow(HMainWnd, r.left, r.top, 1920, 1080, TRUE);
+	Engine::Get()->GetRender()->Reset();
+
 	//assert(D3dDevice);
 	//assert(SwapChain);
 	//assert(CommandListAlloc);
-
+	//
 	//FlushCommandQueue();
-
+	//
 	//CommandList->Reset(CommandListAlloc.Get(), nullptr);
-
+	//
 	//for (int i = 0; i < SwapChainBufferCount; ++i)
 	//	SwapChainBuffer[i].Reset();
 	//DepthStencilBuffer.Reset();
-
+	//
 	//SwapChain->ResizeBuffers(SwapChainBufferCount,ClientWidth,ClientHight, DXGI_FORMAT_R8G8B8A8_UNORM, DXGI_SWAP_CHAIN_FLAG_ALLOW_MODE_SWITCH);
 	//CurrBackBuffer=0;
 	// 
 	//CreateRTV();
 	//CreateDSV();
 	//CreateViewPortAndScissorRect();
-
+	//
 	//ThrowIfFailed(CommandList->Close());
 	//ID3D12CommandList* cmdsLists[] = { CommandList.Get() };
 	//CommandQueue->ExecuteCommandLists(_countof(cmdsLists), cmdsLists);
 	//FlushCommandQueue();
+
 }
 
 
@@ -175,7 +183,6 @@ int AppWin32::Run()
 		{
 			Quit=true;
 		}
-
 	}
 	return !Quit;
 }

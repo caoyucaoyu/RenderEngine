@@ -1,6 +1,6 @@
 #include "stdafx.h"
 #include "Camera.h"
-
+#include "Input.h"
 using namespace DirectX;
 
 Camera::Camera()
@@ -18,7 +18,7 @@ void Camera::Update()
 	static float Lastx = 0;
 	static float Lasty = 0;
 
-	if (Input::MouseDown())
+	if (Input::GetKeyState(Key::RM)==KeyState::BtnHold)
 	{
 		float dx = DirectX::XMConvertToRadians(0.25f * static_cast<float>(Input::GetMousePose().x - Lastx));
 		float dy = DirectX::XMConvertToRadians(0.25f * static_cast<float>(Input::GetMousePose().y - Lasty));
@@ -31,16 +31,16 @@ void Camera::Update()
 
 	float Speed = 5;
 
-	if (GetAsyncKeyState('W') & 0x8000)
+	if(Input::GetKeyState(Key::W)==KeyState::BtnHold)
 		Walk(Speed);
 
-	if (GetAsyncKeyState('S') & 0x8000)
+	if (Input::GetKeyState(Key::S) == KeyState::BtnHold)
 		Walk(-Speed);
 
-	if (GetAsyncKeyState('A') & 0x8000)
+	if (Input::GetKeyState(Key::A) == KeyState::BtnHold)
 		Strafe(-Speed);
 
-	if (GetAsyncKeyState('D') & 0x8000)
+	if (Input::GetKeyState(Key::D) == KeyState::BtnHold)
 		Strafe(Speed);
 
 

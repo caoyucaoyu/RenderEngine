@@ -1,7 +1,8 @@
 #pragma once
 #include "Input.h"
 
-class App {
+class App 
+{
 public:
 	static App* CreateApp();
 	static void DestroyApp(App* DApp);
@@ -15,5 +16,8 @@ protected:
 	App();
 	virtual ~App();
 
-	Input* Inputv;
+	int Width;
+	int Height;
+
+	Input* MInput;
 };

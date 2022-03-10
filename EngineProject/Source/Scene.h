@@ -43,11 +43,13 @@ public:
 	Scene();
 	~Scene();
 	
-	void Update();
+	void Tick();
 	void Init();
 	void LoadMapActors();
 	std::vector<MeshActor> GetSceneMeshActors();
 	Camera& GetMainCamera();
+
+	void AddActor();
 
 private:
 	Camera MainCamera;

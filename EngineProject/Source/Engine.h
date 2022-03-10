@@ -18,9 +18,11 @@ public:
 	void Run();
 
 	App* GetApp();
+	DxRenderer* GetRender();
 	Scene* GetScene();
 	ResourceManager* GetResourceManager();
 	GameTimer GetTimer();
+
 
 
 private:

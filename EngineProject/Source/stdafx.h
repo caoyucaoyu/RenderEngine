@@ -28,9 +28,9 @@
 
 #include "d3dx12.h"
 
-#include "Engine.h"
+//#include "Engine.h"
 
-#include "DxRenderer.h"
+//#include "DxRenderer.h"
 
 //#include "DDSTextureLoader.h"
 //#include "MathHelper.h"

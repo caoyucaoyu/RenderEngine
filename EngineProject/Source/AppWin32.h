@@ -1,9 +1,9 @@
 #pragma once
 #include "stdafx.h"
 #include "App.h"
-#include "D3dUtil.h"
-#include "GameTimer.h"
-#include "Input.h"
+//#include "D3dUtil.h"
+//#include "GameTimer.h"
+//#include "Input.h"
 
 using Microsoft::WRL::ComPtr;
 

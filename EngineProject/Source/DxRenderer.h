@@ -14,7 +14,7 @@ class DxRenderer
 public:
 	DxRenderer();
 	~DxRenderer(){};
-	void Run();
+	void Render();
 
 	bool Init();
 	bool InitDirect3D();
@@ -22,6 +22,7 @@ public:
 
 	void Update(const GameTimer& Gt);
 	void Draw();
+	void Reset();
 
 	void CreateDevice();
 	void CreateFence();
@@ -96,7 +97,7 @@ private:
 	//std::vector<std::shared_ptr<RenderMesh>> DrawList;
 
 	std::vector<MeshActor> NDrawList;
-	std::unordered_map<std::string,RenderMesh> DrawMeshList; //ok
+	std::unordered_map<std::string,RenderMesh> DrawMeshList;
 
 public:
 	RenderMesh FindRMesh(std::string MeshName)

@@ -22,6 +22,20 @@ void Engine::InitEngine()
 		MEngine->Init();		
 	}
 }
+void Engine::Init()
+{
+	assert(MApp == nullptr);
+	MApp = App::CreateApp();
+	MScene = new Scene();
+	MRender = new DxRenderer();
+	MResourceManager = new ResourceManager();
+
+	Timer.Reset();
+	Timer.Start();
+
+	MScene->Init();
+	MRender->Init();
+}
 
 void Engine::Destroy()
 {
@@ -35,10 +49,6 @@ void Engine::Destroy()
 	}
 }
 
-Engine* Engine::Get()
-{
-	return MEngine;
-}
 
 void Engine::Run()
 {
@@ -47,47 +57,51 @@ void Engine::Run()
 	MScene->LoadMapActors();
 	MRender->InitDraw();
 
+#if PLATFORM_WINDOWS
+
 	while (IsRunning&&MApp->Run())
 	{
 		Tick();
 	}
 	//Engine::Destroy();
 
-#if PLATFORM_WINDOWS
 #elif PLATFORM_IOS
+
+#elif PLATFORM_ANDROID
+
 #else
-#error("Not supported platform")
+	#error("Not supported platform")
 #endif
+
 }
 
-void Engine::Init()
-{
-	assert(MApp==nullptr);
-	MApp = App::CreateApp();
-	MScene = new Scene();
-	MRender = new DxRenderer();
-	MResourceManager = new ResourceManager();
-
-	Timer.Reset();
-	Timer.Start();
-
-	MScene->Init();
-	MRender->Init();
-}
 
 
 void Engine::Tick()
 {
 	Timer.Tick();
-	MScene->Update();
-	MRender->Run();
+	MApp->GetInput()->Update();
+	MScene->Tick();
+	MRender->Render();
 }
 
 
 
+
+
+Engine* Engine::Get()
+{
+	return MEngine;
+}
+
 App* Engine::GetApp()
 {
 	return MApp;
+}
+
+DxRenderer* Engine::GetRender()
+{
+	return MRender;
 }
 
 Scene* Engine::GetScene()
