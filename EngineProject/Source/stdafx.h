@@ -32,5 +32,5 @@
 
 //#include "DxRenderer.h"
 
-//#include "DDSTextureLoader.h"
-//#include "MathHelper.h"
+#include "DDSTextureLoader.h"
+#include "MathHelper.h"

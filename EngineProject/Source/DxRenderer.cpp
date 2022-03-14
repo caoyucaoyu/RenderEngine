@@ -65,13 +65,16 @@ bool DxRenderer::InitDirect3D()
 
 bool DxRenderer::InitDraw()
 {
+	FlushCommandQueue();
 	CommandList->Reset(CommandListAlloc.Get(), nullptr);
 
-	BuildRenderData();
 	//BuildGeometry();
+	BuildRenderData();
+	BuildTextures();
 	BuildFrameResource();
 	BuildDescriptorHeaps();
 	BuildConstantBuffers();
+
 	BuildRootSignature();
 	BuildShadersAndInputLayout();
 	BuildPSO();
@@ -111,22 +114,17 @@ void DxRenderer::Update(const GameTimer& Gt)
 	for (int i = 0; i < DrawCount; i++)
 	{
 		ObjectConstants ObjConstant;
-		DirectX::XMMATRIX L = XMLoadFloat4x4(&NDrawList[i].Location_Matrix);
-		DirectX::XMMATRIX R = XMLoadFloat4x4(&NDrawList[i].Rotation_Matrix);
-		DirectX::XMMATRIX S = XMLoadFloat4x4(&NDrawList[i].Scale3D_Matrix);
+		DirectX::XMMATRIX L = XMLoadFloat4x4(&DrawList[i].Location_Matrix);
+		DirectX::XMMATRIX R = XMLoadFloat4x4(&DrawList[i].Rotation_Matrix);
+		DirectX::XMMATRIX S = XMLoadFloat4x4(&DrawList[i].Scale3D_Matrix);
 
-		//DirectX::XMMATRIX L = XMLoadFloat4x4(&DrawList[i]->Location_Matrix);
-		//DirectX::XMMATRIX R = XMLoadFloat4x4(&DrawList[i]->Rotation_Matrix);
-		//DirectX::XMMATRIX S = XMLoadFloat4x4(&DrawList[i]->Scale3D_Matrix);
-
-		//DirectX::XMMATRIX W_Matrix = w ;//* DirectX::XMMatrixTranslation(i*300, i*300, 0.0f);
-		//float trans=120;
-		//L*= DirectX::XMMatrixTranslation(sin(Gt.TotalTime()) * trans, sin(Gt.TotalTime()) * trans, 0.0f);
 		XMStoreFloat4x4(&ObjConstant.Location_M, XMMatrixTranspose(L));
 		XMStoreFloat4x4(&ObjConstant.Rotation_M, XMMatrixTranspose(R));
 		XMStoreFloat4x4(&ObjConstant.Scale3D_M, XMMatrixTranspose(S));
 		CurrFrameResource->ObjectCB->CopyData(i, ObjConstant);
 	}
+
+
 }
 
 void DxRenderer::Draw()
@@ -157,32 +155,43 @@ void DxRenderer::Draw()
 	int PasCbvIndex = FrameResourcesCount * DrawCount + CurrFrameResourceIndex;//3*n+Curr
 	auto Handle = CD3DX12_GPU_DESCRIPTOR_HANDLE(CbvHeap->GetGPUDescriptorHandleForHeapStart());
 	Handle.Offset(PasCbvIndex, CbvSrvUavDescriptorSize);
-	CommandList->SetGraphicsRootDescriptorTable(1, Handle);
 
-	//for (int i = 0; i < DrawList.size(); i++)
+	CommandList->SetGraphicsRootDescriptorTable(1, Handle);
+	//auto PCbvAdress = FrameResources[CurrFrameResourceIndex]->PassCB->Resource()->GetGPUVirtualAddress();
+	//PCbvAdress+= CbvSrvUavDescriptorSize* PasCbvIndex;
+	//CommandList->SetGraphicsRootConstantBufferView(1, PCbvAdress);
+
+
 	for (int i = 0; i < DrawCount; i++)
 	{	
-		RenderMesh DrawMesh= FindRMesh(NDrawList[i].MeshName);//new
+		if(!CanFindRMesh(DrawList[i].MeshName))
+			continue;
+		DXMesh DrawMesh= FindRMesh(DrawList[i].MeshName);
 
 		CommandList->SetPipelineState(PSOs[0].Get());
 
-		//if(DrawList[i]->Indices.size() ==2304)	
-		if (DrawMesh.Indices.size() == 2304)//new
+		if (DrawMesh.Indices.size() == 2304)
 			CommandList->SetPipelineState(PSOs[1].Get());
-
-		//CommandList->IASetVertexBuffers(0, 1, &DrawList[i]->VertexBufferView());	//换为 绘制项 对应 Mesh 的VBV
-		//CommandList->IASetIndexBuffer(&DrawList[i]->IndexBufferView());				//换为 同理
 
 		CommandList->IASetVertexBuffers(0, 1, &DrawMesh.VertexBufferView());
 		CommandList->IASetIndexBuffer(&DrawMesh.IndexBufferView());
-
 		CommandList->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
 
 		CD3DX12_GPU_DESCRIPTOR_HANDLE ObjCbvHandle;
 		int ObjCbvIndex = CurrFrameResourceIndex * DrawCount + i;//
 		ObjCbvHandle = CD3DX12_GPU_DESCRIPTOR_HANDLE(CbvHeap->GetGPUDescriptorHandleForHeapStart());
 		ObjCbvHandle.Offset(ObjCbvIndex, CbvSrvUavDescriptorSize);
+
 		CommandList->SetGraphicsRootDescriptorTable(0, ObjCbvHandle);
+
+		//CD3DX12_GPU_DESCRIPTOR_HANDLE MatCbvHandle;
+		//int MatCbvIndex = CurrFrameResourceIndex * DrawCount + i;//
+		//MatCbvHandle = CD3DX12_GPU_DESCRIPTOR_HANDLE(CbvHeap->GetGPUDescriptorHandleForHeapStart());
+		//MatCbvHandle.Offset(MatCbvIndex, CbvSrvUavDescriptorSize);
+		//auto ObjCbvAdress = FrameResources[CurrFrameResourceIndex]->ObjectCB->Resource()->GetGPUVirtualAddress();
+		////ObjCbvAdress += CbvSrvUavDescriptorSize* ObjCbvIndex;
+		//CommandList->SetGraphicsRootConstantBufferView(2, ObjCbvAdress);
+
 
 		CommandList->DrawIndexedInstanced((UINT)DrawMesh.Indices.size(), 1, 0, 0, 0);//换为 同理
 	}
@@ -419,13 +428,13 @@ void DxRenderer::BuildGeometry()
 {
 	//std::vector<MapItem> MeshsData;
 	//D3DUtil::ReadMapFile("StaticMesh\\Map1.Usmh", MeshsData);
-
+	//
 	//for (auto MeshData : MeshsData)
 	//{
 	//	auto OMesh = std::make_shared<RenderMesh>(MeshData);
-
+	//
 	//	OMesh->BuildDefaultBuffer(D3dDevice.Get(), CommandList.Get());
-
+	//
 	//	DrawList.push_back(OMesh);//绘制项 
 	//	DrawCount++;
 	//}
@@ -433,35 +442,68 @@ void DxRenderer::BuildGeometry()
 
 void DxRenderer::BuildRenderData()
 {
-	NDrawList = Engine::Get()->GetScene()->GetSceneMeshActors();
-	DrawCount = NDrawList.size();
+	DrawList.clear();
+	DXMeshs.clear();
+	DrawList = Engine::Get()->GetScene()->GetSceneMeshActors();
+	DrawCount = DrawList.size();
 
-	for (auto DrawListActor : NDrawList)
+	for (auto DrawListActor : DrawList)
 	{
 		Mesh AMesh;
-		Engine::Get()->GetResourceManager()->FindMesh(DrawListActor.MeshName,AMesh);
 
-		if (DrawMeshList.count(DrawListActor.MeshName))
+		bool meshFinded = Engine::Get()->GetResourceManager()->FindMesh(DrawListActor.MeshName, AMesh);
+
+		if (!meshFinded||DXMeshs.count(DrawListActor.MeshName))
 			continue;		
 
-		RenderMesh ARenderMesh(AMesh);
+		DXMesh ARenderMesh(AMesh);
 	
 		ARenderMesh.BuildDefaultBuffer(D3dDevice.Get(), CommandList.Get());
-		DrawMeshList.insert(std::make_pair<>(DrawListActor.MeshName,ARenderMesh));//std::string,RenderMesh
+		DXMeshs.insert(std::make_pair<>(DrawListActor.MeshName,ARenderMesh));//std::string,RenderMesh
 	}
+}
+
+void DxRenderer::BuildTextures()
+{
+	Texture ATexture;
+	for (auto DrawListActor : DrawList)
+	{
+		Material AMaterial;
+		bool MaterialFinded = Engine::Get()->GetResourceManager()->FindMaterial(DrawListActor.MaterialName, AMaterial);
+		if (!MaterialFinded || DXMaterials.count(DrawListActor.MaterialName))
+			continue;
+		DXMaterials[AMaterial.Name] = AMaterial;
+
+		Texture Atexture;
+		bool TextureFinded = Engine::Get()->GetResourceManager()->FindTexture(AMaterial.TextureName, Atexture);
+		if (!TextureFinded || DXTextures.count(Atexture.Name))
+			continue;
+
+		DXTexture ADxtexture(Atexture);
+		ThrowIfFailed(
+			DirectX::CreateDDSTextureFromFile12(D3dDevice.Get(), CommandList.Get(), ADxtexture.Filename.c_str(), ADxtexture.Resource, ADxtexture.UploadHeap));
+		DXTextures[ADxtexture.Name] = ADxtexture;
+
+	}
+	//遍历绘制列表里Actor 对应材质 材质使用了贴图
+	//RenderScene 里的 Texture
+	//进行 CreateDDSTextureFromFile12
+	MaterialCount= DXMaterials.size();
+	TextureCount= DXTextures.size();
 }
 
 void DxRenderer::BuildFrameResource()
 {
+	FrameResources.resize(FrameResourcesCount);
 	for (int i = 0; i < FrameResourcesCount; i++)
 	{
-		FrameResources.push_back(std::make_unique<FrameResource>(D3dDevice.Get(), 1, DrawCount));//PassCount ObjCount
+		FrameResources[i]=std::make_unique<FrameResource>(D3dDevice.Get(), 1, DrawCount, MaterialCount);
 	}
 }
 
 void DxRenderer::BuildDescriptorHeaps()
 {
-	DescriptorsNum = (DrawCount + 1) * FrameResourcesCount;//Meshs
+	DescriptorsNum = (DrawCount + 1 + MaterialCount) * FrameResourcesCount;//Meshs
 
 	D3D12_DESCRIPTOR_HEAP_DESC CbvHeapDesc;
 	CbvHeapDesc.Type = D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV;
@@ -476,8 +518,9 @@ void DxRenderer::BuildConstantBuffers()
 {
 	UINT ObjCBByteSize = D3DUtil::CalcConstantBufferByteSize(sizeof(ObjectConstants));
 	UINT PassCBByteSize = D3DUtil::CalcConstantBufferByteSize(sizeof(PassConstants));
-	UINT TimeCBByteSize = D3DUtil::CalcConstantBufferByteSize(sizeof(TimeConstants));
+	UINT MatCBByteSize = D3DUtil::CalcConstantBufferByteSize(sizeof(MaterialConstants));
 
+	int HeapIndexN = 0;
 	//前三组
 	//ObjCBV
 	for (int FrameIndex = 0; FrameIndex < FrameResourcesCount; FrameIndex++)
@@ -490,6 +533,7 @@ void DxRenderer::BuildConstantBuffers()
 			ObjCBAddress += i * ObjCBByteSize;//缓冲区 第i个常量缓冲区偏移量 得到起始位置
 
 			int HeapIndex = FrameIndex * DrawCount + i;//CBV堆 当前帧当前物体对应CB的序号
+			HeapIndexN++;
 
 			auto Handle = CD3DX12_CPU_DESCRIPTOR_HANDLE(CbvHeap->GetCPUDescriptorHandleForHeapStart());//获得CBV堆首地址
 			Handle.Offset(HeapIndex, CbvSrvUavDescriptorSize);
@@ -501,10 +545,12 @@ void DxRenderer::BuildConstantBuffers()
 		}
 	}
 
+	//3帧3个
 	for (int FrameIndex = 0; FrameIndex < FrameResourcesCount; FrameIndex++)
 	{
 		D3D12_GPU_VIRTUAL_ADDRESS PassCBAddress = FrameResources[FrameIndex]->PassCB->Resource()->GetGPUVirtualAddress();
 		int HeapIndex = DrawCount * FrameResourcesCount + FrameIndex;
+		HeapIndexN++;
 
 		auto Handle = CD3DX12_CPU_DESCRIPTOR_HANDLE(CbvHeap->GetCPUDescriptorHandleForHeapStart());//获得CBV堆首地址
 		Handle.Offset(HeapIndex, CbvSrvUavDescriptorSize);
@@ -515,12 +561,32 @@ void DxRenderer::BuildConstantBuffers()
 		D3dDevice->CreateConstantBufferView(&CbvDesc, Handle);
 	}
 
+	for (int FrameIndex = 0; FrameIndex < FrameResourcesCount; FrameIndex++)
+	{
+		auto CurMaterialCB = FrameResources[FrameIndex]->MaterialCB->Resource();
+		for (int i = 0; i < MaterialCount; i++)
+		{
+			D3D12_GPU_VIRTUAL_ADDRESS MatCBAddress = CurMaterialCB->GetGPUVirtualAddress();
+			MatCBAddress += i * MatCBByteSize;
+
+			int HeapIndex = MaterialCount * FrameResourcesCount + 3 + FrameIndex * MaterialCount + i;//CBV堆 当前帧当前物体对应CB的序号
+			HeapIndexN++;
+
+			auto Handle = CD3DX12_CPU_DESCRIPTOR_HANDLE(CbvHeap->GetCPUDescriptorHandleForHeapStart());//获得CBV堆首地址
+			Handle.Offset(HeapIndex, CbvSrvUavDescriptorSize);
+
+			D3D12_CONSTANT_BUFFER_VIEW_DESC CbvDesc;
+			CbvDesc.BufferLocation = MatCBAddress;
+			CbvDesc.SizeInBytes = MatCBByteSize;
+			D3dDevice->CreateConstantBufferView(&CbvDesc, Handle);
+		}
+	}
 }
 
 void DxRenderer::BuildRootSignature()
 {
 	//RootSignature
-	CD3DX12_ROOT_PARAMETER SlotRootParameter[2];//根参数
+	CD3DX12_ROOT_PARAMETER SlotRootParameter[3];//根参数
 
 	CD3DX12_DESCRIPTOR_RANGE CbvTable0;
 	CbvTable0.Init(D3D12_DESCRIPTOR_RANGE_TYPE_CBV, 1, 0);
@@ -529,9 +595,12 @@ void DxRenderer::BuildRootSignature()
 
 	SlotRootParameter[0].InitAsDescriptorTable(1, &CbvTable0);
 	SlotRootParameter[1].InitAsDescriptorTable(1, &CbvTable1);
+	SlotRootParameter[2].InitAsConstantBufferView(2);
+	//SlotRootParameter[1].InitAsConstantBufferView(1);
+
 
 	CD3DX12_ROOT_SIGNATURE_DESC RootSigDesc(
-		2,//3个根参数
+		3,//3个根参数
 		SlotRootParameter,//根参数指针
 		0, nullptr, D3D12_ROOT_SIGNATURE_FLAG_ALLOW_INPUT_ASSEMBLER_INPUT_LAYOUT);
 
@@ -554,6 +623,7 @@ void DxRenderer::BuildShadersAndInputLayout()
 	{
 		{ "POSITION", 0, DXGI_FORMAT_R32G32B32_FLOAT, 0, 0, D3D12_INPUT_CLASSIFICATION_PER_VERTEX_DATA, 0 }
 		,{ "NORMAL", 0, DXGI_FORMAT_R32G32B32A32_FLOAT, 0, 12, D3D12_INPUT_CLASSIFICATION_PER_VERTEX_DATA, 0 }
+		,{ "TEXCOORD", 0, DXGI_FORMAT_R32G32_FLOAT, 0, 28, D3D12_INPUT_CLASSIFICATION_PER_VERTEX_DATA, 0 }
 	};
 }
 
@@ -590,4 +660,26 @@ void DxRenderer::BuildPSO()
 
 	PSOs.push_back(Pso);
 	D3dDevice->CreateGraphicsPipelineState(&PsoDesc, IID_PPV_ARGS(&PSOs[1]));
+}
+
+DXMesh DxRenderer::FindRMesh(std::string MeshName)
+{
+	return DXMeshs.at(MeshName);
+	//for(auto it : DrawMeshList)
+	//{
+	//	if(it.first == MeshName)
+	//	{
+	//		return it.second;
+	//	}
+	//}
+}
+
+bool DxRenderer::CanFindRMesh(std::string MeshName)
+{
+	if (DXMeshs.count(MeshName))
+	{
+		return true;
+	}
+	//OutputDebugStringA(("Cant Find RenderMesh: "+MeshName+"  \n").c_str());
+	return false;
 }

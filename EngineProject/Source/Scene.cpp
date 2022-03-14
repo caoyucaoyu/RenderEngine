@@ -15,6 +15,13 @@ Scene::~Scene()
 void Scene::Tick()
 {
 	MainCamera.Update();
+
+	if (Input::GetKeyState(Key::LM) == KeyState::BtnDown)
+	{
+		MeshActor ma;
+		AddMeshActor(ma);
+		Engine::Get()->GetRender()->InitDraw();
+	}
 }
 
 void Scene::Init()
@@ -33,9 +40,35 @@ void Scene::LoadMapActors()
 	{
 		MeshActor AMeshActor(MapMeshItem);
 		SceneMeshActors.push_back(AMeshActor);
-		ActorNum++;
+		MeshActorNum++;
+	}
+}
+
+void Scene::AddMeshActor(MeshActor NewActor)
+{
+	static int of = 300;
+	if (of<6300)
+	{
+		of += 300;
+		auto newa = SceneMeshActors[2];
+		std::string name = newa.MeshName;
+		newa.Location = Float3(-3002, -3000, 0);
+		newa.Scale3D = Float3(2, 2, 2);
+		newa.Location.Y += of;
+		newa.UpdateMatrix();
+		SceneMeshActors.push_back(newa);
 	}
 
+	NewActor.UpdateMatrix();
+
+	SceneMeshActors.push_back(NewActor);
+
+	UpdateActorNum();
+}
+
+void Scene::UpdateActorNum()
+{
+	MeshActorNum = SceneMeshActors.size();
 }
 
 std::vector<MeshActor> Scene::GetSceneMeshActors()
@@ -48,7 +81,4 @@ Camera& Scene::GetMainCamera()
 	return MainCamera;
 }
 
-void Scene::AddActor()
-{
-	ActorNum++;
-}
+

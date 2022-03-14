@@ -9,15 +9,40 @@
 
 using Microsoft::WRL::ComPtr;
 
+struct Float2
+{
+	Float2() {};
+	Float2(float x, float y)
+	{
+		X = x;
+		Y = y;
+	}
+	float X;
+	float Y;
+};
 struct Float3
 {
+	Float3(){};
+	Float3(float x, float y, float z)
+	{
+		X=x;
+		Y=y;
+		Z=z;
+	}
 	float X;
 	float Y;
 	float Z;
 };
-
 struct Float4
 {
+	Float4() {};
+	Float4(float x, float y, float z,float w)
+	{
+		X = x;
+		Y = y;
+		Z = z;
+		W = w;
+	}
 	float X;
 	float Y;
 	float Z;
@@ -29,6 +54,7 @@ struct Vertex
 	DirectX::XMFLOAT3 Pos;
 	DirectX::XMFLOAT4 Color;
 	DirectX::XMFLOAT4 Normal;
+	DirectX::XMFLOAT2 UV;
 };
 
 
@@ -42,27 +68,6 @@ struct MapItem
 	std::vector<Vertex> Vertices;
 	std::vector<uint16_t> Indices;
 };
-
-struct ObjectConstants
-{
-	DirectX::XMFLOAT4X4 Location_M = MathHelper::Identity4x4();
-	DirectX::XMFLOAT4X4 Rotation_M = MathHelper::Identity4x4();
-	DirectX::XMFLOAT4X4 Scale3D_M = MathHelper::Identity4x4();
-	//glm::mat4 World_M = MathHelper::GIdentity4x4();
-};
-
-struct PassConstants
-{
-	DirectX::XMFLOAT4X4 ViewProj_M = MathHelper::Identity4x4();
-	float Time;
-	//glm::mat4 ViewProj_M = MathHelper::GIdentity4x4();
-};
-
-struct TimeConstants
-{
-	float Time;
-};
-
 
 class D3DUtil
 {
@@ -167,16 +172,19 @@ public:
 			MapItem Mesh;
 			int32_t NameLength;
 			readFile.read((char*)&NameLength, sizeof(int32_t));
-			Mesh.MeshName.resize(NameLength);
-			readFile.read((char*)Mesh.MeshName.data(), sizeof(char)*NameLength);
 
-			//ss << Mesh.MeshName.c_str() << "\n";
+			Mesh.MeshName.resize(NameLength-1);
+			readFile.read((char*)Mesh.MeshName.data(), sizeof(char)*NameLength-1);
+
+			char temp;
+			readFile.read((char*)&temp, sizeof(char));
+			ss << Mesh.MeshName.c_str() << "\n";
 
 			//Transform
 			readFile.read((char*)&Mesh.Location, sizeof(Float3));
 			readFile.read((char*)&Mesh.Rotation, sizeof(Float4));
 			readFile.read((char*)&Mesh.Scale3D, sizeof(Float3));
-			//ss<< Mesh.Rotation.X << "   " << Mesh.Rotation.Y << "   " << Mesh.Rotation.Z << "   "<< Mesh.Rotation.W<<"\n";
+			ss<< Mesh.Rotation.X << "   " << Mesh.Rotation.Y << "   " << Mesh.Rotation.Z << "   "<< Mesh.Rotation.W<<"\n";
 
 			//Vertex
 			int VCount;
@@ -188,14 +196,22 @@ public:
 				readFile.read((char*)&VertexPosition, sizeof(Float3));
 				Float4 Normal;
 				readFile.read((char*)&Normal, sizeof(Float4));
+				Float2 Auv;
+				readFile.read((char*)&Auv, sizeof(Float2));
+
 				Vertex Vert;
+
 				Vert.Pos.x = VertexPosition.X; Vert.Pos.y = VertexPosition.Y; Vert.Pos.z = VertexPosition.Z;
-				//Vert.Color = DirectX::XMFLOAT4(float(i + 1) / VCount * 2, float(i + 1) / VCount, 0, 1.0f);
 				Vert.Normal.x = Normal.X; Vert.Normal.y = Normal.Y; Vert.Normal.z = Normal.Z; Vert.Normal.w = Normal.W;
+				Vert.UV.x=Auv.X; Vert.UV.y = Auv.Y;
+
+				//ss << Vert.UV.x <<" "<< Vert.UV.y;
+				//Vert.Color = DirectX::XMFLOAT4(float(i + 1) / VCount * 2, float(i + 1) / VCount, 0, 1.0f);				
 				Vert.Color = DirectX::XMFLOAT4(Normal.X,Normal.Y,Normal.Z,1.0f);
 
-				Mesh.Vertices.push_back(Vert);				
+				Mesh.Vertices.push_back(Vert);	
 			}
+			ss << "\n";
 
 			//Index
 			int ICount;

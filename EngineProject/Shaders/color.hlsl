@@ -16,12 +16,14 @@ struct VertexIn
 {
 	float3 PosL  : POSITION;
     float4 Normal : NORMAL;
+	float2 TexC    : TEXCOORD;
 };
 
 struct VertexOut
 {
 	float4 PosH  : SV_POSITION;
     float4 Normal : NORMAL;
+	float2 TexC    : TEXCOORD;
 };
 
 VertexOut VS(VertexIn vin)
@@ -32,7 +34,7 @@ VertexOut VS(VertexIn vin)
 
 	
 	vout.PosH = mul(float4(PosW, 1.0f), gViewProj);
-
+	vout.TexC = vin.TexC;
     vout.Normal = mul(vin.Normal, gRotation);
     
     return vout;
@@ -40,7 +42,10 @@ VertexOut VS(VertexIn vin)
 
 float4 PS(VertexOut pin) : SV_Target
 {
-	return pow((pin.Normal + 1) * 0.5,1 / 2.2f);
+	float4 color;
+	color = pow((pin.Normal + 1) * 0.5,1 / 2.2f);
+	//float4 color = {pin.TexC.x,pin.TexC.y,1.f,1.f};
+	return color;
 }
 
 

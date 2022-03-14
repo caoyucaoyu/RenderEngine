@@ -20,8 +20,8 @@ void Camera::Update()
 
 	if (Input::GetKeyState(Key::RM)==KeyState::BtnHold)
 	{
-		float dx = DirectX::XMConvertToRadians(0.25f * static_cast<float>(Input::GetMousePose().x - Lastx));
-		float dy = DirectX::XMConvertToRadians(0.25f * static_cast<float>(Input::GetMousePose().y - Lasty));
+		float dx = glm::radians(0.15f * static_cast<float>(Input::GetMousePose().x - Lastx));
+		float dy = glm::radians(0.15f * static_cast<float>(Input::GetMousePose().y - Lasty));
 		Pitch(dy);
 		RotateZ(dx);
 	}
@@ -29,7 +29,6 @@ void Camera::Update()
 	Lastx= Input::GetMousePose().x;
 	Lasty= Input::GetMousePose().y;
 
-	float Speed = 5;
 
 	if(Input::GetKeyState(Key::W)==KeyState::BtnHold)
 		Walk(Speed);

@@ -80,8 +80,9 @@ void Engine::Run()
 void Engine::Tick()
 {
 	Timer.Tick();
-	MApp->GetInput()->Update();
 	MScene->Tick();
+	
+	MApp->GetInput()->Update();
 	MRender->Render();
 }
 

@@ -17,11 +17,13 @@ enum class KeyState
 
 enum class Key
 {
+	LM,
 	RM,
 	W,
 	S,
 	A,
 	D,
+	count
 };
 
 
@@ -35,12 +37,11 @@ public:
 	virtual void OnMouseUp(Key key, int x, int y)=0;
 	virtual void OnMouseMove(int x, int y)=0;
 	
-
 	static IPOINT GetMousePose();
 	static KeyState GetKeyState(Key k);
 protected:
 	static IPOINT MousePos;
-	static std::array<KeyState,5> AllKeyState;
+	static std::array<KeyState, (int)Key::count> AllKeyState;
 };
 
 

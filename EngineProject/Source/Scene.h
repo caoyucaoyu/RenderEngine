@@ -3,7 +3,7 @@
 struct MeshActor
 {
 public:
-	MeshActor() {};
+	MeshActor(){};
 	MeshActor(MapItem MapMeshItem)
 	{
 		MeshName = MapMeshItem.MeshName;
@@ -26,10 +26,12 @@ public:
 		XMStoreFloat4x4(&World_Matrix, Quat * DirectX::XMMatrixScaling(S.X, S.Y, S.Z) * DirectX::XMMatrixTranslation(L.X, L.Y, L.Z));
 	}
 
+	Float3 Location = Float3(0, 0, 0);
+	Float4 Rotation = Float4(0, 0, 0, 1);
+	Float3 Scale3D = Float3(1, 1, 1);
+
 	std::string MeshName;
-	Float3 Location;
-	Float4 Rotation;
-	Float3 Scale3D;
+	std::string MaterialName = "Default";
 
 	DirectX::XMFLOAT4X4 World_Matrix = MathHelper::Identity4x4();
 	DirectX::XMFLOAT4X4 Location_Matrix = MathHelper::Identity4x4();
@@ -45,14 +47,17 @@ public:
 	
 	void Tick();
 	void Init();
+
 	void LoadMapActors();
+	void AddMeshActor(MeshActor NewActor);
+
+	void UpdateActorNum();
+
 	std::vector<MeshActor> GetSceneMeshActors();
 	Camera& GetMainCamera();
-
-	void AddActor();
 
 private:
 	Camera MainCamera;
 	std::vector<MeshActor> SceneMeshActors;
-	int ActorNum=0;
+	int MeshActorNum=0;
 };

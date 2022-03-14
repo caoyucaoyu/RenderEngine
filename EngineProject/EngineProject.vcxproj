@@ -19,12 +19,13 @@
     </ProjectConfiguration>
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="Source\Camera.cpp" />
+    <ClCompile Include="Source\DDSTextureLoader.cpp" />
     <ClCompile Include="Source\DxRenderer.cpp" />
     <ClCompile Include="Source\Input.cpp" />
     <ClCompile Include="Source\ResourceManager.cpp" />
     <ClCompile Include="Source\Scene.cpp" />
     <ClCompile Include="Source\App.cpp" />
-    <ClCompile Include="Source\Camera.cpp" />
     <ClCompile Include="Source\AppWin32.cpp" />
     <ClCompile Include="Source\old.cpp" />
     <ClCompile Include="Source\D3DUtil.cpp" />
@@ -38,12 +39,14 @@
     <ClCompile Include="Source\MathHelper.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="Source\Camera.h" />
+    <ClInclude Include="Source\DDSTextureLoader.h" />
     <ClInclude Include="Source\DxRenderer.h" />
     <ClInclude Include="Source\Input.h" />
+    <ClInclude Include="Source\Material.h" />
     <ClInclude Include="Source\ResourceManager.h" />
     <ClInclude Include="Source\Scene.h" />
     <ClInclude Include="Source\App.h" />
-    <ClInclude Include="Source\Camera.h" />
     <ClInclude Include="Source\AppWin32.h" />
     <ClInclude Include="Source\old.h" />
     <ClInclude Include="Source\D3DUtil.h" />
@@ -54,6 +57,7 @@
     <ClInclude Include="Source\stdafx.h" />
     <ClInclude Include="Source\MathHelper.h" />
     <ClInclude Include="Source\Mesh.h" />
+    <ClInclude Include="Source\Texture.h" />
     <ClInclude Include="Source\UploadBuffer.h" />
   </ItemGroup>
   <PropertyGroup Label="Globals">

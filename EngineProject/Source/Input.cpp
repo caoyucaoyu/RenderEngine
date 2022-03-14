@@ -3,7 +3,7 @@
 
 
 IPOINT Input::MousePos;
-std::array<KeyState, 5> Input::AllKeyState;
+std::array<KeyState, (int)Key::count> Input::AllKeyState;
 
 
 Input* Input::CreateInput()
@@ -50,7 +50,11 @@ InputWin32::~InputWin32()
 
 void InputWin32::Update()
 {
-	if(AllKeyState[(int)Key::RM] == KeyState::BtnDown)
+	if(AllKeyState[(int)Key::LM] == KeyState::BtnDown)
+		AllKeyState[(int)Key::LM] = KeyState::BtnHold;
+
+
+	if (AllKeyState[(int)Key::RM] == KeyState::BtnDown)
 		AllKeyState[(int)Key::RM] = KeyState::BtnHold;
 
 

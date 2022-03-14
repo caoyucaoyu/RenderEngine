@@ -22,15 +22,15 @@
     <Filter Include="Source Files\DX">
       <UniqueIdentifier>{cf163ae1-6c13-46c4-a259-b512af3c81b2}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Source Files\Assset">
+      <UniqueIdentifier>{ee2fb9d2-00c1-46b9-8256-2d42d236d622}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Source\AppWin32.cpp">
       <Filter>Source Files\Source</Filter>
     </ClCompile>
     <ClCompile Include="Source\stdafx.cpp">
-      <Filter>Source Files\Source</Filter>
-    </ClCompile>
-    <ClCompile Include="Source\Scene.cpp">
       <Filter>Source Files\Source</Filter>
     </ClCompile>
     <ClCompile Include="Source\App.cpp">
@@ -44,9 +44,6 @@
     </ClCompile>
     <ClCompile Include="Source\Engine.cpp">
       <Filter>Source Files\Source</Filter>
-    </ClCompile>
-    <ClCompile Include="Source\Camera.cpp">
-      <Filter>Source Files\DX</Filter>
     </ClCompile>
     <ClCompile Include="Source\old.cpp">
       <Filter>Source Files\Other</Filter>
@@ -66,8 +63,17 @@
     <ClCompile Include="Source\D3DUtil.cpp">
       <Filter>Source Files\DX</Filter>
     </ClCompile>
+    <ClCompile Include="Source\Camera.cpp">
+      <Filter>Source Files\DX</Filter>
+    </ClCompile>
+    <ClCompile Include="Source\DDSTextureLoader.cpp">
+      <Filter>Source Files\DX</Filter>
+    </ClCompile>
     <ClCompile Include="Source\ResourceManager.cpp">
-      <Filter>Source Files\Source</Filter>
+      <Filter>Source Files\Assset</Filter>
+    </ClCompile>
+    <ClCompile Include="Source\Scene.cpp">
+      <Filter>Source Files\Assset</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -75,9 +81,6 @@
       <Filter>Source Files\Source</Filter>
     </ClInclude>
     <ClInclude Include="Source\stdafx.h">
-      <Filter>Source Files\Source</Filter>
-    </ClInclude>
-    <ClInclude Include="Source\Scene.h">
       <Filter>Source Files\Source</Filter>
     </ClInclude>
     <ClInclude Include="Source\App.h">
@@ -88,9 +91,6 @@
     </ClInclude>
     <ClInclude Include="Source\Engine.h">
       <Filter>Source Files\Source</Filter>
-    </ClInclude>
-    <ClInclude Include="Source\Camera.h">
-      <Filter>Source Files\DX</Filter>
     </ClInclude>
     <ClInclude Include="Source\old.h">
       <Filter>Source Files\Other</Filter>
@@ -116,11 +116,26 @@
     <ClInclude Include="Source\d3dx12.h">
       <Filter>Source Files\DX</Filter>
     </ClInclude>
-    <ClInclude Include="Source\Mesh.h">
+    <ClInclude Include="Source\Camera.h">
       <Filter>Source Files\DX</Filter>
     </ClInclude>
+    <ClInclude Include="Source\DDSTextureLoader.h">
+      <Filter>Source Files\DX</Filter>
+    </ClInclude>
+    <ClInclude Include="Source\Material.h">
+      <Filter>Source Files\Assset</Filter>
+    </ClInclude>
+    <ClInclude Include="Source\Texture.h">
+      <Filter>Source Files\Assset</Filter>
+    </ClInclude>
+    <ClInclude Include="Source\Scene.h">
+      <Filter>Source Files\Assset</Filter>
+    </ClInclude>
     <ClInclude Include="Source\ResourceManager.h">
-      <Filter>Source Files\Source</Filter>
+      <Filter>Source Files\Assset</Filter>
+    </ClInclude>
+    <ClInclude Include="Source\Mesh.h">
+      <Filter>Source Files\Assset</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>

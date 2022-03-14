@@ -19,14 +19,25 @@ LRESULT CALLBACK MainWindowProc(HWND Window, UINT Msg, WPARAM wParam, LPARAM lPa
 		((MINMAXINFO*)lParam)->ptMinTrackSize.x = 500;
 		((MINMAXINFO*)lParam)->ptMinTrackSize.y = 300;
 		return 0;
+
+	case WM_LBUTTONDOWN:
+		Engine::Get()->GetApp()->GetInput()->OnMouseDown(Key::LM, GET_X_LPARAM(lParam), GET_Y_LPARAM(lParam));
+		SetCapture(AAppWin32->GetWnd());
+		return 0;
 	case WM_RBUTTONDOWN:
 		Engine::Get()->GetApp()->GetInput()->OnMouseDown(Key::RM, GET_X_LPARAM(lParam), GET_Y_LPARAM(lParam));
 		SetCapture(AAppWin32->GetWnd());
+		return 0;
+
+	case WM_LBUTTONUP:
+		ReleaseCapture();
+		Engine::Get()->GetApp()->GetInput()->OnMouseUp(Key::LM, GET_X_LPARAM(lParam), GET_Y_LPARAM(lParam));
 		return 0;
 	case WM_RBUTTONUP:
 		ReleaseCapture();
 		Engine::Get()->GetApp()->GetInput()->OnMouseUp(Key::RM, GET_X_LPARAM(lParam), GET_Y_LPARAM(lParam));
 		return 0;
+
 	case WM_MOUSEMOVE:
 		Engine::Get()->GetApp()->GetInput()->OnMouseMove(GET_X_LPARAM(lParam), GET_Y_LPARAM(lParam));
 		return 0;

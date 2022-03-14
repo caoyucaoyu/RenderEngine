@@ -1,9 +1,12 @@
 #pragma once
 #include "FrameResource.h"
 #include "Mesh.h"
+#include "Material.h"
+#include "Texture.h"
 #include "Camera.h"
 #include "Scene.h"
 #include <dxgi.h>
+
 
 using Microsoft::WRL::ComPtr;
 using DirectX::XMConvertToRadians;
@@ -38,8 +41,11 @@ public:
 	D3D12_CPU_DESCRIPTOR_HANDLE DepthStencilView();
 	D3D12_CPU_DESCRIPTOR_HANDLE CurrentBackBufferView();
 
-	void BuildGeometry();
+	void BuildGeometry();//Abandon
+
 	void BuildRenderData();//New
+	void BuildTextures();
+
 	void BuildFrameResource();
 	void BuildDescriptorHeaps();
 	void BuildConstantBuffers();
@@ -93,17 +99,18 @@ protected:
 
 private:
 	int DrawCount = 0;
+	int MaterialCount = 0;
+	int TextureCount = 0;
 
-	//std::vector<std::shared_ptr<RenderMesh>> DrawList;
-
-	std::vector<MeshActor> NDrawList;
-	std::unordered_map<std::string,RenderMesh> DrawMeshList;
+	std::vector<MeshActor> DrawList;
+	std::unordered_map<std::string, DXMesh> DXMeshs;
+	std::unordered_map<std::string, DXTexture> DXTextures;
+	std::unordered_map<std::string, Material> DXMaterials;
 
 public:
-	RenderMesh FindRMesh(std::string MeshName)
-	{
-		//DrawMeshList.count(MeshName);
-		return DrawMeshList.at(MeshName);
-	}
+	DXMesh FindRMesh(std::string MeshName);
+
+	bool CanFindRMesh(std::string MeshName);
+
 };
 
