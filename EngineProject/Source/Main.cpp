@@ -2,16 +2,16 @@
 #include "Engine.h"
 #include <thread>
 
-//SM_TableRound
+#if PLATFORM_WINDOWS
 
-int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE prevInstance,PSTR cmdLine, int showCmd)
+int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE prevInstance, PSTR cmdLine, int showCmd)
 {
-	std::thread t1([](){OutputDebugStringA("thread t1\n");});
+	std::thread t1([]() {OutputDebugStringA("thread t1\n"); });
 	t1.join();
 
 	Engine::InitEngine();
 
-	Engine::Get()->GetResourceManager()->LoadMap("StaticMesh\\Map1.Usmh");
+	Engine::Get()->GetAssetsManager()->LoadMap("StaticMesh\\Map1.Usmh");
 
 	Engine::Get()->Run();
 
@@ -19,4 +19,11 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE prevInstance,PSTR cmdLine, int
 
 	return 0;
 }
+
+#elif PLATFORM_IOS
+
+#elif PLATFORM_ANDROID
+
+#endif
+
 

@@ -26,9 +26,13 @@ void Scene::Tick()
 
 void Scene::Init()
 {
-	DirectX::FXMVECTOR Position = { 3000.f, 0.0f, 1000.0f };
-	DirectX::FXMVECTOR Target = { 0.0f, 0.0f, 0.0f };
-	DirectX::FXMVECTOR Up = { 0.0f, 0.0f, 1.0f };
+	glm::vec3 Position = { 3000.f, 0.0f, 1000.0f };
+	glm::vec3 Target = { 0.0f, 0.0f, 0.0f };
+	glm::vec3 Up = { 0.0f, 0.0f, 1.0f };
+
+	//DirectX::FXMVECTOR Position = { 3000.f, 0.0f, 1000.0f };
+	//DirectX::FXMVECTOR Target = { 0.0f, 0.0f, 0.0f };
+	//DirectX::FXMVECTOR Up = { 0.0f, 0.0f, 1.0f };
 	MainCamera.LookAt(Position, Target, Up);
 
 	MainCamera.UpdateViewMatrix();
@@ -36,7 +40,7 @@ void Scene::Init()
 
 void Scene::LoadMapActors()
 {
-	for (auto MapMeshItem : Engine::Get()->GetResourceManager()->GetMapMeshsData())
+	for (auto MapMeshItem : Engine::Get()->GetAssetsManager()->GetMapMeshsData())
 	{
 		MeshActor AMeshActor(MapMeshItem);
 		SceneMeshActors.push_back(AMeshActor);

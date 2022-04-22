@@ -29,11 +29,17 @@ struct VertexOut
 VertexOut VS(VertexIn vin)
 {
 	VertexOut vout;
-	float4x4 gWorld = mul(mul(gScale,gRotation), gLocation);
-	float3 PosW = mul(float4(vin.PosL, 1.0f), gWorld).xyz;
 
-	
-	vout.PosH = mul(float4(PosW, 1.0f), gViewProj);
+	float4x4 gWorld = mul(mul(gScale,gRotation), gLocation);
+	//float4x4 gWorld = mul(gLocation, mul(gRotation, gScale));
+
+	float3 PosW = mul(float4(vin.PosL, 1.0f), gWorld).xyz;
+	//float3 PosW = mul(gWorld, float4(vin.PosL, 1.0f)).xyz;
+
+	vout.PosH = mul(float4(PosW, 1.0f),gViewProj );
+	//vout.PosH = mul(gViewProj, float4(PosW, 1.0f));
+
+
 	vout.TexC = vin.TexC;
     vout.Normal = mul(vin.Normal, gRotation);
     

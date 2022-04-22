@@ -228,7 +228,7 @@ public:
 			MeshData.push_back(Mesh);
 		}
 
-		OutputDebugStringA(ss.str().c_str());
+		//OutputDebugStringA(ss.str().c_str());
 		readFile.close();
 	}
 

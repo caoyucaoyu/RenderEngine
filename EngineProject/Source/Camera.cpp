@@ -48,7 +48,7 @@ void Camera::Update()
 
 void Camera::SetPosition(float x, float y, float z)
 {
-	Position = XMFLOAT3(x, y, z);
+	Position = glm::vec3(x,y,z);
 	ViewDirty = true;
 }
 
@@ -62,119 +62,105 @@ void Camera::SetLens(float fovY, float aspect, float zn, float zf)
 	NearWindowHeight = 2.0f * NearZ * tanf(0.5f * FovY);
 	FarWindowHeight = 2.0f * FarZ * tanf(0.5f * FovY);
 
-	XMMATRIX P = XMMatrixPerspectiveFovLH(FovY, Aspect, NearZ, FarZ);
-	XMStoreFloat4x4(&Proj, P);
+	Proj= glm::perspectiveLH_ZO(FovY, Aspect, NearZ, FarZ);
 }
 
-void Camera::LookAt(FXMVECTOR pos, FXMVECTOR target, FXMVECTOR worldUp)
+void Camera::LookAt(glm::vec3 pos, glm::vec3 target, glm::vec3 worldUp)
 {
-	XMVECTOR L = XMVector3Normalize(XMVectorSubtract(target, pos));
-	XMVECTOR R = XMVector3Normalize(XMVector3Cross(worldUp, L));
-	XMVECTOR U = XMVector3Cross(L, R);
-
-	XMStoreFloat3(&Position, pos);
-	XMStoreFloat3(&Look, L);
-	XMStoreFloat3(&Right, R);
-	XMStoreFloat3(&Up, U);
+	Look =glm::normalize(target - pos) ;
+	Right = glm::normalize(glm::cross(worldUp , Look));
+	Up = glm::cross(Look,Right);
+	Position=pos;
 
 	ViewDirty = true;
 }
 
 void Camera::Walk(float d)
 {
-	XMVECTOR s = XMVectorReplicate(d);
-	XMVECTOR l = XMLoadFloat3(&Look);
-	XMVECTOR p = XMLoadFloat3(&Position);
-	XMStoreFloat3(&Position, XMVectorMultiplyAdd(s, l, p));
+	glm::vec3 s = { d,d,d };
+	glm::vec3 l = Look;
+	glm::vec3 p = Position;
+	Position = s * l + p;
 
 	ViewDirty = true;
 }
 
 void Camera::Strafe(float d)
 {
-	XMVECTOR s = XMVectorReplicate(d);
-	XMVECTOR r = XMLoadFloat3(&Right);
-	XMVECTOR p = XMLoadFloat3(&Position);
-	XMStoreFloat3(&Position, XMVectorMultiplyAdd(s, r, p));
+	glm::vec3 s = glm::vec3(d, d, d);
+	glm::vec3 r = Right;
+	glm::vec3 p = Position;
+	Position = s * r + p;
 
 	ViewDirty = true;
 }
 
 void Camera::Pitch(float angle)
 {
-	XMMATRIX R = XMMatrixRotationAxis(XMLoadFloat3(&Right), angle);
+	auto R = glm::mat4(1.0f);
+	R = glm::rotate(R, angle, Right);
 
-	XMStoreFloat3(&Up, XMVector3TransformNormal(XMLoadFloat3(&Up), R));
-	XMStoreFloat3(&Look, XMVector3TransformNormal(XMLoadFloat3(&Look), R));
+	Up = glm::normalize(Transform(R, Up));
+	Look = glm::normalize(Transform(R, Look));
+	Right = glm::normalize(Transform(R, Right));
 
 	ViewDirty = true;
 }
 
 void Camera::RotateZ(float angle)
-{
+{ 
+	auto R = glm::mat4(1.0f);
+	R = glm::rotate(R, angle, glm::vec3(0,0,1));
 
-	XMMATRIX R = XMMatrixRotationZ(angle);
-
-	XMStoreFloat3(&Right, XMVector3TransformNormal(XMLoadFloat3(&Right), R));
-	XMStoreFloat3(&Up,    XMVector3TransformNormal(XMLoadFloat3(&Up), R));
-	XMStoreFloat3(&Look,  XMVector3TransformNormal(XMLoadFloat3(&Look), R));
+	Right = glm::normalize(Transform(R, Right));
+	Up = glm::normalize(Transform(R, Up));
+	Look = glm::normalize(Transform(R, Look));
 
 	ViewDirty = true;
 }
 
+
+
 void Camera::UpdateViewMatrix()
 {
-	
-	if (ViewDirty)
-	{
-		XMVECTOR R = XMLoadFloat3(&Right);
-		XMVECTOR U = XMLoadFloat3(&Up);
-		XMVECTOR L = XMLoadFloat3(&Look);
-		XMVECTOR P = XMLoadFloat3(&Position);
-
-		L = XMVector3Normalize(L);
-		U = XMVector3Normalize(XMVector3Cross(L, R));
-
-		R = XMVector3Cross(U, L);
-
-		float x = -XMVectorGetX(XMVector3Dot(P, R));
-		float y = -XMVectorGetX(XMVector3Dot(P, U));
-		float z = -XMVectorGetX(XMVector3Dot(P, L));
-
-		XMStoreFloat3(&Right, R);
-		XMStoreFloat3(&Up, U);
-		XMStoreFloat3(&Look, L);
-
-		View(0, 0) = Right.x;
-		View(1, 0) = Right.y;
-		View(2, 0) = Right.z;
-		View(3, 0) = x;
-
-		View(0, 1) = Up.x;
-		View(1, 1) = Up.y;
-		View(2, 1) = Up.z;
-		View(3, 1) = y;
-
-		View(0, 2) = Look.x;
-		View(1, 2) = Look.y;
-		View(2, 2) = Look.z;
-		View(3, 2) = z;
-
-		View(0, 3) = 0.0f;
-		View(1, 3) = 0.0f;
-		View(2, 3) = 0.0f;
-		View(3, 3) = 1.0f;
+	if (ViewDirty) 
+	{	
+		View=glm::lookAtLH(Position, Position+Look,Up);
 
 		ViewDirty = false;
 	}
 }
 
-DirectX::XMMATRIX Camera::GetView()
+
+glm::mat4 Camera::GetView()
 {
-	return XMLoadFloat4x4(&View);
+	return View;
 }
 
-DirectX::XMMATRIX Camera::GetProj()
+glm::mat4 Camera::GetProj()
 {
-	return XMLoadFloat4x4(&Proj);
+	return Proj;
+}
+
+
+glm::vec3 VectorMultiplyAdd(glm::vec3 MultiplyV1, glm::vec3 MultiplyV2, glm::vec3 addV) {
+	glm::vec3 result;
+	result.x = MultiplyV1.x * MultiplyV2.x + addV.x;
+	result.y = MultiplyV1.y * MultiplyV2.y + addV.y;
+	result.z = MultiplyV1.z * MultiplyV2.z + addV.z;
+
+	return result;
+}
+
+glm::vec3 Camera::Transform(glm::mat4x4 m, glm::vec3 v) {
+	glm::vec4 Z = { v.z,v.z,v.z,v.z };
+	glm::vec4 Y = { v.y,v.y,v.y,v.y };
+	glm::vec4 X = { v.x,v.x,v.x,v.x };
+
+	glm::vec3 Result = { Z.x * m[2].x,Z.y * m[2].y,Z.z * m[2].z };
+
+	Result = VectorMultiplyAdd(Y, m[1], Result);
+	Result = VectorMultiplyAdd(X, m[0], Result);
+
+	return Result;
 }

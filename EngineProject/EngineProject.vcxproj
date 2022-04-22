@@ -21,13 +21,14 @@
   <ItemGroup>
     <ClCompile Include="Source\Camera.cpp" />
     <ClCompile Include="Source\DDSTextureLoader.cpp" />
-    <ClCompile Include="Source\DxRenderer.cpp" />
+    <ClCompile Include="Source\Renderer.cpp" />
     <ClCompile Include="Source\Input.cpp" />
-    <ClCompile Include="Source\ResourceManager.cpp" />
+    <ClCompile Include="Source\AssetsManager.cpp" />
+    <ClCompile Include="Source\RHI\DX12RHI.cpp" />
+    <ClCompile Include="Source\RHI\RHI.cpp" />
     <ClCompile Include="Source\Scene.cpp" />
-    <ClCompile Include="Source\App.cpp" />
-    <ClCompile Include="Source\AppWin32.cpp" />
-    <ClCompile Include="Source\old.cpp" />
+    <ClCompile Include="Source\Window.cpp" />
+    <ClCompile Include="Source\WindowWin32.cpp" />
     <ClCompile Include="Source\D3DUtil.cpp" />
     <ClCompile Include="Source\Engine.cpp" />
     <ClCompile Include="Source\FrameResource.cpp" />
@@ -41,14 +42,15 @@
   <ItemGroup>
     <ClInclude Include="Source\Camera.h" />
     <ClInclude Include="Source\DDSTextureLoader.h" />
-    <ClInclude Include="Source\DxRenderer.h" />
+    <ClInclude Include="Source\Renderer.h" />
     <ClInclude Include="Source\Input.h" />
     <ClInclude Include="Source\Material.h" />
-    <ClInclude Include="Source\ResourceManager.h" />
+    <ClInclude Include="Source\AssetsManager.h" />
+    <ClInclude Include="Source\RHI\DX12RHI.h" />
+    <ClInclude Include="Source\RHI\RHI.h" />
     <ClInclude Include="Source\Scene.h" />
-    <ClInclude Include="Source\App.h" />
-    <ClInclude Include="Source\AppWin32.h" />
-    <ClInclude Include="Source\old.h" />
+    <ClInclude Include="Source\Window.h" />
+    <ClInclude Include="Source\WindowWin32.h" />
     <ClInclude Include="Source\D3DUtil.h" />
     <ClInclude Include="Source\d3dx12.h" />
     <ClInclude Include="Source\Engine.h" />
@@ -157,7 +159,7 @@
     <ClCompile>
       <WarningLevel>Level3</WarningLevel>
       <SDLCheck>true</SDLCheck>
-      <PreprocessorDefinitions>PLATFORM_WINDOWS=1;_DEBUG;_WINDOWS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions>PLATFORM_WINDOWS;_DEBUG;_WINDOWS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>false</ConformanceMode>
       <AdditionalIncludeDirectories>eigen-3.4.0\Eigen;glm;</AdditionalIncludeDirectories>
       <PrecompiledHeaderFile>stdafx.h</PrecompiledHeaderFile>

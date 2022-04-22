@@ -1,8 +1,8 @@
 #pragma once
-#include "App.h"
-#include "DxRenderer.h"
+#include "Window.h"
+#include "Renderer.h"
 #include "Scene.h"
-#include "ResourceManager.h"
+#include "AssetsManager.h"
 
 class Engine
 {
@@ -17,24 +17,22 @@ public:
 	static Engine* Get();
 	void Run();
 
-	App* GetApp();
-	DxRenderer* GetRender();
+	Window* GetWindow();
+	Renderer* GetRender();
 	Scene* GetScene();
-	ResourceManager* GetResourceManager();
-	GameTimer GetTimer();
-
-
+	AssetsManager* GetAssetsManager();
+	GameTimer* GetTimer();
 
 private:
 	void Init();
 	void Tick();
 	
 private:
-	App* MApp;
-	DxRenderer* MRender;
+	Window* MWindow;
+	Renderer* MRender;
 	Scene* MScene;
-	ResourceManager* MResourceManager;
-	GameTimer Timer;
+	AssetsManager* MResourceManager;
+	GameTimer* MTimer;
 	bool IsRunning;
 };
 

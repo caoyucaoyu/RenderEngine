@@ -16,37 +16,34 @@
     <Filter Include="Source Files\Source">
       <UniqueIdentifier>{0e3a2572-9b96-4fa6-b251-31725f9a4306}</UniqueIdentifier>
     </Filter>
-    <Filter Include="Source Files\Other">
-      <UniqueIdentifier>{270f7e0f-a370-4279-be9a-437aa31aafba}</UniqueIdentifier>
-    </Filter>
     <Filter Include="Source Files\DX">
       <UniqueIdentifier>{cf163ae1-6c13-46c4-a259-b512af3c81b2}</UniqueIdentifier>
     </Filter>
     <Filter Include="Source Files\Assset">
       <UniqueIdentifier>{ee2fb9d2-00c1-46b9-8256-2d42d236d622}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Source Files\RHI">
+      <UniqueIdentifier>{426ebda2-e1c1-4596-8e6f-30d43e92ac52}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="Source\AppWin32.cpp">
+    <ClCompile Include="Source\WindowWin32.cpp">
       <Filter>Source Files\Source</Filter>
     </ClCompile>
     <ClCompile Include="Source\stdafx.cpp">
       <Filter>Source Files\Source</Filter>
     </ClCompile>
-    <ClCompile Include="Source\App.cpp">
+    <ClCompile Include="Source\Window.cpp">
       <Filter>Source Files\Source</Filter>
     </ClCompile>
     <ClCompile Include="Source\Main.cpp">
       <Filter>Source Files\Source</Filter>
     </ClCompile>
-    <ClCompile Include="Source\DxRenderer.cpp">
+    <ClCompile Include="Source\Renderer.cpp">
       <Filter>Source Files\Source</Filter>
     </ClCompile>
     <ClCompile Include="Source\Engine.cpp">
       <Filter>Source Files\Source</Filter>
-    </ClCompile>
-    <ClCompile Include="Source\old.cpp">
-      <Filter>Source Files\Other</Filter>
     </ClCompile>
     <ClCompile Include="Source\Input.cpp">
       <Filter>Source Files\Source</Filter>
@@ -69,31 +66,34 @@
     <ClCompile Include="Source\DDSTextureLoader.cpp">
       <Filter>Source Files\DX</Filter>
     </ClCompile>
-    <ClCompile Include="Source\ResourceManager.cpp">
+    <ClCompile Include="Source\AssetsManager.cpp">
       <Filter>Source Files\Assset</Filter>
     </ClCompile>
     <ClCompile Include="Source\Scene.cpp">
       <Filter>Source Files\Assset</Filter>
     </ClCompile>
+    <ClCompile Include="Source\RHI\RHI.cpp">
+      <Filter>Source Files\RHI</Filter>
+    </ClCompile>
+    <ClCompile Include="Source\RHI\DX12RHI.cpp">
+      <Filter>Source Files\RHI</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="Source\AppWin32.h">
+    <ClInclude Include="Source\WindowWin32.h">
       <Filter>Source Files\Source</Filter>
     </ClInclude>
     <ClInclude Include="Source\stdafx.h">
       <Filter>Source Files\Source</Filter>
     </ClInclude>
-    <ClInclude Include="Source\App.h">
+    <ClInclude Include="Source\Window.h">
       <Filter>Source Files\Source</Filter>
     </ClInclude>
-    <ClInclude Include="Source\DxRenderer.h">
+    <ClInclude Include="Source\Renderer.h">
       <Filter>Source Files\Source</Filter>
     </ClInclude>
     <ClInclude Include="Source\Engine.h">
       <Filter>Source Files\Source</Filter>
-    </ClInclude>
-    <ClInclude Include="Source\old.h">
-      <Filter>Source Files\Other</Filter>
     </ClInclude>
     <ClInclude Include="Source\Input.h">
       <Filter>Source Files\Source</Filter>
@@ -131,11 +131,17 @@
     <ClInclude Include="Source\Scene.h">
       <Filter>Source Files\Assset</Filter>
     </ClInclude>
-    <ClInclude Include="Source\ResourceManager.h">
+    <ClInclude Include="Source\AssetsManager.h">
       <Filter>Source Files\Assset</Filter>
     </ClInclude>
     <ClInclude Include="Source\Mesh.h">
       <Filter>Source Files\Assset</Filter>
+    </ClInclude>
+    <ClInclude Include="Source\RHI\RHI.h">
+      <Filter>Source Files\RHI</Filter>
+    </ClInclude>
+    <ClInclude Include="Source\RHI\DX12RHI.h">
+      <Filter>Source Files\RHI</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>

@@ -1,6 +1,6 @@
 #include "stdafx.h"
 #include "Engine.h"
-#include "DxRenderer.h"
+#include "Renderer.h"
 
 Engine::Engine() : IsRunning(false)
 {
@@ -9,7 +9,7 @@ Engine::Engine() : IsRunning(false)
 
 Engine::~Engine()
 {
-	App::DestroyApp(MApp);
+	Window::DestroyApp(MWindow);
 }
 
 Engine* Engine::MEngine = nullptr;
@@ -24,14 +24,15 @@ void Engine::InitEngine()
 }
 void Engine::Init()
 {
-	assert(MApp == nullptr);
-	MApp = App::CreateApp();
+	assert(MWindow == nullptr);
+	MWindow = Window::CreateApp();
 	MScene = new Scene();
-	MRender = new DxRenderer();
-	MResourceManager = new ResourceManager();
+	MResourceManager = new AssetsManager();
+	MRender = new Renderer();
+	MTimer = new GameTimer();
 
-	Timer.Reset();
-	Timer.Start();
+	MTimer->Reset();
+	MTimer->Start();
 
 	MScene->Init();
 	MRender->Init();
@@ -44,6 +45,7 @@ void Engine::Destroy()
 		delete MEngine->MRender;
 		delete MEngine->MScene;
 		delete MEngine->MResourceManager;
+		delete MEngine->MTimer;
 		delete MEngine;
 		MEngine = nullptr;
 	}
@@ -59,19 +61,21 @@ void Engine::Run()
 
 #if PLATFORM_WINDOWS
 
-	while (IsRunning&&MApp->Run())
+	while (IsRunning&&MWindow->Run())
 	{
 		Tick();
 	}
 	//Engine::Destroy();
 
 #elif PLATFORM_IOS
-
+	
 #elif PLATFORM_ANDROID
 
 #else
 	#error("Not supported platform")
 #endif
+
+
 
 }
 
@@ -79,10 +83,9 @@ void Engine::Run()
 
 void Engine::Tick()
 {
-	Timer.Tick();
+	MTimer->Tick();
 	MScene->Tick();
-	
-	MApp->GetInput()->Update();
+	MWindow->GetInput()->Update();
 	MRender->Render();
 }
 
@@ -95,12 +98,12 @@ Engine* Engine::Get()
 	return MEngine;
 }
 
-App* Engine::GetApp()
+Window* Engine::GetWindow()
 {
-	return MApp;
+	return MWindow;
 }
 
-DxRenderer* Engine::GetRender()
+Renderer* Engine::GetRender()
 {
 	return MRender;
 }
@@ -110,13 +113,13 @@ Scene* Engine::GetScene()
 	return MScene;
 }
 
-ResourceManager* Engine::GetResourceManager()
+AssetsManager* Engine::GetAssetsManager()
 {
 	return MResourceManager;
 }
 
-GameTimer Engine::GetTimer()
+GameTimer* Engine::GetTimer()
 {
-	return Timer;
+	return MTimer;
 }
 
