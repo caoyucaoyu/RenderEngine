@@ -1,6 +1,7 @@
 #include "stdafx.h"
 #include "Engine.h"
-#include "Renderer.h"
+#include "OldRenderer.h"
+#include "RHI/RHI.h"
 
 Engine::Engine() : IsRunning(false)
 {
@@ -9,7 +10,7 @@ Engine::Engine() : IsRunning(false)
 
 Engine::~Engine()
 {
-	Window::DestroyApp(MWindow);
+	Window::DestroyWindow(MWindow);
 }
 
 Engine* Engine::MEngine = nullptr;
@@ -25,16 +26,21 @@ void Engine::InitEngine()
 void Engine::Init()
 {
 	assert(MWindow == nullptr);
-	MWindow = Window::CreateApp();
+	MWindow = Window::CreateAWindow();
+
+	RHI::CreateRHI();
+
 	MScene = new Scene();
-	MResourceManager = new AssetsManager();
-	MRender = new Renderer();
 	MTimer = new GameTimer();
+	MResourceManager = new AssetsManager();
 
 	MTimer->Reset();
 	MTimer->Start();
 
 	MScene->Init();
+
+
+	MRender = new OldRenderer();
 	MRender->Init();
 }
 
@@ -42,6 +48,7 @@ void Engine::Destroy()
 {
 	if (MEngine)
 	{
+		RHI::DestroyRHI();
 		delete MEngine->MRender;
 		delete MEngine->MScene;
 		delete MEngine->MResourceManager;
@@ -103,7 +110,7 @@ Window* Engine::GetWindow()
 	return MWindow;
 }
 
-Renderer* Engine::GetRender()
+OldRenderer* Engine::GetRender()
 {
 	return MRender;
 }

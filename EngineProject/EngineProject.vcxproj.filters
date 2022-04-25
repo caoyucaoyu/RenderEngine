@@ -27,34 +27,19 @@
     </Filter>
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="Source\WindowWin32.cpp">
-      <Filter>Source Files\Source</Filter>
-    </ClCompile>
     <ClCompile Include="Source\stdafx.cpp">
-      <Filter>Source Files\Source</Filter>
-    </ClCompile>
-    <ClCompile Include="Source\Window.cpp">
       <Filter>Source Files\Source</Filter>
     </ClCompile>
     <ClCompile Include="Source\Main.cpp">
       <Filter>Source Files\Source</Filter>
     </ClCompile>
-    <ClCompile Include="Source\Renderer.cpp">
-      <Filter>Source Files\Source</Filter>
-    </ClCompile>
-    <ClCompile Include="Source\Engine.cpp">
-      <Filter>Source Files\Source</Filter>
-    </ClCompile>
-    <ClCompile Include="Source\Input.cpp">
+    <ClCompile Include="Source\OldRenderer.cpp">
       <Filter>Source Files\Source</Filter>
     </ClCompile>
     <ClCompile Include="Source\FrameResource.cpp">
       <Filter>Source Files\DX</Filter>
     </ClCompile>
     <ClCompile Include="Source\MathHelper.cpp">
-      <Filter>Source Files\DX</Filter>
-    </ClCompile>
-    <ClCompile Include="Source\GameTimer.cpp">
       <Filter>Source Files\DX</Filter>
     </ClCompile>
     <ClCompile Include="Source\D3DUtil.cpp">
@@ -78,24 +63,36 @@
     <ClCompile Include="Source\RHI\DX12RHI.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="Source\Core\Engine.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="Source\Core\GameTimer.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="Source\Core\Input.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="Source\Core\Window.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="Source\Core\WindowWin32.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="Source\Core\Thread.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="Source\Core\RenderThread.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="Source\Core\Task.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="Source\WindowWin32.h">
-      <Filter>Source Files\Source</Filter>
-    </ClInclude>
     <ClInclude Include="Source\stdafx.h">
       <Filter>Source Files\Source</Filter>
     </ClInclude>
-    <ClInclude Include="Source\Window.h">
-      <Filter>Source Files\Source</Filter>
-    </ClInclude>
-    <ClInclude Include="Source\Renderer.h">
-      <Filter>Source Files\Source</Filter>
-    </ClInclude>
-    <ClInclude Include="Source\Engine.h">
-      <Filter>Source Files\Source</Filter>
-    </ClInclude>
-    <ClInclude Include="Source\Input.h">
+    <ClInclude Include="Source\OldRenderer.h">
       <Filter>Source Files\Source</Filter>
     </ClInclude>
     <ClInclude Include="Source\FrameResource.h">
@@ -105,9 +102,6 @@
       <Filter>Source Files\DX</Filter>
     </ClInclude>
     <ClInclude Include="Source\UploadBuffer.h">
-      <Filter>Source Files\DX</Filter>
-    </ClInclude>
-    <ClInclude Include="Source\GameTimer.h">
       <Filter>Source Files\DX</Filter>
     </ClInclude>
     <ClInclude Include="Source\D3DUtil.h">
@@ -141,6 +135,30 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="Source\RHI\DX12RHI.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Source\Core\Engine.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Source\Core\GameTimer.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Source\Core\Input.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Source\Core\Window.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Source\Core\WindowWin32.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Source\Core\Thread.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Source\Core\RenderThread.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Source\Core\Task.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

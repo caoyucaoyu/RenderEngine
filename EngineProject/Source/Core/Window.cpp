@@ -12,7 +12,7 @@ Window::~Window()
 	delete MInput;
 }
 
-Window* Window::CreateApp()
+Window* Window::CreateAWindow()
 {
 	Window* NApp = nullptr;
 #if PLATFORM_WINDOWS
@@ -25,7 +25,7 @@ Window* Window::CreateApp()
 	return NApp;
 }
 
-void Window::DestroyApp(Window* DApp)
+void Window::DestroyWindow(Window* DApp)
 {
 	delete DApp;
 }

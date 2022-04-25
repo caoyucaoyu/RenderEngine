@@ -4,12 +4,14 @@
 class Window 
 {
 public:
-	static Window* CreateApp();
-	static void DestroyApp(Window* DApp);
+	static Window* CreateAWindow();
+	static void DestroyWindow(Window* DWindow);
 	
 	virtual int Run() = 0;
-
 	virtual HWND GetWnd() = 0;
+	virtual int GetHeight() { return Hight; }
+	virtual int GetWidth() { return Width; }
+
 	Input* GetInput();
 
 protected:
@@ -17,7 +19,7 @@ protected:
 	virtual ~Window();
 
 	int Width;
-	int Height;
+	int Hight;
 
 	Input* MInput;
 };

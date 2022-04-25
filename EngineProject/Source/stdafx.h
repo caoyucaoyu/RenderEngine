@@ -28,9 +28,14 @@
 
 #include "d3dx12.h"
 
-//#include "Engine.h"
-
-//#include "DxRenderer.h"
-
 #include "DDSTextureLoader.h"
 #include "MathHelper.h"
+
+#include <mutex>
+#include <atomic>
+#include <condition_variable>
+#include <thread>
+#include <chrono>
+
+
+//#include <functional>

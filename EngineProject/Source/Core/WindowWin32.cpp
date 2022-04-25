@@ -2,13 +2,13 @@
 #include "WindowWin32.h"
 #include "Engine.h"
 
-static WindowWin32* AAppWin32 =nullptr;
+static WindowWin32* Win32Window =nullptr;
 
 LRESULT CALLBACK MainWindowProc(HWND Window, UINT Msg, WPARAM wParam, LPARAM lParam)
 {
-	if(AAppWin32 == nullptr)
+	if(Win32Window == nullptr)
 		return DefWindowProc(Window, Msg, wParam, lParam);
-	Input* Inputv = AAppWin32->GetInput();
+	Input* Inputv = Win32Window->GetInput();
 
 	switch (Msg) 
 	{
@@ -22,11 +22,11 @@ LRESULT CALLBACK MainWindowProc(HWND Window, UINT Msg, WPARAM wParam, LPARAM lPa
 
 	case WM_LBUTTONDOWN:
 		Engine::Get()->GetWindow()->GetInput()->OnMouseDown(Key::LM, GET_X_LPARAM(lParam), GET_Y_LPARAM(lParam));
-		SetCapture(AAppWin32->GetWnd());
+		SetCapture(Win32Window->GetWnd());
 		return 0;
 	case WM_RBUTTONDOWN:
 		Engine::Get()->GetWindow()->GetInput()->OnMouseDown(Key::RM, GET_X_LPARAM(lParam), GET_Y_LPARAM(lParam));
-		SetCapture(AAppWin32->GetWnd());
+		SetCapture(Win32Window->GetWnd());
 		return 0;
 
 	case WM_LBUTTONUP:
@@ -96,7 +96,7 @@ LRESULT CALLBACK MainWindowProc(HWND Window, UINT Msg, WPARAM wParam, LPARAM lPa
 
 WindowWin32::WindowWin32()
 {
-	AAppWin32=this;
+	Win32Window=this;
 	Init();
 }
 
@@ -127,7 +127,7 @@ bool WindowWin32::InitWindow()
 		return false;
 	}
 
-	RECT R = { 0, 0, ClientWidth, ClientHight };
+	RECT R = { 0, 0, Width, Hight };
 	AdjustWindowRect(&R, WS_OVERLAPPEDWINDOW, false);
 	int Width = R.right - R.left;
 	int Height = R.bottom - R.top;
@@ -144,7 +144,7 @@ bool WindowWin32::InitWindow()
 
 WindowWin32::~WindowWin32()
 {
-	AAppWin32=nullptr;
+	Win32Window=nullptr;
 }
 
 
@@ -154,31 +154,6 @@ void WindowWin32::OnResize()
 	GetWindowRect(HMainWnd, &r);
 	MoveWindow(HMainWnd, r.left, r.top, 1920, 1080, TRUE);
 	Engine::Get()->GetRender()->Reset();
-
-	//assert(D3dDevice);
-	//assert(SwapChain);
-	//assert(CommandListAlloc);
-	//
-	//FlushCommandQueue();
-	//
-	//CommandList->Reset(CommandListAlloc.Get(), nullptr);
-	//
-	//for (int i = 0; i < SwapChainBufferCount; ++i)
-	//	SwapChainBuffer[i].Reset();
-	//DepthStencilBuffer.Reset();
-	//
-	//SwapChain->ResizeBuffers(SwapChainBufferCount,ClientWidth,ClientHight, DXGI_FORMAT_R8G8B8A8_UNORM, DXGI_SWAP_CHAIN_FLAG_ALLOW_MODE_SWITCH);
-	//CurrBackBuffer=0;
-	// 
-	//CreateRTV();
-	//CreateDSV();
-	//CreateViewPortAndScissorRect();
-	//
-	//ThrowIfFailed(CommandList->Close());
-	//ID3D12CommandList* cmdsLists[] = { CommandList.Get() };
-	//CommandQueue->ExecuteCommandLists(_countof(cmdsLists), cmdsLists);
-	//FlushCommandQueue();
-
 }
 
 

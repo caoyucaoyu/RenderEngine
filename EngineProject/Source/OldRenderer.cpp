@@ -1,26 +1,28 @@
 #include "stdafx.h"
 #include "Engine.h"
-#include "Renderer.h"
+#include "OldRenderer.h"
+#include "RHI/RHI.h"
 
 
-Renderer::Renderer()
+OldRenderer::OldRenderer()
 {
 
 }
 
-bool Renderer::Init()
+bool OldRenderer::Init()
 {
+	//RHI::Get()->Init();
 	InitDirect3D();
 	return true;
 }
 
-void Renderer::Render()
+void OldRenderer::Render()
 {	
 	Update(Engine::Get()->GetTimer());
 	Draw();
 }
 
-bool Renderer::InitDirect3D()
+bool OldRenderer::InitDirect3D()
 {
 	ComPtr<ID3D12Debug> DebugController;
 	if (SUCCEEDED(D3D12GetDebugInterface(IID_PPV_ARGS(&DebugController))))
@@ -52,7 +54,7 @@ bool Renderer::InitDirect3D()
 	return true;
 }
 
-bool Renderer::InitDraw()
+bool OldRenderer::InitDraw()
 {
 	FlushCommandQueue();
 	CommandList->Reset(CommandListAlloc.Get(), nullptr);
@@ -78,7 +80,7 @@ bool Renderer::InitDraw()
 }
 
 
-void Renderer::Update(const GameTimer* Gt)
+void OldRenderer::Update(const GameTimer* Gt)
 {
 	CurrFrameResourceIndex = (CurrFrameResourceIndex + 1) % FrameResourcesCount;
 	CurrFrameResource = FrameResources[CurrFrameResourceIndex].get();
@@ -121,7 +123,7 @@ void Renderer::Update(const GameTimer* Gt)
 
 }
 
-void Renderer::Draw()
+void OldRenderer::Draw()
 {
 	auto CurrentAllocator = CurrFrameResource->CmdListAlloc;
 
@@ -223,7 +225,7 @@ void Renderer::Draw()
 
 }
 
-void Renderer::Reset()
+void OldRenderer::Reset()
 {
 	OutputDebugStringA("Render Reset \n");
 	assert(D3dDevice);
@@ -251,7 +253,7 @@ void Renderer::Reset()
 	FlushCommandQueue();
 }
 
-void Renderer::CreateDevice()
+void OldRenderer::CreateDevice()
 {
 	//Create IDXGIFactory
 	CreateDXGIFactory1(IID_PPV_ARGS(&DxgiFactory));
@@ -263,19 +265,19 @@ void Renderer::CreateDevice()
 		IID_PPV_ARGS(&D3dDevice));
 }
 
-void Renderer::CreateFence()
+void OldRenderer::CreateFence()
 {
 	D3dDevice->CreateFence(0, D3D12_FENCE_FLAG_NONE, IID_PPV_ARGS(&Fence));
 }
 
-void Renderer::GetDescriptorSize()
+void OldRenderer::GetDescriptorSize()
 {
 	RtvDescriptorSize = D3dDevice->GetDescriptorHandleIncrementSize(D3D12_DESCRIPTOR_HEAP_TYPE_RTV);
 	DsvDescriptorSize = D3dDevice->GetDescriptorHandleIncrementSize(D3D12_DESCRIPTOR_HEAP_TYPE_DSV);
 	CbvSrvUavDescriptorSize = D3dDevice->GetDescriptorHandleIncrementSize(D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV);
 }
 
-void Renderer::SetMSAA()
+void OldRenderer::SetMSAA()
 {
 	MsaaQualityLevels.Format = DXGI_FORMAT_R8G8B8A8_UNORM;
 	MsaaQualityLevels.SampleCount = 1;
@@ -285,7 +287,7 @@ void Renderer::SetMSAA()
 	assert(MsaaQualityLevels.NumQualityLevels > 0);
 }
 
-void Renderer::CreateCommandObject()
+void OldRenderer::CreateCommandObject()
 {
 	D3D12_COMMAND_QUEUE_DESC queueDesc = {};
 	queueDesc.Type = D3D12_COMMAND_LIST_TYPE_DIRECT;
@@ -301,7 +303,7 @@ void Renderer::CreateCommandObject()
 	CommandList->Close();
 }
 
-void Renderer::CreateSwapChain()
+void OldRenderer::CreateSwapChain()
 {
 	HMainWnd=Engine::Get()->GetWindow()->GetWnd();
 	
@@ -327,7 +329,7 @@ void Renderer::CreateSwapChain()
 }
 
 //DescriptorHeap chouxiang
-void Renderer::CreateDescriptorHeap()
+void OldRenderer::CreateDescriptorHeap()
 {
 	//Create Rtv DescriptorHeaps
 	D3D12_DESCRIPTOR_HEAP_DESC RtvHeapDesc;
@@ -345,7 +347,7 @@ void Renderer::CreateDescriptorHeap()
 	D3dDevice->CreateDescriptorHeap(&DsvHeapDesc, IID_PPV_ARGS(DsvHeap.GetAddressOf()));
 }
 
-void Renderer::CreateRTV()
+void OldRenderer::CreateRTV()
 {
 	//Create RenderTargetView
 	CD3DX12_CPU_DESCRIPTOR_HANDLE RtvHeapHandle(RtvHeap->GetCPUDescriptorHandleForHeapStart());
@@ -357,7 +359,7 @@ void Renderer::CreateRTV()
 	}
 }
 
-void Renderer::CreateDSV()
+void OldRenderer::CreateDSV()
 {
 	//Create Depth/Stencil View
 	D3D12_RESOURCE_DESC DepthStencilDesc;
@@ -394,7 +396,7 @@ void Renderer::CreateDSV()
 	D3dDevice->CreateDepthStencilView(DepthStencilBuffer.Get(), &DsvDesc, DepthStencilView());
 }
 
-void Renderer::FlushCommandQueue()
+void OldRenderer::FlushCommandQueue()
 {
 	CurrentFence++;
 
@@ -409,7 +411,7 @@ void Renderer::FlushCommandQueue()
 	}
 }
 
-void Renderer::CreateViewPortAndScissorRect()
+void OldRenderer::CreateViewPortAndScissorRect()
 {
 	//Set ScreenV ScissorR
 	ScreenViewport.TopLeftX = 0.0f;
@@ -421,12 +423,12 @@ void Renderer::CreateViewPortAndScissorRect()
 	ScissorRect = { 0,0,ClientWidth,ClientHight };
 }
 
-D3D12_CPU_DESCRIPTOR_HANDLE Renderer::DepthStencilView()
+D3D12_CPU_DESCRIPTOR_HANDLE OldRenderer::DepthStencilView()
 {
 	return DsvHeap->GetCPUDescriptorHandleForHeapStart();
 }
 
-D3D12_CPU_DESCRIPTOR_HANDLE Renderer::CurrentBackBufferView()
+D3D12_CPU_DESCRIPTOR_HANDLE OldRenderer::CurrentBackBufferView()
 {
 	return CD3DX12_CPU_DESCRIPTOR_HANDLE(
 		RtvHeap->GetCPUDescriptorHandleForHeapStart(),
@@ -436,7 +438,7 @@ D3D12_CPU_DESCRIPTOR_HANDLE Renderer::CurrentBackBufferView()
 
 
 
-void Renderer::BuildGeometry()
+void OldRenderer::BuildGeometry()
 {
 	//std::vector<MapItem> MeshsData;
 	//D3DUtil::ReadMapFile("StaticMesh\\Map1.Usmh", MeshsData);
@@ -452,7 +454,7 @@ void Renderer::BuildGeometry()
 	//}
 }
 
-void Renderer::BuildRenderData()
+void OldRenderer::BuildRenderData()
 {
 	DrawList.clear();
 	DXMeshs.clear();
@@ -475,7 +477,7 @@ void Renderer::BuildRenderData()
 	}
 }
 
-void Renderer::BuildTextures()
+void OldRenderer::BuildTextures()
 {
 	Texture ATexture;
 	for (auto DrawListActor : DrawList)
@@ -504,7 +506,7 @@ void Renderer::BuildTextures()
 	TextureCount= DXTextures.size();
 }
 
-void Renderer::BuildFrameResource()
+void OldRenderer::BuildFrameResource()
 {
 	FrameResources.resize(FrameResourcesCount);
 	for (int i = 0; i < FrameResourcesCount; i++)
@@ -513,7 +515,7 @@ void Renderer::BuildFrameResource()
 	}
 }
 
-void Renderer::BuildDescriptorHeaps()
+void OldRenderer::BuildDescriptorHeaps()
 {
 	DescriptorsNum = (DrawCount + 1 + MaterialCount) * FrameResourcesCount;//Meshs
 
@@ -526,7 +528,7 @@ void Renderer::BuildDescriptorHeaps()
 	D3dDevice->CreateDescriptorHeap(&CbvHeapDesc, IID_PPV_ARGS(&CbvHeap));
 }
 
-void Renderer::BuildConstantBuffers()
+void OldRenderer::BuildConstantBuffers()
 {
 	UINT ObjCBByteSize = D3DUtil::CalcConstantBufferByteSize(sizeof(ObjectConstants));
 	UINT PassCBByteSize = D3DUtil::CalcConstantBufferByteSize(sizeof(PassConstants));
@@ -595,7 +597,7 @@ void Renderer::BuildConstantBuffers()
 	//}
 }
 
-void Renderer::BuildRootSignature()
+void OldRenderer::BuildRootSignature()
 {
 	//RootSignature
 	CD3DX12_ROOT_PARAMETER SlotRootParameter[3];//¸ù²ÎÊý
@@ -624,7 +626,7 @@ void Renderer::BuildRootSignature()
 
 }
 
-void Renderer::BuildShadersAndInputLayout()
+void OldRenderer::BuildShadersAndInputLayout()
 {
 	MvsByteCode[0] = D3DUtil::CompileShader(L"Shaders\\color.hlsl", nullptr, "VS", "vs_5_0");
 	MpsByteCode[0] = D3DUtil::CompileShader(L"Shaders\\color.hlsl", nullptr, "PS", "ps_5_0");
@@ -640,7 +642,7 @@ void Renderer::BuildShadersAndInputLayout()
 	};
 }
 
-void Renderer::BuildPSO()
+void OldRenderer::BuildPSO()
 {
 	D3D12_GRAPHICS_PIPELINE_STATE_DESC PsoDesc;
 	ZeroMemory(&PsoDesc, sizeof(D3D12_GRAPHICS_PIPELINE_STATE_DESC));
@@ -675,7 +677,7 @@ void Renderer::BuildPSO()
 	D3dDevice->CreateGraphicsPipelineState(&PsoDesc, IID_PPV_ARGS(&PSOs[1]));
 }
 
-DXMesh Renderer::FindRMesh(std::string MeshName)
+DXMesh OldRenderer::FindRMesh(std::string MeshName)
 {
 	return DXMeshs.at(MeshName);
 	//for(auto it : DrawMeshList)
@@ -687,7 +689,7 @@ DXMesh Renderer::FindRMesh(std::string MeshName)
 	//}
 }
 
-bool Renderer::CanFindRMesh(std::string MeshName)
+bool OldRenderer::CanFindRMesh(std::string MeshName)
 {
 	if (DXMeshs.count(MeshName))
 	{

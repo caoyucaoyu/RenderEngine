@@ -1,6 +1,6 @@
 #include "stdafx.h"
 #include "Engine.h"
-#include <thread>
+
 
 #if PLATFORM_WINDOWS
 

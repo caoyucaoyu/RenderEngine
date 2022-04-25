@@ -1,6 +1,6 @@
 #pragma once
 #include "Window.h"
-#include "Renderer.h"
+#include "OldRenderer.h"
 #include "Scene.h"
 #include "AssetsManager.h"
 
@@ -18,7 +18,7 @@ public:
 	void Run();
 
 	Window* GetWindow();
-	Renderer* GetRender();
+	OldRenderer* GetRender();
 	Scene* GetScene();
 	AssetsManager* GetAssetsManager();
 	GameTimer* GetTimer();
@@ -29,7 +29,7 @@ private:
 	
 private:
 	Window* MWindow;
-	Renderer* MRender;
+	OldRenderer* MRender;
 	Scene* MScene;
 	AssetsManager* MResourceManager;
 	GameTimer* MTimer;
