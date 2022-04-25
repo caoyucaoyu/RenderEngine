@@ -73,10 +73,10 @@
       <Filter>Source Files\Assset</Filter>
     </ClCompile>
     <ClCompile Include="Source\RHI\RHI.cpp">
-      <Filter>Source Files\RHI</Filter>
+      <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="Source\RHI\DX12RHI.cpp">
-      <Filter>Source Files\RHI</Filter>
+      <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -138,10 +138,10 @@
       <Filter>Source Files\Assset</Filter>
     </ClInclude>
     <ClInclude Include="Source\RHI\RHI.h">
-      <Filter>Source Files\RHI</Filter>
+      <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="Source\RHI\DX12RHI.h">
-      <Filter>Source Files\RHI</Filter>
+      <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>

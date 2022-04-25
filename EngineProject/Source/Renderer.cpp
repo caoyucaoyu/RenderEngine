@@ -41,21 +41,12 @@ bool Renderer::InitDirect3D()
 	CreateSwapChain();
 	CreateDescriptorHeap();
 
+
+
+
 	CreateRTV();
 	CreateDSV();
 	CreateViewPortAndScissorRect();
-
-	//for (int i = 0; i < SwapChainBufferCount; ++i)
-	//	SwapChainBuffer[i].Reset();
-	//DepthStencilBuffer.Reset();
-	//
-	//SwapChain->ResizeBuffers(SwapChainBufferCount, ClientWidth, ClientHight, DXGI_FORMAT_R8G8B8A8_UNORM, DXGI_SWAP_CHAIN_FLAG_ALLOW_MODE_SWITCH);
-	//CurrBackBuffer = 0;
-	//
-	//ThrowIfFailed(CommandList->Close());
-	//ID3D12CommandList* cmdsLists[] = { CommandList.Get() };
-	//CommandQueue->ExecuteCommandLists(_countof(cmdsLists), cmdsLists);
-	//FlushCommandQueue();
 
 	OutputDebugStringA("DxInit Success\n");
 	return true;
@@ -335,6 +326,7 @@ void Renderer::CreateSwapChain()
 	ThrowIfFailed(DxgiFactory->CreateSwapChain(CommandQueue.Get(), &Scd, SwapChain.GetAddressOf()));
 }
 
+//DescriptorHeap chouxiang
 void Renderer::CreateDescriptorHeap()
 {
 	//Create Rtv DescriptorHeaps
