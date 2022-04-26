@@ -20,7 +20,7 @@ void RenderThread::CreateRenderThread()
 	if (MRenderThread == nullptr)
 	{
 		MRenderThread = new RenderThread;
-		MRenderThread->Start();
+		//MRenderThread->Start();
 	}
 }
 

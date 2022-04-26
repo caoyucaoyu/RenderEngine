@@ -22,5 +22,5 @@ void Renderer::Init()
 
 void Renderer::Render()
 {
-	//OutputDebugStringA("Renderer Render\n");
+	Engine::Get()->GetRender()->Render();
 }

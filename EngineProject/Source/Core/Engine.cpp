@@ -28,7 +28,7 @@ void Engine::Init()
 {
 	assert(MWindow == nullptr);
 	MWindow = Window::CreateAWindow();
-	RenderThread::CreateRenderThread();
+	RenderThread::CreateRenderThread();//目前不是创建即运行
 
 	MScene = new Scene();
 	MTimer = new GameTimer();
@@ -40,8 +40,8 @@ void Engine::Init()
 	MScene->Init();
 
 	//Old ForRun
-	MRender = new OldRenderer();
-	MRender->Init();
+	MOldRender = new OldRenderer();
+	MOldRender->Init();
 }
 
 void Engine::Destroy()
@@ -50,7 +50,7 @@ void Engine::Destroy()
 	{
 		RHI::DestroyRHI();
 		RenderThread::DestroyRenderThread();
-		delete MEngine->MRender;
+		delete MEngine->MOldRender;
 		delete MEngine->MScene;
 		delete MEngine->MAssetsManager;
 		delete MEngine->MTimer;
@@ -65,7 +65,9 @@ void Engine::Run()
 	IsRunning=true;
 
 	MScene->LoadMapActors();
-	MRender->InitDraw();
+	MOldRender->InitDraw();
+
+	RenderThread::Get()->Start();
 
 #if PLATFORM_WINDOWS
 
@@ -94,7 +96,7 @@ void Engine::Tick()
 	MTimer->Tick();
 	MScene->Tick();
 	MWindow->GetInput()->Update();
-	MRender->Render();
+	//MOldRender->Render();
 }
 
 
@@ -113,7 +115,7 @@ Window* Engine::GetWindow()
 
 OldRenderer* Engine::GetRender()
 {
-	return MRender;
+	return MOldRender;
 }
 
 Scene* Engine::GetScene()

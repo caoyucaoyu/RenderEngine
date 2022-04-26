@@ -29,7 +29,7 @@ private:
 	
 private:
 	Window* MWindow;
-	OldRenderer* MRender;
+	OldRenderer* MOldRender;
 	Scene* MScene;
 	AssetsManager* MAssetsManager;
 	GameTimer* MTimer;
