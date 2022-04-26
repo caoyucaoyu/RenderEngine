@@ -23,6 +23,7 @@
     <ClCompile Include="Source\Core\Engine.cpp" />
     <ClCompile Include="Source\Core\GameTimer.cpp" />
     <ClCompile Include="Source\Core\Input.cpp" />
+    <ClCompile Include="Source\Core\Renderer.cpp" />
     <ClCompile Include="Source\Core\RenderThread.cpp" />
     <ClCompile Include="Source\Core\Task.cpp" />
     <ClCompile Include="Source\Core\Thread.cpp" />
@@ -47,6 +48,7 @@
     <ClInclude Include="Source\Core\Engine.h" />
     <ClInclude Include="Source\Core\GameTimer.h" />
     <ClInclude Include="Source\Core\Input.h" />
+    <ClInclude Include="Source\Core\Renderer.h" />
     <ClInclude Include="Source\Core\RenderThread.h" />
     <ClInclude Include="Source\Core\Task.h" />
     <ClInclude Include="Source\Core\Thread.h" />

@@ -1,6 +1,7 @@
 #include "stdafx.h"
 #include "Engine.h"
 #include "OldRenderer.h"
+#include "RenderThread.h"
 #include "RHI/RHI.h"
 
 Engine::Engine() : IsRunning(false)
@@ -27,19 +28,18 @@ void Engine::Init()
 {
 	assert(MWindow == nullptr);
 	MWindow = Window::CreateAWindow();
-
-	RHI::CreateRHI();
+	RenderThread::CreateRenderThread();
 
 	MScene = new Scene();
 	MTimer = new GameTimer();
-	MResourceManager = new AssetsManager();
+	MAssetsManager = new AssetsManager();
 
 	MTimer->Reset();
 	MTimer->Start();
 
 	MScene->Init();
 
-
+	//Old ForRun
 	MRender = new OldRenderer();
 	MRender->Init();
 }
@@ -49,9 +49,10 @@ void Engine::Destroy()
 	if (MEngine)
 	{
 		RHI::DestroyRHI();
+		RenderThread::DestroyRenderThread();
 		delete MEngine->MRender;
 		delete MEngine->MScene;
-		delete MEngine->MResourceManager;
+		delete MEngine->MAssetsManager;
 		delete MEngine->MTimer;
 		delete MEngine;
 		MEngine = nullptr;
@@ -83,13 +84,13 @@ void Engine::Run()
 #endif
 
 
-
 }
 
 
 
 void Engine::Tick()
 {
+	OutputDebugStringA("Engine Tick\n");
 	MTimer->Tick();
 	MScene->Tick();
 	MWindow->GetInput()->Update();
@@ -122,7 +123,7 @@ Scene* Engine::GetScene()
 
 AssetsManager* Engine::GetAssetsManager()
 {
-	return MResourceManager;
+	return MAssetsManager;
 }
 
 GameTimer* Engine::GetTimer()

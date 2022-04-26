@@ -31,7 +31,7 @@ private:
 	Window* MWindow;
 	OldRenderer* MRender;
 	Scene* MScene;
-	AssetsManager* MResourceManager;
+	AssetsManager* MAssetsManager;
 	GameTimer* MTimer;
 	bool IsRunning;
 };
