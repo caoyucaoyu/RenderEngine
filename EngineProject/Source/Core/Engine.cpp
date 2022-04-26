@@ -27,7 +27,7 @@ void Engine::InitEngine()
 void Engine::Init()
 {
 	assert(MWindow == nullptr);
-	MWindow = Window::CreateAWindow();
+	MWindow = Window::CreateAWindow(1280,720);
 	RenderThread::CreateRenderThread();//目前不是创建即运行
 
 	MScene = new Scene();
@@ -39,18 +39,20 @@ void Engine::Init()
 
 	MScene->Init();
 
-	//Old ForRun
-	MOldRender = new OldRenderer();
-	MOldRender->Init();
+	//OldRun
+	//MOldRender = new OldRenderer();
+	//MOldRender->Init();
 }
 
 void Engine::Destroy()
 {
 	if (MEngine)
 	{
-		RHI::DestroyRHI();
 		RenderThread::DestroyRenderThread();
-		delete MEngine->MOldRender;
+
+		//OldRun
+		//delete MEngine->MOldRender;
+
 		delete MEngine->MScene;
 		delete MEngine->MAssetsManager;
 		delete MEngine->MTimer;
@@ -65,17 +67,18 @@ void Engine::Run()
 	IsRunning=true;
 
 	MScene->LoadMapActors();
-	MOldRender->InitDraw();
+
+	//OldRun
+	//MOldRender->InitDraw();
 
 	RenderThread::Get()->Start();
 
 #if PLATFORM_WINDOWS
 
-	while (IsRunning&&MWindow->Run())
+	while (IsRunning && MWindow->Run())
 	{
 		Tick();
 	}
-	//Engine::Destroy();
 
 #elif PLATFORM_IOS
 	
@@ -85,19 +88,25 @@ void Engine::Run()
 	#error("Not supported platform")
 #endif
 
-
 }
-
 
 
 void Engine::Tick()
 {
-	OutputDebugStringA("Engine Tick\n");
 	MTimer->Tick();
 	MScene->Tick();
 	MWindow->GetInput()->Update();
-	//MOldRender->Render();
+
+	RenderThread* RenderThread = RenderThread::Get();
+	RenderThread->TriggerRender();//Task give end
+	while (RenderThread->GetRenderNum() > 0)//wait render do task
+	{
+		std::this_thread::sleep_for(std::chrono::nanoseconds(1));
+	}
 }
+
+
+
 
 
 

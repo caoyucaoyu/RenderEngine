@@ -15,6 +15,7 @@ LRESULT CALLBACK MainWindowProc(HWND Window, UINT Msg, WPARAM wParam, LPARAM lPa
 	case WM_DESTROY:
 		PostQuitMessage(0);
 		return 0;
+
 	case WM_GETMINMAXINFO:
 		((MINMAXINFO*)lParam)->ptMinTrackSize.x = 500;
 		((MINMAXINFO*)lParam)->ptMinTrackSize.y = 300;
@@ -94,10 +95,12 @@ LRESULT CALLBACK MainWindowProc(HWND Window, UINT Msg, WPARAM wParam, LPARAM lPa
 	//Inputv->OnMouseMove(wParam, GET_X_LPARAM(lParam), GET_Y_LPARAM(lParam));
 }
 
-WindowWin32::WindowWin32()
+WindowWin32::WindowWin32(UINT32 Width, UINT32 Height)
 {
-	Win32Window=this;
-	Init();
+	Win32Window = this;
+	Win32Window->Width = Width;
+	Win32Window->Hight = Hight;
+	InitWindow();
 }
 
 bool WindowWin32::Init(HINSTANCE hInstance)
@@ -166,10 +169,11 @@ int WindowWin32::Run()
 		TranslateMessage(&msg);
 		DispatchMessage(&msg);
 		if (msg.message == WM_QUIT)
-		{
+		{	
 			Quit=true;
 		}
 	}
+
 	return !Quit;
 }
 

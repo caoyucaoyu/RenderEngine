@@ -4,11 +4,12 @@
 class Window 
 {
 public:
-	static Window* CreateAWindow();
+	static Window* CreateAWindow(UINT32 Width, UINT32 Height);
 	static void DestroyWindow(Window* DWindow);
 	
 	virtual int Run() = 0;
 	virtual HWND GetWnd() = 0;
+
 	virtual int GetHeight() { return Hight; }
 	virtual int GetWidth() { return Width; }
 

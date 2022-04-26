@@ -1,6 +1,6 @@
 #pragma once
 #include "RHI.h"
-//#include <dxgi.h>
+
 using Microsoft::WRL::ComPtr;
 
 class DX12RHI : public RHI
@@ -11,7 +11,11 @@ public:
 
 public:
 	virtual void Init()override;
+	virtual void Flush()override;
+	virtual void DrawInstanced(UINT DrawIndexCount) override;
+	virtual void ResizeWindow(UINT32 Width, UINT32 Height) override;
 
+private:
 	void CreateDevice();
 	void CreateFence();
 	void GetDescriptorSize();
@@ -33,5 +37,10 @@ private:
 	D3D12_FEATURE_DATA_MULTISAMPLE_QUALITY_LEVELS MsaaQualityLevels;
 	HWND HMainWnd;
 	static const int SwapChainBufferCount = 2;
+
+	UINT64 CurrentFence = 0;
+
+	D3D12_VIEWPORT ScreenViewport;
+	D3D12_RECT ScissorRect;
 
 };

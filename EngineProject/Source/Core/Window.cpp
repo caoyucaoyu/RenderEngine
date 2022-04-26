@@ -9,14 +9,18 @@ Window::Window()
 
 Window::~Window()
 {
-	delete MInput;
+	if (MInput != nullptr)
+	{
+		delete MInput;
+		MInput = nullptr;
+	}
 }
 
-Window* Window::CreateAWindow()
+Window* Window::CreateAWindow(UINT32 Width, UINT32 Height)
 {
 	Window* NApp = nullptr;
 #if PLATFORM_WINDOWS
-	NApp = new WindowWin32;
+	NApp = new WindowWin32(Width, Height);
 #elif PLATFORM_IOS
 
 #elif PLATFORM_ANDROID
@@ -25,9 +29,13 @@ Window* Window::CreateAWindow()
 	return NApp;
 }
 
-void Window::DestroyWindow(Window* DApp)
+void Window::DestroyWindow(Window* DWindow)
 {
-	delete DApp;
+	if (DWindow != nullptr)
+	{
+		delete DWindow;
+		DWindow = nullptr;
+	}
 }
 
 Input* Window::GetInput()

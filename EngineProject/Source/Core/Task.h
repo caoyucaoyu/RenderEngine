@@ -18,9 +18,9 @@ protected:
 };
 
 
-void MPrint(int a)
-{
-
-}
-
-Task* task = new Task( [=]() {MPrint(1);} );
+//void MPrint(int a)
+//{
+//
+//}
+//
+//Task* task = new Task( [=]() {MPrint(1);} );

@@ -28,7 +28,32 @@ void DX12RHI::Init()
 	CreateCommandObject();
 	CreateSwapChain();
 
-	OutputDebugStringA("DxInit Success\n");
+	OutputDebugStringA("DX12 Init Success\n");
+}
+
+void DX12RHI::Flush()
+{
+	CurrentFence++;
+
+	CommandQueue->Signal(Fence.Get(), CurrentFence);//添加命令：设置新围栏点
+	if (Fence->GetCompletedValue() < CurrentFence)//等该点前的全部完成
+	{
+		HANDLE EventHandle = CreateEventEx(nullptr, false, false, EVENT_ALL_ACCESS);
+		Fence->SetEventOnCompletion(CurrentFence, EventHandle);//若命中即执行到Signal，激发事件
+
+		WaitForSingleObject(EventHandle, INFINITE);
+		CloseHandle(EventHandle);
+	}
+}
+
+void DX12RHI::DrawInstanced(UINT DrawIndexCount)
+{
+	CommandList->DrawInstanced(DrawIndexCount, 1, 0, 0);
+}
+
+void DX12RHI::ResizeWindow(UINT32 Width, UINT32 Height)
+{
+
 }
 
 void DX12RHI::CreateDevice()

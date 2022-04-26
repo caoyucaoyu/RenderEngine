@@ -1,7 +1,6 @@
 #include "stdafx.h"
 #include "Engine.h"
 
-
 #if PLATFORM_WINDOWS
 
 int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE prevInstance, PSTR cmdLine, int showCmd)

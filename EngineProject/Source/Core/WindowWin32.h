@@ -6,14 +6,15 @@ using Microsoft::WRL::ComPtr;
 
 class WindowWin32 : public Window
 {
-public:
-	WindowWin32();
+public:	
+	WindowWin32(UINT32 Width, UINT32 Height);
 	virtual ~WindowWin32();
 
 	virtual void OnResize();
 	virtual bool Init(HINSTANCE hInstance=nullptr);
 	virtual int Run()override;
 	virtual HWND GetWnd() override;
+
 	virtual int GetHeight() { return Hight; }
 	virtual int GetWidth() { return Width; }
 

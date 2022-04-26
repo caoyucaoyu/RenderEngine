@@ -20,8 +20,8 @@ public:
 
 	void Render();
 
-	bool Init();
-	bool InitDirect3D();
+	bool Init();//
+	bool InitDirect3D();//...
 	bool InitDraw();
 
 	void Update(const GameTimer* Gt);

@@ -18,7 +18,6 @@ public:
 	void Run();
 
 	Window* GetWindow();
-	OldRenderer* GetRender();
 	Scene* GetScene();
 	AssetsManager* GetAssetsManager();
 	GameTimer* GetTimer();
@@ -29,10 +28,15 @@ private:
 	
 private:
 	Window* MWindow;
-	OldRenderer* MOldRender;
 	Scene* MScene;
 	AssetsManager* MAssetsManager;
 	GameTimer* MTimer;
 	bool IsRunning;
+
+
+	//OldRun
+	OldRenderer* MOldRender;
+public:
+	OldRenderer* GetRender();////////////////
 };
 

@@ -20,7 +20,7 @@ void Scene::Tick()
 	{
 		MeshActor ma;
 		AddMeshActor(ma);
-		Engine::Get()->GetRender()->InitDraw();
+		//Engine::Get()->GetRender()->InitDraw();
 	}
 }
 
@@ -30,9 +30,6 @@ void Scene::Init()
 	glm::vec3 Target = { 0.0f, 0.0f, 0.0f };
 	glm::vec3 Up = { 0.0f, 0.0f, 1.0f };
 
-	//DirectX::FXMVECTOR Position = { 3000.f, 0.0f, 1000.0f };
-	//DirectX::FXMVECTOR Target = { 0.0f, 0.0f, 0.0f };
-	//DirectX::FXMVECTOR Up = { 0.0f, 0.0f, 1.0f };
 	MainCamera.LookAt(Position, Target, Up);
 
 	MainCamera.UpdateViewMatrix();

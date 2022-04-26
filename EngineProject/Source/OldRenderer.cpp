@@ -38,7 +38,6 @@ bool OldRenderer::InitDirect3D()
 	CreateFence();
 	GetDescriptorSize();
 	SetMSAA();
-
 	CreateCommandObject();
 	CreateSwapChain();
 	CreateDescriptorHeap();
