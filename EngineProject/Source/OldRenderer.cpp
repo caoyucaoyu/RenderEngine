@@ -18,7 +18,7 @@ bool OldRenderer::Init()
 
 void OldRenderer::Render()
 {	
-	Update(Engine::Get()->GetTimer());
+	RendererUpdate(Engine::Get()->GetTimer());
 	Draw();
 }
 
@@ -40,11 +40,8 @@ bool OldRenderer::InitDirect3D()
 	SetMSAA();
 	CreateCommandObject();
 	CreateSwapChain();
+
 	CreateDescriptorHeap();
-
-
-
-
 	CreateRTV();
 	CreateDSV();
 	CreateViewPortAndScissorRect();
@@ -69,21 +66,29 @@ bool OldRenderer::InitDraw()
 	BuildShadersAndInputLayout();
 	BuildPSO();
 
+
+
+	//ExecuteCommandLists
 	ThrowIfFailed(CommandList->Close());
 	ID3D12CommandList* cmdLists[] = { CommandList.Get() };
 	CommandQueue->ExecuteCommandLists(_countof(cmdLists), cmdLists);//送入命令队列
 
+
 	FlushCommandQueue();
+
 
 	return true;
 }
 
 
-void OldRenderer::Update(const GameTimer* Gt)
+void OldRenderer::RendererUpdate(const GameTimer* Gt)
 {
+	//帧资源变下一帧
 	CurrFrameResourceIndex = (CurrFrameResourceIndex + 1) % FrameResourcesCount;
 	CurrFrameResource = FrameResources[CurrFrameResourceIndex].get();
-	if (CurrFrameResource->Fence != 0 && Fence->GetCompletedValue() < CurrFrameResource->Fence)
+
+	//
+	if (CurrFrameResource->Fence != 0 && Fence->GetCompletedValue() < CurrFrameResource->Fence)//cpu 不是初始 且 GPU未完成
 	{
 		HANDLE EventHandle = CreateEventEx(nullptr, false, false, EVENT_ALL_ACCESS);
 		ThrowIfFailed(Fence->SetEventOnCompletion(CurrFrameResource->Fence, EventHandle));
@@ -91,6 +96,7 @@ void OldRenderer::Update(const GameTimer* Gt)
 		CloseHandle(EventHandle);
 	}
 
+	//相机位置 时间
 	glm::mat4 v = Engine::Get()->GetScene()->GetMainCamera().GetView();
 	glm::mat4 p = Engine::Get()->GetScene()->GetMainCamera().GetProj();
 	glm::mat4 VP_Matrix = p * v;
@@ -101,6 +107,7 @@ void OldRenderer::Update(const GameTimer* Gt)
 	CurrFrameResource->PassCB->CopyData(0, PasConstant);//数据拷贝至GPU缓存
 
 
+	//物体位置
 	for (int i = 0; i < DrawCount; i++)
 	{
 		ObjectConstants ObjConstant;
@@ -224,7 +231,7 @@ void OldRenderer::Draw()
 
 }
 
-void OldRenderer::Reset()
+void OldRenderer::RendererReset()
 {
 	OutputDebugStringA("Render Reset \n");
 	assert(D3dDevice);
@@ -252,188 +259,6 @@ void OldRenderer::Reset()
 	FlushCommandQueue();
 }
 
-void OldRenderer::CreateDevice()
-{
-	//Create IDXGIFactory
-	CreateDXGIFactory1(IID_PPV_ARGS(&DxgiFactory));
-
-	//Create Hardware Device.
-	HRESULT hardwareResult = D3D12CreateDevice(
-		nullptr,             // default adapter
-		D3D_FEATURE_LEVEL_11_0,
-		IID_PPV_ARGS(&D3dDevice));
-}
-
-void OldRenderer::CreateFence()
-{
-	D3dDevice->CreateFence(0, D3D12_FENCE_FLAG_NONE, IID_PPV_ARGS(&Fence));
-}
-
-void OldRenderer::GetDescriptorSize()
-{
-	RtvDescriptorSize = D3dDevice->GetDescriptorHandleIncrementSize(D3D12_DESCRIPTOR_HEAP_TYPE_RTV);
-	DsvDescriptorSize = D3dDevice->GetDescriptorHandleIncrementSize(D3D12_DESCRIPTOR_HEAP_TYPE_DSV);
-	CbvSrvUavDescriptorSize = D3dDevice->GetDescriptorHandleIncrementSize(D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV);
-}
-
-void OldRenderer::SetMSAA()
-{
-	MsaaQualityLevels.Format = DXGI_FORMAT_R8G8B8A8_UNORM;
-	MsaaQualityLevels.SampleCount = 1;
-	MsaaQualityLevels.Flags = D3D12_MULTISAMPLE_QUALITY_LEVELS_FLAG_NONE;
-	MsaaQualityLevels.NumQualityLevels = 0;
-	D3dDevice->CheckFeatureSupport(D3D12_FEATURE_MULTISAMPLE_QUALITY_LEVELS, &MsaaQualityLevels, sizeof(MsaaQualityLevels));
-	assert(MsaaQualityLevels.NumQualityLevels > 0);
-}
-
-void OldRenderer::CreateCommandObject()
-{
-	D3D12_COMMAND_QUEUE_DESC queueDesc = {};
-	queueDesc.Type = D3D12_COMMAND_LIST_TYPE_DIRECT;
-	queueDesc.Flags = D3D12_COMMAND_QUEUE_FLAG_NONE;
-	D3dDevice->CreateCommandQueue(&queueDesc, IID_PPV_ARGS(&CommandQueue));
-	D3dDevice->CreateCommandAllocator(D3D12_COMMAND_LIST_TYPE_DIRECT, IID_PPV_ARGS(CommandListAlloc.GetAddressOf()));
-	D3dDevice->CreateCommandList(
-		0,
-		D3D12_COMMAND_LIST_TYPE_DIRECT,
-		CommandListAlloc.Get(),
-		nullptr,
-		IID_PPV_ARGS(CommandList.GetAddressOf()));
-	CommandList->Close();
-}
-
-void OldRenderer::CreateSwapChain()
-{
-	HMainWnd=Engine::Get()->GetWindow()->GetWnd();
-	
-	SwapChain.Reset();
-	DXGI_SWAP_CHAIN_DESC Scd;
-	Scd.BufferDesc.Width = ClientWidth;
-	Scd.BufferDesc.Height = ClientHight;
-	Scd.BufferDesc.RefreshRate.Numerator = 60;
-	Scd.BufferDesc.RefreshRate.Denominator = 1;
-	Scd.BufferDesc.Format = DXGI_FORMAT_R8G8B8A8_UNORM;//BianLiang: DXGI_FORMAT mBackBufferFormat
-	Scd.BufferDesc.ScanlineOrdering = DXGI_MODE_SCANLINE_ORDER_UNSPECIFIED;
-	Scd.BufferDesc.Scaling = DXGI_MODE_SCALING_UNSPECIFIED;
-	Scd.SampleDesc.Count = 1;//m4xMsaaState ? 4 : 1
-	Scd.SampleDesc.Quality = 0;  //m4xMsaaState ? (m4xMsaaQuality - 1) : 0;
-	Scd.BufferUsage = DXGI_USAGE_RENDER_TARGET_OUTPUT;
-	Scd.BufferCount = SwapChainBufferCount;
-	Scd.OutputWindow = HMainWnd;
-	Scd.Windowed = true;
-	Scd.SwapEffect = DXGI_SWAP_EFFECT_FLIP_DISCARD;
-	Scd.Flags = DXGI_SWAP_CHAIN_FLAG_ALLOW_MODE_SWITCH;
-
-	ThrowIfFailed(DxgiFactory->CreateSwapChain(CommandQueue.Get(), &Scd, SwapChain.GetAddressOf()));
-}
-
-//DescriptorHeap chouxiang
-void OldRenderer::CreateDescriptorHeap()
-{
-	//Create Rtv DescriptorHeaps
-	D3D12_DESCRIPTOR_HEAP_DESC RtvHeapDesc;
-	RtvHeapDesc.NumDescriptors = SwapChainBufferCount;
-	RtvHeapDesc.Type = D3D12_DESCRIPTOR_HEAP_TYPE_RTV;
-	RtvHeapDesc.Flags = D3D12_DESCRIPTOR_HEAP_FLAG_NONE;
-	RtvHeapDesc.NodeMask = 0;
-	D3dDevice->CreateDescriptorHeap(&RtvHeapDesc, IID_PPV_ARGS(RtvHeap.GetAddressOf()));
-	//Create Dsv DescriptorHeaps
-	D3D12_DESCRIPTOR_HEAP_DESC DsvHeapDesc;
-	DsvHeapDesc.NumDescriptors = 1;
-	DsvHeapDesc.Type = D3D12_DESCRIPTOR_HEAP_TYPE_DSV;
-	DsvHeapDesc.Flags = D3D12_DESCRIPTOR_HEAP_FLAG_NONE;
-	DsvHeapDesc.NodeMask = 0;
-	D3dDevice->CreateDescriptorHeap(&DsvHeapDesc, IID_PPV_ARGS(DsvHeap.GetAddressOf()));
-}
-
-void OldRenderer::CreateRTV()
-{
-	//Create RenderTargetView
-	CD3DX12_CPU_DESCRIPTOR_HANDLE RtvHeapHandle(RtvHeap->GetCPUDescriptorHandleForHeapStart());
-	for (UINT i = 0; i < SwapChainBufferCount; i++)
-	{
-		SwapChain->GetBuffer(i, IID_PPV_ARGS(&SwapChainBuffers[i]));
-		D3dDevice->CreateRenderTargetView(SwapChainBuffers[i].Get(), nullptr, RtvHeapHandle);
-		RtvHeapHandle.Offset(1, RtvDescriptorSize);
-	}
-}
-
-void OldRenderer::CreateDSV()
-{
-	//Create Depth/Stencil View
-	D3D12_RESOURCE_DESC DepthStencilDesc;
-	DepthStencilDesc.Dimension = D3D12_RESOURCE_DIMENSION_TEXTURE2D;
-	DepthStencilDesc.Alignment = 0;
-	DepthStencilDesc.Width = ClientWidth;
-	DepthStencilDesc.Height = ClientHight;
-	DepthStencilDesc.DepthOrArraySize = 1;
-	DepthStencilDesc.MipLevels = 1;
-	DepthStencilDesc.Format = DXGI_FORMAT_R24G8_TYPELESS;
-	DepthStencilDesc.SampleDesc.Count = 1;
-	DepthStencilDesc.SampleDesc.Quality = 0;
-	DepthStencilDesc.Layout = D3D12_TEXTURE_LAYOUT_UNKNOWN;
-	DepthStencilDesc.Flags = D3D12_RESOURCE_FLAG_ALLOW_DEPTH_STENCIL;
-
-	D3D12_CLEAR_VALUE OptClear;
-	OptClear.Format = DXGI_FORMAT_D24_UNORM_S8_UINT;//DXGI_FORMAT DepthStencilFormat
-	OptClear.DepthStencil.Depth = 1.0f;
-	OptClear.DepthStencil.Stencil = 0;
-	D3dDevice->CreateCommittedResource(&CD3DX12_HEAP_PROPERTIES(D3D12_HEAP_TYPE_DEFAULT),
-		D3D12_HEAP_FLAG_NONE,
-		&DepthStencilDesc,
-		D3D12_RESOURCE_STATE_DEPTH_WRITE,
-		&OptClear,
-		IID_PPV_ARGS(DepthStencilBuffer.GetAddressOf()));
-
-	DepthStencilBuffer->SetName(L"MyDSBuffer");
-
-	D3D12_DEPTH_STENCIL_VIEW_DESC DsvDesc;
-	DsvDesc.Flags = D3D12_DSV_FLAG_NONE;
-	DsvDesc.ViewDimension = D3D12_DSV_DIMENSION_TEXTURE2D;
-	DsvDesc.Format = DXGI_FORMAT_D24_UNORM_S8_UINT;//DXGI_FORMAT mDepthStencilFormat
-	DsvDesc.Texture2D.MipSlice = 0;
-	D3dDevice->CreateDepthStencilView(DepthStencilBuffer.Get(), &DsvDesc, DepthStencilView());
-}
-
-void OldRenderer::FlushCommandQueue()
-{
-	CurrentFence++;
-
-	CommandQueue->Signal(Fence.Get(), CurrentFence);//添加命令：设置新围栏点
-	if (Fence->GetCompletedValue() < CurrentFence)//等该点前的全部完成
-	{
-		HANDLE EventHandle = CreateEventEx(nullptr, false, false, EVENT_ALL_ACCESS);
-		Fence->SetEventOnCompletion(CurrentFence, EventHandle);//若命中即执行到Signal，激发事件
-
-		WaitForSingleObject(EventHandle, INFINITE);
-		CloseHandle(EventHandle);
-	}
-}
-
-void OldRenderer::CreateViewPortAndScissorRect()
-{
-	//Set ScreenV ScissorR
-	ScreenViewport.TopLeftX = 0.0f;
-	ScreenViewport.TopLeftY = 0.0f;
-	ScreenViewport.Width = static_cast<float>(ClientWidth);
-	ScreenViewport.Height = static_cast<float>(ClientHight);
-	ScreenViewport.MinDepth = 0.0f;
-	ScreenViewport.MaxDepth = 1.0f;
-	ScissorRect = { 0,0,ClientWidth,ClientHight };
-}
-
-D3D12_CPU_DESCRIPTOR_HANDLE OldRenderer::DepthStencilView()
-{
-	return DsvHeap->GetCPUDescriptorHandleForHeapStart();
-}
-
-D3D12_CPU_DESCRIPTOR_HANDLE OldRenderer::CurrentBackBufferView()
-{
-	return CD3DX12_CPU_DESCRIPTOR_HANDLE(
-		RtvHeap->GetCPUDescriptorHandleForHeapStart(),
-		CurrBackBuffer,
-		RtvDescriptorSize);
-}
 
 
 
@@ -696,4 +521,222 @@ bool OldRenderer::CanFindRMesh(std::string MeshName)
 	}
 	//OutputDebugStringA(("Cant Find RenderMesh: "+MeshName+"  \n").c_str());
 	return false;
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+void OldRenderer::CreateDevice()
+{
+	//Create IDXGIFactory
+	CreateDXGIFactory1(IID_PPV_ARGS(&DxgiFactory));
+
+	//Create Hardware Device.
+	HRESULT hardwareResult = D3D12CreateDevice(
+		nullptr,             // default adapter
+		D3D_FEATURE_LEVEL_11_0,
+		IID_PPV_ARGS(&D3dDevice));
+}
+
+void OldRenderer::CreateFence()
+{
+	D3dDevice->CreateFence(0, D3D12_FENCE_FLAG_NONE, IID_PPV_ARGS(&Fence));
+}
+
+void OldRenderer::GetDescriptorSize()
+{
+	RtvDescriptorSize = D3dDevice->GetDescriptorHandleIncrementSize(D3D12_DESCRIPTOR_HEAP_TYPE_RTV);
+	DsvDescriptorSize = D3dDevice->GetDescriptorHandleIncrementSize(D3D12_DESCRIPTOR_HEAP_TYPE_DSV);
+	CbvSrvUavDescriptorSize = D3dDevice->GetDescriptorHandleIncrementSize(D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV);
+}
+
+void OldRenderer::SetMSAA()
+{
+	MsaaQualityLevels.Format = DXGI_FORMAT_R8G8B8A8_UNORM;
+	MsaaQualityLevels.SampleCount = 1;
+	MsaaQualityLevels.Flags = D3D12_MULTISAMPLE_QUALITY_LEVELS_FLAG_NONE;
+	MsaaQualityLevels.NumQualityLevels = 0;
+	D3dDevice->CheckFeatureSupport(D3D12_FEATURE_MULTISAMPLE_QUALITY_LEVELS, &MsaaQualityLevels, sizeof(MsaaQualityLevels));
+	assert(MsaaQualityLevels.NumQualityLevels > 0);
+}
+
+void OldRenderer::CreateCommandObject()
+{
+	D3D12_COMMAND_QUEUE_DESC queueDesc = {};
+	queueDesc.Type = D3D12_COMMAND_LIST_TYPE_DIRECT;
+	queueDesc.Flags = D3D12_COMMAND_QUEUE_FLAG_NONE;
+	D3dDevice->CreateCommandQueue(&queueDesc, IID_PPV_ARGS(&CommandQueue));
+	D3dDevice->CreateCommandAllocator(D3D12_COMMAND_LIST_TYPE_DIRECT, IID_PPV_ARGS(CommandListAlloc.GetAddressOf()));
+	D3dDevice->CreateCommandList(
+		0,
+		D3D12_COMMAND_LIST_TYPE_DIRECT,
+		CommandListAlloc.Get(),
+		nullptr,
+		IID_PPV_ARGS(CommandList.GetAddressOf()));
+	CommandList->Close();
+}
+
+void OldRenderer::CreateSwapChain()
+{
+	HMainWnd = Engine::Get()->GetWindow()->GetWnd();
+
+	SwapChain.Reset();
+	DXGI_SWAP_CHAIN_DESC Scd;
+	Scd.BufferDesc.Width = ClientWidth;
+	Scd.BufferDesc.Height = ClientHight;
+	Scd.BufferDesc.RefreshRate.Numerator = 60;
+	Scd.BufferDesc.RefreshRate.Denominator = 1;
+	Scd.BufferDesc.Format = DXGI_FORMAT_R8G8B8A8_UNORM;//BianLiang: DXGI_FORMAT mBackBufferFormat
+	Scd.BufferDesc.ScanlineOrdering = DXGI_MODE_SCANLINE_ORDER_UNSPECIFIED;
+	Scd.BufferDesc.Scaling = DXGI_MODE_SCALING_UNSPECIFIED;
+	Scd.SampleDesc.Count = 1;//m4xMsaaState ? 4 : 1
+	Scd.SampleDesc.Quality = 0;  //m4xMsaaState ? (m4xMsaaQuality - 1) : 0;
+	Scd.BufferUsage = DXGI_USAGE_RENDER_TARGET_OUTPUT;
+	Scd.BufferCount = SwapChainBufferCount;
+	Scd.OutputWindow = HMainWnd;
+	Scd.Windowed = true;
+	Scd.SwapEffect = DXGI_SWAP_EFFECT_FLIP_DISCARD;
+	Scd.Flags = DXGI_SWAP_CHAIN_FLAG_ALLOW_MODE_SWITCH;
+
+	ThrowIfFailed(DxgiFactory->CreateSwapChain(CommandQueue.Get(), &Scd, SwapChain.GetAddressOf()));
+}
+
+
+void OldRenderer::FlushCommandQueue()
+{
+	CurrentFence++;
+
+	CommandQueue->Signal(Fence.Get(), CurrentFence);//添加命令：设置新围栏点
+	if (Fence->GetCompletedValue() < CurrentFence)//等该点前的全部完成
+	{
+		HANDLE EventHandle = CreateEventEx(nullptr, false, false, EVENT_ALL_ACCESS);
+		Fence->SetEventOnCompletion(CurrentFence, EventHandle);//若命中即执行到Signal，激发事件
+
+		WaitForSingleObject(EventHandle, INFINITE);
+		CloseHandle(EventHandle);
+	}
+}
+
+void OldRenderer::CreateViewPortAndScissorRect()
+{
+	//Set ScreenV ScissorR
+	ScreenViewport.TopLeftX = 0.0f;
+	ScreenViewport.TopLeftY = 0.0f;
+	ScreenViewport.Width = static_cast<float>(ClientWidth);
+	ScreenViewport.Height = static_cast<float>(ClientHight);
+	ScreenViewport.MinDepth = 0.0f;
+	ScreenViewport.MaxDepth = 1.0f;
+	ScissorRect = { 0,0,ClientWidth,ClientHight };
+}
+
+D3D12_CPU_DESCRIPTOR_HANDLE OldRenderer::DepthStencilView()
+{
+	return DsvHeap->GetCPUDescriptorHandleForHeapStart();
+}
+
+
+
+//DescriptorHeap chouxiang
+void OldRenderer::CreateDescriptorHeap()
+{
+	//Create Rtv DescriptorHeaps
+	D3D12_DESCRIPTOR_HEAP_DESC RtvHeapDesc;
+	RtvHeapDesc.NumDescriptors = SwapChainBufferCount;
+	RtvHeapDesc.Type = D3D12_DESCRIPTOR_HEAP_TYPE_RTV;
+	RtvHeapDesc.Flags = D3D12_DESCRIPTOR_HEAP_FLAG_NONE;
+	RtvHeapDesc.NodeMask = 0;
+	D3dDevice->CreateDescriptorHeap(&RtvHeapDesc, IID_PPV_ARGS(RtvHeap.GetAddressOf()));
+
+	//Create Dsv DescriptorHeaps
+	D3D12_DESCRIPTOR_HEAP_DESC DsvHeapDesc;
+	DsvHeapDesc.NumDescriptors = 1;//1
+	DsvHeapDesc.Type = D3D12_DESCRIPTOR_HEAP_TYPE_DSV;
+	DsvHeapDesc.Flags = D3D12_DESCRIPTOR_HEAP_FLAG_NONE;
+	DsvHeapDesc.NodeMask = 0;
+	D3dDevice->CreateDescriptorHeap(&DsvHeapDesc, IID_PPV_ARGS(DsvHeap.GetAddressOf()));
+}
+
+void OldRenderer::CreateRTV()
+{
+	//Create RenderTargetView
+	CD3DX12_CPU_DESCRIPTOR_HANDLE RtvHeapHandle(RtvHeap->GetCPUDescriptorHandleForHeapStart());
+	for (UINT i = 0; i < SwapChainBufferCount; i++)
+	{
+		SwapChain->GetBuffer(i, IID_PPV_ARGS(&SwapChainBuffers[i]));
+		D3dDevice->CreateRenderTargetView(SwapChainBuffers[i].Get(), nullptr, RtvHeapHandle);
+		RtvHeapHandle.Offset(1, RtvDescriptorSize);
+	}
+}
+
+void OldRenderer::CreateDSV()
+{
+	//Create Depth/Stencil View
+	D3D12_RESOURCE_DESC DepthStencilDesc;
+	DepthStencilDesc.Dimension = D3D12_RESOURCE_DIMENSION_TEXTURE2D;
+	DepthStencilDesc.Alignment = 0;
+	DepthStencilDesc.Width = ClientWidth;
+	DepthStencilDesc.Height = ClientHight;
+	DepthStencilDesc.DepthOrArraySize = 1;
+	DepthStencilDesc.MipLevels = 1;
+	DepthStencilDesc.Format = DXGI_FORMAT_R24G8_TYPELESS;
+	DepthStencilDesc.SampleDesc.Count = 1;
+	DepthStencilDesc.SampleDesc.Quality = 0;
+	DepthStencilDesc.Layout = D3D12_TEXTURE_LAYOUT_UNKNOWN;
+	DepthStencilDesc.Flags = D3D12_RESOURCE_FLAG_ALLOW_DEPTH_STENCIL;
+
+	D3D12_CLEAR_VALUE OptClear;
+	OptClear.Format = DXGI_FORMAT_D24_UNORM_S8_UINT;//DXGI_FORMAT DepthStencilFormat
+	OptClear.DepthStencil.Depth = 1.0f;
+	OptClear.DepthStencil.Stencil = 0;
+	D3dDevice->CreateCommittedResource(&CD3DX12_HEAP_PROPERTIES(D3D12_HEAP_TYPE_DEFAULT),
+		D3D12_HEAP_FLAG_NONE,
+		&DepthStencilDesc,
+		D3D12_RESOURCE_STATE_DEPTH_WRITE,
+		&OptClear,
+		IID_PPV_ARGS(DepthStencilBuffer.GetAddressOf()));
+
+	DepthStencilBuffer->SetName(L"MyDSBuffer");
+
+	D3D12_DEPTH_STENCIL_VIEW_DESC DsvDesc;
+	DsvDesc.Flags = D3D12_DSV_FLAG_NONE;
+	DsvDesc.ViewDimension = D3D12_DSV_DIMENSION_TEXTURE2D;
+	DsvDesc.Format = DXGI_FORMAT_D24_UNORM_S8_UINT;//DXGI_FORMAT mDepthStencilFormat
+	DsvDesc.Texture2D.MipSlice = 0;
+	D3dDevice->CreateDepthStencilView(DepthStencilBuffer.Get(), &DsvDesc, DepthStencilView());
+}
+
+
+D3D12_CPU_DESCRIPTOR_HANDLE OldRenderer::CurrentBackBufferView()
+{
+	return CD3DX12_CPU_DESCRIPTOR_HANDLE(
+		RtvHeap->GetCPUDescriptorHandleForHeapStart(),
+		CurrBackBuffer,
+		RtvDescriptorSize);
 }

@@ -5,7 +5,7 @@
 
 int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE prevInstance, PSTR cmdLine, int showCmd)
 {
-	std::thread t1([]() {OutputDebugStringA("thread t1\n"); });
+	std::thread t1([]() {OutputDebugStringA("Thread t1\n"); });
 	t1.join();
 
 	Engine::InitEngine();

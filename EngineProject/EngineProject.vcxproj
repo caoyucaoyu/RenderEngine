@@ -32,6 +32,7 @@
     <ClCompile Include="Source\Core\Window.cpp" />
     <ClCompile Include="Source\Core\WindowWin32.cpp" />
     <ClCompile Include="Source\DDSTextureLoader.cpp" />
+    <ClCompile Include="Source\DX\DescriptorHeap.cpp" />
     <ClCompile Include="Source\OldRenderer.cpp" />
     <ClCompile Include="Source\AssetsManager.cpp" />
     <ClCompile Include="Source\RHI\DX12RHI.cpp" />
@@ -59,6 +60,7 @@
     <ClInclude Include="Source\Core\Window.h" />
     <ClInclude Include="Source\Core\WindowWin32.h" />
     <ClInclude Include="Source\DDSTextureLoader.h" />
+    <ClInclude Include="Source\DX\DescriptorHeap.h" />
     <ClInclude Include="Source\OldRenderer.h" />
     <ClInclude Include="Source\Material.h" />
     <ClInclude Include="Source\AssetsManager.h" />

@@ -24,9 +24,9 @@ public:
 	bool InitDirect3D();//...
 	bool InitDraw();
 
-	void Update(const GameTimer* Gt);
+	void RendererUpdate(const GameTimer* Gt);
 	void Draw();
-	void Reset();
+	void RendererReset();
 
 	void CreateDevice();//
 	void CreateFence();//
@@ -35,12 +35,14 @@ public:
 	void CreateCommandObject();//
 	void CreateSwapChain();//
 
-	void CreateDescriptorHeap();
-	void CreateRTV();
-	void CreateDSV();
+	void CreateDescriptorHeap();//
+	void CreateRTV();//
+	void CreateDSV();//
 
-	void FlushCommandQueue();
+	void FlushCommandQueue();//
+
 	void CreateViewPortAndScissorRect();
+
 	D3D12_CPU_DESCRIPTOR_HANDLE DepthStencilView();
 	D3D12_CPU_DESCRIPTOR_HANDLE CurrentBackBufferView();
 
@@ -88,7 +90,9 @@ protected:
 
 	std::vector<std::unique_ptr<FrameResource>> FrameResources;
 	int DescriptorsNum = 0;
+
 	ComPtr<ID3D12DescriptorHeap> CbvHeap;
+
 	ComPtr<ID3D12RootSignature> RootSignature;
 	ComPtr<ID3DBlob> MvsByteCode[2];
 	ComPtr<ID3DBlob> MpsByteCode[2];

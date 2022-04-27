@@ -156,7 +156,7 @@ void WindowWin32::OnResize()
 	RECT r;
 	GetWindowRect(HMainWnd, &r);
 	MoveWindow(HMainWnd, r.left, r.top, 1920, 1080, TRUE);
-	Engine::Get()->GetRender()->Reset();
+	Engine::Get()->GetRender()->RendererReset();
 }
 
 

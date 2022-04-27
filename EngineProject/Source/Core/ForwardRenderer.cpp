@@ -13,28 +13,32 @@ ForwardRenderer::~ForwardRenderer()
 
 }
 
+void ForwardRenderer::DestroyRenderer()
+{
+	RHI::DestroyRHI();
+}
+
 void ForwardRenderer::Init()
 {
+	
+}
 
+void ForwardRenderer::RenderFrameBegin()
+{
+	RHI::Get()->BeginFrame();
 }
 
 void ForwardRenderer::Render()
 {
+	
 	//OldRun
 	//Engine::Get()->GetRender()->Render();
 }
 
 void ForwardRenderer::RenderFrameEnd()
 {
-
+	RHI::Get()->EndFrame();
 }
 
-void ForwardRenderer::DestroyRenderer()
-{
-	RHI::DestroyRHI();
-}
 
-void ForwardRenderer::RenderFrameBegin()
-{
 
-}

@@ -1,6 +1,8 @@
 #include "stdafx.h"
 #include "Engine.h"
 #include "DX12RHI.h"
+#include "DX\DescriptorHeap.h"
+
 using Microsoft::WRL::ComPtr;
 
 DX12RHI::DX12RHI()
@@ -27,15 +29,29 @@ void DX12RHI::Init()
 	SetMSAA();
 	CreateCommandObject();
 	CreateSwapChain();
+	CreateRtvAndDsvDescriptorHeaps();
+	CreateRTV();
+	CreateDSV();
 
 	OutputDebugStringA("DX12 Init Success\n");
 }
 
-void DX12RHI::Flush()
+void DX12RHI::BeginFrame()
+{
+
+}
+
+void DX12RHI::EndFrame()
+{
+
+}
+
+void DX12RHI::FlushCommandQueue()
 {
 	CurrentFence++;
 
 	CommandQueue->Signal(Fence.Get(), CurrentFence);//添加命令：设置新围栏点
+
 	if (Fence->GetCompletedValue() < CurrentFence)//等该点前的全部完成
 	{
 		HANDLE EventHandle = CreateEventEx(nullptr, false, false, EVENT_ALL_ACCESS);
@@ -54,6 +70,13 @@ void DX12RHI::DrawInstanced(UINT DrawIndexCount)
 void DX12RHI::ResizeWindow(UINT32 Width, UINT32 Height)
 {
 
+}
+
+void DX12RHI::ExecuteCommandList()
+{
+	CommandList->Close();
+	ID3D12CommandList* CmdsLists[] = { CommandList.Get() };
+	CommandQueue->ExecuteCommandLists(_countof(CmdsLists), CmdsLists);
 }
 
 void DX12RHI::CreateDevice()
@@ -105,13 +128,13 @@ void DX12RHI::CreateCommandObject()
 
 void DX12RHI::CreateSwapChain()
 {
-	Window* wd = Engine::Get()->GetWindow();
-	HMainWnd = wd->GetWnd();
+	Wd = Engine::Get()->GetWindow();
+	HMainWnd = Wd->GetWnd();
 
 	SwapChain.Reset();
 	DXGI_SWAP_CHAIN_DESC Scd;
-	Scd.BufferDesc.Width = wd->GetWidth();
-	Scd.BufferDesc.Height = wd->GetHeight();
+	Scd.BufferDesc.Width = Wd->GetWidth();
+	Scd.BufferDesc.Height = Wd->GetHeight();
 
 	Scd.BufferDesc.RefreshRate.Numerator = 60;
 	Scd.BufferDesc.RefreshRate.Denominator = 1;
@@ -128,4 +151,76 @@ void DX12RHI::CreateSwapChain()
 	Scd.Flags = DXGI_SWAP_CHAIN_FLAG_ALLOW_MODE_SWITCH;
 
 	ThrowIfFailed(DxgiFactory->CreateSwapChain(CommandQueue.Get(), &Scd, SwapChain.GetAddressOf()));
+}
+
+void DX12RHI::CreateRtvAndDsvDescriptorHeaps()
+{
+	RtvHeap = std::make_unique<DescriptorHeap>(D3D12_DESCRIPTOR_HEAP_TYPE_RTV, D3dDevice, SwapChainBufferCount);
+	DsvHeap = std::make_unique<DescriptorHeap>(D3D12_DESCRIPTOR_HEAP_TYPE_DSV, D3dDevice, 1);
+}
+
+void DX12RHI::CreateRTV()
+{
+	//Create RenderTargetView
+	
+	//CD3DX12_CPU_DESCRIPTOR_HANDLE RtvHeapHandle(RtvHeap->GetCPUDescriptorHandleForHeapStart());
+	for (UINT i = 0; i < SwapChainBufferCount; i++)
+	{	
+		SwapChain->GetBuffer(i, IID_PPV_ARGS(&SwapChainBuffers[i]));
+		auto RtvAllocation = RtvHeap->Allocate(1);
+
+		D3dDevice->CreateRenderTargetView(SwapChainBuffers[i].Get(), nullptr, RtvAllocation.Handle);
+	}
+}
+
+void DX12RHI::CreateDSV()
+{
+	//Create Depth/Stencil View
+
+	D3D12_RESOURCE_DESC DepthStencilDesc;
+	DepthStencilDesc.Dimension = D3D12_RESOURCE_DIMENSION_TEXTURE2D;
+	DepthStencilDesc.Alignment = 0;
+	DepthStencilDesc.Width = Wd->GetWidth();
+	DepthStencilDesc.Height = Wd->GetHeight();
+	DepthStencilDesc.DepthOrArraySize = 1;
+	DepthStencilDesc.MipLevels = 1;
+	DepthStencilDesc.Format = DXGI_FORMAT_R24G8_TYPELESS;
+	DepthStencilDesc.SampleDesc.Count = 1;
+	DepthStencilDesc.SampleDesc.Quality = 0;
+	DepthStencilDesc.Layout = D3D12_TEXTURE_LAYOUT_UNKNOWN;
+	DepthStencilDesc.Flags = D3D12_RESOURCE_FLAG_ALLOW_DEPTH_STENCIL;
+
+	D3D12_CLEAR_VALUE OptClear;
+	OptClear.Format = DXGI_FORMAT_D24_UNORM_S8_UINT;//DXGI_FORMAT DepthStencilFormat
+	OptClear.DepthStencil.Depth = 1.0f;
+	OptClear.DepthStencil.Stencil = 0;
+	D3dDevice->CreateCommittedResource(&CD3DX12_HEAP_PROPERTIES(D3D12_HEAP_TYPE_DEFAULT),
+		D3D12_HEAP_FLAG_NONE,
+		&DepthStencilDesc,
+		D3D12_RESOURCE_STATE_DEPTH_WRITE,
+		&OptClear,
+		IID_PPV_ARGS(DepthStencilBuffer.GetAddressOf()));
+
+	DepthStencilBuffer->SetName(L"MyDSBuffer");
+
+	D3D12_DEPTH_STENCIL_VIEW_DESC DsvDesc;
+	DsvDesc.Flags = D3D12_DSV_FLAG_NONE;
+	DsvDesc.ViewDimension = D3D12_DSV_DIMENSION_TEXTURE2D;
+	DsvDesc.Format = DXGI_FORMAT_D24_UNORM_S8_UINT;//DXGI_FORMAT mDepthStencilFormat
+	DsvDesc.Texture2D.MipSlice = 0;
+
+	auto DsvAllocation = DsvHeap->Allocate(1);
+	D3dDevice->CreateDepthStencilView(DepthStencilBuffer.Get(), &DsvDesc, DsvAllocation.Handle);
+}
+
+void DX12RHI::CreateViewPortAndScissorRect()
+{
+	//Set ScreenV ScissorR
+	ScreenViewport.TopLeftX = 0.0f;
+	ScreenViewport.TopLeftY = 0.0f;
+	ScreenViewport.Width = static_cast<float>(Wd->GetWidth());
+	ScreenViewport.Height = static_cast<float>(Wd->GetHeight());
+	ScreenViewport.MinDepth = 0.0f;
+	ScreenViewport.MaxDepth = 1.0f;
+	ScissorRect = { 0,0,Wd->GetWidth(),Wd->GetHeight() };
 }
