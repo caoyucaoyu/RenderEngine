@@ -81,20 +81,24 @@ bool OldRenderer::InitDraw()
 }
 
 
+//ok
 void OldRenderer::RendererUpdate(const GameTimer* Gt)
 {
 	//帧资源变下一帧
-	CurrFrameResourceIndex = (CurrFrameResourceIndex + 1) % FrameResourcesCount;
+	CurrFrameResourceIndex = (CurrFrameResourceIndex + 1) % OldFrameResourcesCount;
 	CurrFrameResource = FrameResources[CurrFrameResourceIndex].get();
 
 	//
-	if (CurrFrameResource->Fence != 0 && Fence->GetCompletedValue() < CurrFrameResource->Fence)//cpu 不是初始 且 GPU未完成
+	if (CurrFrameResource->Fence != 0 && Fence->GetCompletedValue() < CurrFrameResource->Fence)//当前帧不是第一次 且 GPU未完成此帧 等待
 	{
 		HANDLE EventHandle = CreateEventEx(nullptr, false, false, EVENT_ALL_ACCESS);
 		ThrowIfFailed(Fence->SetEventOnCompletion(CurrFrameResource->Fence, EventHandle));
 		WaitForSingleObject(EventHandle, INFINITE);
 		CloseHandle(EventHandle);
 	}
+
+	
+	//以下部分转Task
 
 	//相机位置 时间
 	glm::mat4 v = Engine::Get()->GetScene()->GetMainCamera().GetView();
@@ -104,6 +108,7 @@ void OldRenderer::RendererUpdate(const GameTimer* Gt)
 	PassConstants PasConstant;
 	PasConstant.Time = Gt->TotalTime();
 	PasConstant.ViewProj_M = glm::transpose(VP_Matrix);
+
 	CurrFrameResource->PassCB->CopyData(0, PasConstant);//数据拷贝至GPU缓存
 
 
@@ -131,11 +136,12 @@ void OldRenderer::RendererUpdate(const GameTimer* Gt)
 
 void OldRenderer::Draw()
 {
-	auto CurrentAllocator = CurrFrameResource->CmdListAlloc;
+	//Render Begin----------------------------------------------------
+	auto CurrentAllocator = CurrFrameResource->CmdListAlloc;//
+	CurrentAllocator->Reset();//
+	CommandList->Reset(CurrentAllocator.Get(), PSOs[0].Get());//
 
-	CurrentAllocator->Reset();
 
-	CommandList->Reset(CurrentAllocator.Get(), PSOs[0].Get());
 
 	CommandList->ResourceBarrier(1, &CD3DX12_RESOURCE_BARRIER::Transition(SwapChainBuffers[CurrBackBuffer].Get(),
 		D3D12_RESOURCE_STATE_PRESENT, D3D12_RESOURCE_STATE_RENDER_TARGET));
@@ -148,16 +154,20 @@ void OldRenderer::Draw()
 
 	CommandList->OMSetRenderTargets(1, &CurrentBackBufferView(), true, &DepthStencilView());
 
+
+
 	//---
 	ID3D12DescriptorHeap* DescriptorHeaps[] = { CbvHeap.Get() };
 	CommandList->SetDescriptorHeaps(_countof(DescriptorHeaps), DescriptorHeaps);
+
+
 
 	CommandList->SetGraphicsRootSignature(RootSignature.Get());
 
 
 
 
-	int PasCbvIndex = FrameResourcesCount * DrawCount + CurrFrameResourceIndex;//3*n+Curr
+	int PasCbvIndex = OldFrameResourcesCount * DrawCount + CurrFrameResourceIndex;//3*n+Curr
 	auto Handle = CD3DX12_GPU_DESCRIPTOR_HANDLE(CbvHeap->GetGPUDescriptorHandleForHeapStart());
 	Handle.Offset(PasCbvIndex, CbvSrvUavDescriptorSize);
 
@@ -171,7 +181,6 @@ void OldRenderer::Draw()
 	//auto PCbvAdress = FrameResources[CurrFrameResourceIndex]->PassCB->Resource()->GetGPUVirtualAddress();
 	//PCbvAdress+= CbvSrvUavDescriptorSize* PasCbvIndex;
 	//CommandList->SetGraphicsRootConstantBufferView(1, PCbvAdress);
-
 
 	for (int i = 0; i < DrawCount; i++)
 	{	
@@ -196,8 +205,6 @@ void OldRenderer::Draw()
 
 		CommandList->SetGraphicsRootDescriptorTable(0, ObjCbvHandle);
 
-
-
 		//CD3DX12_GPU_DESCRIPTOR_HANDLE MatCbvHandle;
 		//int MatCbvIndex = CurrFrameResourceIndex * DrawCount + i;//
 		//MatCbvHandle = CD3DX12_GPU_DESCRIPTOR_HANDLE(CbvHeap->GetGPUDescriptorHandleForHeapStart());
@@ -219,18 +226,25 @@ void OldRenderer::Draw()
 	CommandList->ResourceBarrier(1, &CD3DX12_RESOURCE_BARRIER::Transition(SwapChainBuffers[CurrBackBuffer].Get(),
 		D3D12_RESOURCE_STATE_RENDER_TARGET, D3D12_RESOURCE_STATE_PRESENT));
 
-	CommandList->Close();
-	ID3D12CommandList* CmdsLists[] = { CommandList.Get() };
-	CommandQueue->ExecuteCommandLists(_countof(CmdsLists), CmdsLists);
 
-	SwapChain->Present(0, 0);
-	CurrBackBuffer = (CurrBackBuffer + 1) % SwapChainBufferCount;
 
-	CurrFrameResource->Fence = ++CurrentFence;
-	CommandQueue->Signal(Fence.Get(), CurrentFence);
+
+
+
+	//End Frame --------------------End Frame ------------End Frame ---
+	CommandList->Close();//
+	ID3D12CommandList* CmdsLists[] = { CommandList.Get() };//
+	CommandQueue->ExecuteCommandLists(_countof(CmdsLists), CmdsLists);//
+
+	SwapChain->Present(0, 0);//
+	CurrBackBuffer = (CurrBackBuffer + 1) % SwapChainBufferCount;//
+
+	CurrFrameResource->Fence = ++CurrentFence;//
+	CommandQueue->Signal(Fence.Get(), CurrentFence);//
 
 }
 
+//ok
 void OldRenderer::RendererReset()
 {
 	OutputDebugStringA("Render Reset \n");
@@ -332,16 +346,19 @@ void OldRenderer::BuildTextures()
 
 void OldRenderer::BuildFrameResource()
 {
-	FrameResources.resize(FrameResourcesCount);
-	for (int i = 0; i < FrameResourcesCount; i++)
+	FrameResources.resize(OldFrameResourcesCount);
+	for (int i = 0; i < OldFrameResourcesCount; i++)
 	{
-		FrameResources[i]=std::make_unique<FrameResource>(D3dDevice.Get(), 1, DrawCount, MaterialCount);
+		FrameResources[i] = std::make_unique<FrameResource>(D3dDevice.Get());
+		FrameResources[i]->Init(1, DrawCount, MaterialCount);
 	}
 }
 
+
+//这里是提前知道了 所需大小 创建的，所以比较晚。
 void OldRenderer::BuildDescriptorHeaps()
 {
-	DescriptorsNum = (DrawCount + 1 + MaterialCount) * FrameResourcesCount;//Meshs
+	DescriptorsNum = (DrawCount + 1 + MaterialCount) * OldFrameResourcesCount;//Meshs
 
 	D3D12_DESCRIPTOR_HEAP_DESC CbvHeapDesc;
 	CbvHeapDesc.Type = D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV;
@@ -361,7 +378,7 @@ void OldRenderer::BuildConstantBuffers()
 	int HeapIndexN = 0;
 	//前三组
 	//ObjCBV
-	for (int FrameIndex = 0; FrameIndex < FrameResourcesCount; FrameIndex++)
+	for (int FrameIndex = 0; FrameIndex < OldFrameResourcesCount; FrameIndex++)
 	{
 		auto CurObjectCB = FrameResources[FrameIndex]->ObjectCB->Resource();
 		for (int i = 0; i < DrawCount; i++)
@@ -384,10 +401,10 @@ void OldRenderer::BuildConstantBuffers()
 	}
 
 	//3帧3个
-	for (int FrameIndex = 0; FrameIndex < FrameResourcesCount; FrameIndex++)
+	for (int FrameIndex = 0; FrameIndex < OldFrameResourcesCount; FrameIndex++)
 	{
 		D3D12_GPU_VIRTUAL_ADDRESS PassCBAddress = FrameResources[FrameIndex]->PassCB->Resource()->GetGPUVirtualAddress();
-		int HeapIndex = DrawCount * FrameResourcesCount + FrameIndex;
+		int HeapIndex = DrawCount * OldFrameResourcesCount + FrameIndex;
 		HeapIndexN++;
 
 		auto Handle = CD3DX12_CPU_DESCRIPTOR_HANDLE(CbvHeap->GetCPUDescriptorHandleForHeapStart());//获得CBV堆首地址

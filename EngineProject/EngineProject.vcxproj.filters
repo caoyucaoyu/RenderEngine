@@ -36,7 +36,7 @@
     <ClCompile Include="Source\OldRenderer.cpp">
       <Filter>Source Files\Source</Filter>
     </ClCompile>
-    <ClCompile Include="Source\FrameResource.cpp">
+    <ClCompile Include="Source\DX\FrameResource.cpp">
       <Filter>Source Files\DX</Filter>
     </ClCompile>
     <ClCompile Include="Source\MathHelper.cpp">
@@ -107,7 +107,7 @@
     <ClInclude Include="Source\OldRenderer.h">
       <Filter>Source Files\Source</Filter>
     </ClInclude>
-    <ClInclude Include="Source\FrameResource.h">
+    <ClInclude Include="Source\DX\FrameResource.h">
       <Filter>Source Files\DX</Filter>
     </ClInclude>
     <ClInclude Include="Source\MathHelper.h">

@@ -81,6 +81,9 @@ void RenderThread::Run()
 	{
 		RenderCV.wait(RenderLock);// Wait MainThread Give Task
 	}
+
+	MRenderer->Update();
+
 	DoTasks();
 	RenderNum--;
 

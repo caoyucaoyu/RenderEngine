@@ -29,19 +29,21 @@ struct MaterialConstants
 struct FrameResource
 {
 public:
-	//VP Time only 1,
-	FrameResource(ID3D12Device* Device, UINT PassCount, UINT ObjectCount, UINT MaterialCount)
+	FrameResource(ID3D12Device* Device)
 	{
 		ThrowIfFailed(Device->CreateCommandAllocator(D3D12_COMMAND_LIST_TYPE_DIRECT, IID_PPV_ARGS(CmdListAlloc.GetAddressOf())));
+	}
+	FrameResource(const FrameResource& rhs) = delete;
+	FrameResource& operator=(const FrameResource& rhs) = delete;
+	~FrameResource(){};
+
+	void Init(INT PassCount, UINT ObjectCount, UINT MaterialCount)
+	{
 
 		PassCB = std::make_unique<UploadBuffer<PassConstants>>(Device, PassCount, true);
 		ObjectCB = std::make_unique<UploadBuffer<ObjectConstants>>(Device, ObjectCount, true);
 		//MaterialCB = std::make_unique<UploadBuffer<MaterialConstants>>(Device, MaterialCount, true);
 	}
-
-	FrameResource(const FrameResource& rhs) = delete;
-	FrameResource& operator=(const FrameResource& rhs) = delete;
-	~FrameResource(){};
 
 	Microsoft::WRL::ComPtr<ID3D12CommandAllocator> CmdListAlloc;
 
@@ -50,6 +52,9 @@ public:
 	//std::unique_ptr<UploadBuffer<MaterialConstants>> MaterialCB = nullptr;
 
 	UINT64 Fence = 0;
+
+private:
+	ID3D12Device* Device;
 };
 
 

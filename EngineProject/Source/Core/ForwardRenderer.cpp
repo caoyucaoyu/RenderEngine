@@ -5,7 +5,6 @@
 ForwardRenderer::ForwardRenderer()
 {
 	RHI::CreateRHI();
-	RHI::Get()->Init();
 }
 
 ForwardRenderer::~ForwardRenderer()
@@ -20,7 +19,8 @@ void ForwardRenderer::DestroyRenderer()
 
 void ForwardRenderer::Init()
 {
-	
+	RHI::Get()->Init();
+	RHI::Get()->ResizeWindow(1920, 1080);
 }
 
 void ForwardRenderer::RenderFrameBegin()
@@ -30,7 +30,8 @@ void ForwardRenderer::RenderFrameBegin()
 
 void ForwardRenderer::Render()
 {
-	
+	HDRPass();
+
 	//OldRun
 	//Engine::Get()->GetRender()->Render();
 }
@@ -38,7 +39,17 @@ void ForwardRenderer::Render()
 void ForwardRenderer::RenderFrameEnd()
 {
 	RHI::Get()->EndFrame();
+	//OutputDebugStringA("RenderFrameEnd\n");
 }
 
+void ForwardRenderer::Update()
+{
+	RHI::Get()->UpdateFrameResource();
+}
+
+void ForwardRenderer::HDRPass()
+{
+
+}
 
 

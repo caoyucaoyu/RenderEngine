@@ -11,6 +11,7 @@ public:
 	virtual void Init() = 0;
 	virtual void DestroyRenderer() = 0;
 
+	virtual void Update() = 0;
 	virtual void RenderFrameBegin() = 0;
 	virtual void Render() = 0;
 	virtual void RenderFrameEnd() = 0;

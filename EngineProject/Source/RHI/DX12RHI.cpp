@@ -30,20 +30,91 @@ void DX12RHI::Init()
 	CreateCommandObject();
 	CreateSwapChain();
 	CreateRtvAndDsvDescriptorHeaps();
-	CreateRTV();
-	CreateDSV();
+
+	//
+	//CreateRTV();
+	//CreateDSV();
+	//CreateViewPortAndScissorRect();
+
+	CreateFrameResource();
+	CreatCbvSrvUavHeap();
 
 	OutputDebugStringA("DX12 Init Success\n");
 }
 
+void DX12RHI::ResizeWindow(UINT32 Width, UINT32 Height)
+{
+	OutputDebugStringA("DX12 Resize Window\n");
+	assert(D3dDevice);
+	assert(SwapChain);
+	assert(CommandListAllocator);
+
+	FlushCommandQueue();
+	ResetCommandList(CommandListAllocator);
+
+
+	for (int i = 0; i < SwapChainBufferCount; ++i)
+		SwapChainBuffers[i].Reset();
+	DepthStencilBuffer.Reset();
+
+	SwapChain->ResizeBuffers(SwapChainBufferCount, Width, Height, DXGI_FORMAT_R8G8B8A8_UNORM, DXGI_SWAP_CHAIN_FLAG_ALLOW_MODE_SWITCH);
+	CurrBackBuffer = 0;
+
+	CreateRTV();
+	CreateDSV();
+	CreateViewPortAndScissorRect();
+
+
+	ExecuteCommandList();
+	FlushCommandQueue();
+}
+
+
 void DX12RHI::BeginFrame()
 {
+	auto CurrentAllocator = CurrFrameResource->CmdListAlloc;
 
+	CurrentAllocator->Reset();
+
+	ResetCommandList(CurrentAllocator.Get());
+	
+	//PrepareBufferHeap();
 }
 
 void DX12RHI::EndFrame()
 {
+	ExecuteCommandList();
 
+	SwapChain->Present(0, 0);
+	CurrBackBuffer = (CurrBackBuffer + 1) % SwapChainBufferCount;
+
+	CurrFrameResource->Fence = ++CurrentFence;
+	CommandQueue->Signal(Fence.Get(), CurrentFence);
+}
+
+void DX12RHI::CreateFrameResource()
+{
+	FrameResources.resize(FrameResourcesCount);
+	for (int i = 0; i < FrameResourcesCount; i++)
+	{
+		FrameResources[i] = std::make_unique<FrameResource>(D3dDevice.Get());
+		//FrameResources[i]->Init(1, DrawCount, MaterialCount);
+	}
+}
+
+void DX12RHI::UpdateFrameResource()
+{
+	//帧资源变下一帧
+	CurrFrameResourceIndex = (CurrFrameResourceIndex + 1) % FrameResourcesCount;
+	CurrFrameResource = FrameResources[CurrFrameResourceIndex].get();
+
+	if (CurrFrameResource->Fence != 0 && Fence->GetCompletedValue() < CurrFrameResource->Fence)//当前帧不是第一次 且 GPU未完成此帧 等待
+	{
+		HANDLE EventHandle = CreateEventEx(nullptr, false, false, EVENT_ALL_ACCESS);
+		ThrowIfFailed(Fence->SetEventOnCompletion(CurrFrameResource->Fence, EventHandle));
+		WaitForSingleObject(EventHandle, INFINITE);
+		CloseHandle(EventHandle);
+	}
 }
 
 void DX12RHI::FlushCommandQueue()
@@ -67,10 +138,8 @@ void DX12RHI::DrawInstanced(UINT DrawIndexCount)
 	CommandList->DrawInstanced(DrawIndexCount, 1, 0, 0);
 }
 
-void DX12RHI::ResizeWindow(UINT32 Width, UINT32 Height)
-{
 
-}
+
 
 void DX12RHI::ExecuteCommandList()
 {
@@ -78,6 +147,19 @@ void DX12RHI::ExecuteCommandList()
 	ID3D12CommandList* CmdsLists[] = { CommandList.Get() };
 	CommandQueue->ExecuteCommandLists(_countof(CmdsLists), CmdsLists);
 }
+
+void DX12RHI::ResetCommandList(ComPtr<ID3D12CommandAllocator> CommandListAllocator)
+{
+	ThrowIfFailed(CommandList->Reset(CommandListAllocator.Get(), nullptr));
+}
+
+//?????
+void DX12RHI::PrepareBufferHeap()
+{
+	ID3D12DescriptorHeap* DescriptorHeaps[] = { CbvSrvUavHeap->GetCurrentHeap() };
+	CommandList->SetDescriptorHeaps(_countof(DescriptorHeaps), DescriptorHeaps);
+}
+
 
 void DX12RHI::CreateDevice()
 {
@@ -116,11 +198,11 @@ void DX12RHI::CreateCommandObject()
 	queueDesc.Type = D3D12_COMMAND_LIST_TYPE_DIRECT;
 	queueDesc.Flags = D3D12_COMMAND_QUEUE_FLAG_NONE;
 	D3dDevice->CreateCommandQueue(&queueDesc, IID_PPV_ARGS(&CommandQueue));
-	D3dDevice->CreateCommandAllocator(D3D12_COMMAND_LIST_TYPE_DIRECT, IID_PPV_ARGS(CommandListAlloc.GetAddressOf()));
+	D3dDevice->CreateCommandAllocator(D3D12_COMMAND_LIST_TYPE_DIRECT, IID_PPV_ARGS(CommandListAllocator.GetAddressOf()));
 	D3dDevice->CreateCommandList(
 		0,
 		D3D12_COMMAND_LIST_TYPE_DIRECT,
-		CommandListAlloc.Get(),
+		CommandListAllocator.Get(),
 		nullptr,
 		IID_PPV_ARGS(CommandList.GetAddressOf()));
 	CommandList->Close();
@@ -223,4 +305,9 @@ void DX12RHI::CreateViewPortAndScissorRect()
 	ScreenViewport.MinDepth = 0.0f;
 	ScreenViewport.MaxDepth = 1.0f;
 	ScissorRect = { 0,0,Wd->GetWidth(),Wd->GetHeight() };
+}
+
+void DX12RHI::CreatCbvSrvUavHeap()
+{
+	CbvSrvUavHeap = std::make_unique<DescriptorHeap>(D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV, D3dDevice);
 }

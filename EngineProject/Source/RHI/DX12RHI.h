@@ -5,6 +5,8 @@ using Microsoft::WRL::ComPtr;
 
 class Window;
 class DescriptorHeap;
+class FrameResource;
+const int FrameResourcesCount = 3;
 
 class DX12RHI : public RHI
 {
@@ -18,11 +20,18 @@ public:
 	virtual void BeginFrame() override;
 	virtual void EndFrame() override;
 
+	virtual void CreateFrameResource() override;
+	virtual void UpdateFrameResource() override;
+
 	virtual void FlushCommandQueue()override;
 	virtual void DrawInstanced(UINT DrawIndexCount) override;
 	virtual void ResizeWindow(UINT32 Width, UINT32 Height) override;
 
 	void ExecuteCommandList();//将待执行的命令列表加入GPU的命令队列
+	void ResetCommandList(ComPtr<ID3D12CommandAllocator> CommandListAllocator);
+
+private:
+	void PrepareBufferHeap();
 
 private:
 	void CreateDevice();
@@ -37,6 +46,8 @@ private:
 	void CreateDSV();
 	void CreateViewPortAndScissorRect();
 
+	void CreatCbvSrvUavHeap();
+
 private:
 	Window* Wd;
 	ComPtr<IDXGIFactory> DxgiFactory;
@@ -44,7 +55,7 @@ private:
 	ComPtr<ID3D12Fence> Fence;
 	ComPtr<ID3D12CommandQueue> CommandQueue;
 	ComPtr<ID3D12GraphicsCommandList> CommandList;
-	ComPtr<ID3D12CommandAllocator> CommandListAlloc;
+	ComPtr<ID3D12CommandAllocator> CommandListAllocator;
 	ComPtr<IDXGISwapChain> SwapChain;
 	UINT RtvDescriptorSize;
 	UINT DsvDescriptorSize;
@@ -57,12 +68,17 @@ private:
 
 	std::unique_ptr<DescriptorHeap> RtvHeap;
 	std::unique_ptr<DescriptorHeap> DsvHeap;
-
+	std::unique_ptr<DescriptorHeap> CbvSrvUavHeap;
 
 	UINT64 CurrentFence = 0;
+	UINT64 CurrBackBuffer = 0;
 
 	D3D12_VIEWPORT ScreenViewport;
 	D3D12_RECT ScissorRect;
+
+	std::vector<std::unique_ptr<FrameResource>> FrameResources;
+	FrameResource* CurrFrameResource = nullptr;
+	int CurrFrameResourceIndex = 0;
 
 
 };

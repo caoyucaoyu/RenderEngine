@@ -39,7 +39,7 @@
     <ClCompile Include="Source\RHI\RHI.cpp" />
     <ClCompile Include="Source\Scene.cpp" />
     <ClCompile Include="Source\D3DUtil.cpp" />
-    <ClCompile Include="Source\FrameResource.cpp" />
+    <ClCompile Include="Source\DX\FrameResource.cpp" />
     <ClCompile Include="Source\stdafx.cpp">
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Create</PrecompiledHeader>
     </ClCompile>
@@ -69,7 +69,7 @@
     <ClInclude Include="Source\Scene.h" />
     <ClInclude Include="Source\D3DUtil.h" />
     <ClInclude Include="Source\d3dx12.h" />
-    <ClInclude Include="Source\FrameResource.h" />
+    <ClInclude Include="Source\DX\FrameResource.h" />
     <ClInclude Include="Source\stdafx.h" />
     <ClInclude Include="Source\MathHelper.h" />
     <ClInclude Include="Source\Mesh.h" />
@@ -136,7 +136,7 @@
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
     <LinkIncremental>true</LinkIncremental>
-    <IncludePath>.\Source;.\Source\Core;$(IncludePath)</IncludePath>
+    <IncludePath>.\Source;.\Source\Core;.\Source\DX;$(IncludePath)</IncludePath>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
     <LinkIncremental>false</LinkIncremental>

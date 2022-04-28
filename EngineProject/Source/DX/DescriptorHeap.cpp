@@ -82,4 +82,8 @@ void DescriptorHeap::ClearHeap()
 	CurrentHeap = nullptr;
 }
 
+ID3D12DescriptorHeap* DescriptorHeap::GetCurrentHeap()
+{
+	return CurrentHeap;
+}
 

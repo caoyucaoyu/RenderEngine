@@ -18,6 +18,9 @@ public:
 	virtual void BeginFrame() = 0;
 	virtual void EndFrame() = 0;
 
+	virtual void CreateFrameResource() = 0;
+	virtual void UpdateFrameResource() = 0;
+
 	virtual void FlushCommandQueue() = 0;
 	virtual void ResizeWindow(UINT32 Width, UINT32 Height) = 0;
 	virtual void DrawInstanced(UINT DrawIndexCount) = 0;

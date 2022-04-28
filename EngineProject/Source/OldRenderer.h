@@ -1,5 +1,5 @@
 #pragma once
-#include "FrameResource.h"
+#include "DX\FrameResource.h"
 #include "Mesh.h"
 #include "Material.h"
 #include "Texture.h"
@@ -10,7 +10,7 @@
 
 using Microsoft::WRL::ComPtr;
 using DirectX::XMConvertToRadians;
-const int FrameResourcesCount = 3;
+const int OldFrameResourcesCount = 3;
 
 class OldRenderer
 {
@@ -59,36 +59,37 @@ public:
 	void BuildPSO();
 
 protected:
-	ComPtr<IDXGIFactory> DxgiFactory;
-	ComPtr<ID3D12Device> D3dDevice;
-	ComPtr<ID3D12Fence> Fence;
-	ComPtr<ID3D12CommandQueue> CommandQueue;
-	ComPtr<ID3D12GraphicsCommandList> CommandList;
-	ComPtr<ID3D12CommandAllocator> CommandListAlloc;
-	ComPtr<IDXGISwapChain> SwapChain;
-	static const int SwapChainBufferCount = 2;
+	ComPtr<IDXGIFactory> DxgiFactory;//
+	ComPtr<ID3D12Device> D3dDevice;//
+	ComPtr<ID3D12Fence> Fence;//
+	ComPtr<ID3D12CommandQueue> CommandQueue;//
+	ComPtr<ID3D12GraphicsCommandList> CommandList;//
+	ComPtr<ID3D12CommandAllocator> CommandListAlloc;//
+	ComPtr<IDXGISwapChain> SwapChain;//
+	static const int SwapChainBufferCount = 2;//
 	ComPtr<ID3D12Resource> SwapChainBuffers[2];//SwapChainBufferCount
-	UINT RtvDescriptorSize;
-	UINT DsvDescriptorSize;
-	UINT CbvSrvUavDescriptorSize;
-	int ClientWidth = 1280;
+	UINT RtvDescriptorSize;//
+	UINT DsvDescriptorSize;//
+	UINT CbvSrvUavDescriptorSize;//
+	int ClientWidth = 1280;//
 	int ClientHight = 720;
-	HWND HMainWnd;
-	D3D12_FEATURE_DATA_MULTISAMPLE_QUALITY_LEVELS MsaaQualityLevels;
-
-	ComPtr<ID3D12DescriptorHeap> DsvHeap;
-	ComPtr<ID3D12DescriptorHeap> RtvHeap;
+	HWND HMainWnd;///
+	D3D12_FEATURE_DATA_MULTISAMPLE_QUALITY_LEVELS MsaaQualityLevels;//
+	//
+	ComPtr<ID3D12DescriptorHeap> DsvHeap;//
+	ComPtr<ID3D12DescriptorHeap> RtvHeap;//
 
 
 	ComPtr<ID3D12Resource> DepthStencilBuffer;
 
-	D3D12_VIEWPORT ScreenViewport;
-	D3D12_RECT ScissorRect;
+	D3D12_VIEWPORT ScreenViewport;///
+	D3D12_RECT ScissorRect;///
 
-	UINT64 CurrentFence = 0;
-	int CurrBackBuffer = 0;
+	UINT64 CurrentFence = 0;///
+	int CurrBackBuffer = 0;///
 
-	std::vector<std::unique_ptr<FrameResource>> FrameResources;
+	std::vector<std::unique_ptr<FrameResource>> FrameResources;//////
+
 	int DescriptorsNum = 0;
 
 	ComPtr<ID3D12DescriptorHeap> CbvHeap;
@@ -99,8 +100,9 @@ protected:
 	std::vector<D3D12_INPUT_ELEMENT_DESC> InputLayout;
 	std::vector<ComPtr<ID3D12PipelineState>> PSOs;
 
-	FrameResource* CurrFrameResource = nullptr;
-	int CurrFrameResourceIndex = 0;
+
+	FrameResource* CurrFrameResource = nullptr;/////
+	int CurrFrameResourceIndex = 0;////
 
 
 private:
