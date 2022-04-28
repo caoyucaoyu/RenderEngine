@@ -78,7 +78,7 @@ void DX12RHI::BeginFrame()
 
 	ResetCommandList(CurrentAllocator.Get());
 	
-	//PrepareBufferHeap();
+	PrepareBufferHeap();
 }
 
 void DX12RHI::EndFrame()
@@ -153,11 +153,14 @@ void DX12RHI::ResetCommandList(ComPtr<ID3D12CommandAllocator> CommandListAllocat
 	ThrowIfFailed(CommandList->Reset(CommandListAllocator.Get(), nullptr));
 }
 
-//?????
+
 void DX12RHI::PrepareBufferHeap()
 {
-	ID3D12DescriptorHeap* DescriptorHeaps[] = { CbvSrvUavHeap->GetCurrentHeap() };
-	CommandList->SetDescriptorHeaps(_countof(DescriptorHeaps), DescriptorHeaps);
+	if (CbvSrvUavHeap->GetCurrentHeap() != nullptr)
+	{
+		ID3D12DescriptorHeap* DescriptorHeaps[] = { CbvSrvUavHeap->GetCurrentHeap() };
+		CommandList->SetDescriptorHeaps(_countof(DescriptorHeaps), DescriptorHeaps);
+	}
 }
 
 

@@ -142,16 +142,19 @@ void OldRenderer::Draw()
 	CommandList->Reset(CurrentAllocator.Get(), PSOs[0].Get());//
 
 
-
+	//后台缓冲资源从呈现状态转换到渲染目标状态
 	CommandList->ResourceBarrier(1, &CD3DX12_RESOURCE_BARRIER::Transition(SwapChainBuffers[CurrBackBuffer].Get(),
 		D3D12_RESOURCE_STATE_PRESENT, D3D12_RESOURCE_STATE_RENDER_TARGET));
 
+	//设置视口和裁剪矩形
 	CommandList->RSSetViewports(1, &ScreenViewport);
 	CommandList->RSSetScissorRects(1, &ScissorRect);
 
+	//清除后台缓冲区和深度缓冲区，并赋值
 	CommandList->ClearRenderTargetView(CurrentBackBufferView(), DirectX::Colors::Black, 0, nullptr);
 	CommandList->ClearDepthStencilView(DepthStencilView(), D3D12_CLEAR_FLAG_DEPTH | D3D12_CLEAR_FLAG_STENCIL, 1.0f, 0, 0, nullptr);
 
+	//指定将要渲染的缓冲区，指定RTV和DSV
 	CommandList->OMSetRenderTargets(1, &CurrentBackBufferView(), true, &DepthStencilView());
 
 
@@ -159,7 +162,6 @@ void OldRenderer::Draw()
 	//---
 	ID3D12DescriptorHeap* DescriptorHeaps[] = { CbvHeap.Get() };
 	CommandList->SetDescriptorHeaps(_countof(DescriptorHeaps), DescriptorHeaps);
-
 
 
 	CommandList->SetGraphicsRootSignature(RootSignature.Get());
@@ -221,8 +223,9 @@ void OldRenderer::Draw()
 
 		CommandList->DrawIndexedInstanced((UINT)DrawMesh.Indices.size(), 1, 0, 0, 0);//换为 同理
 	}
-	//---
 
+	//---
+	//后台缓冲区的状态改成呈现状态
 	CommandList->ResourceBarrier(1, &CD3DX12_RESOURCE_BARRIER::Transition(SwapChainBuffers[CurrBackBuffer].Get(),
 		D3D12_RESOURCE_STATE_RENDER_TARGET, D3D12_RESOURCE_STATE_PRESENT));
 
