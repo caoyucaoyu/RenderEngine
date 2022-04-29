@@ -4,7 +4,7 @@ struct MeshActor
 {
 public:
 	MeshActor(){};
-	MeshActor(MapItem MapMeshItem)
+	MeshActor(MeshRead MapMeshItem)
 	{
 		MeshName = MapMeshItem.MeshName;
 		Location = MapMeshItem.Location;

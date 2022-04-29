@@ -1,11 +1,11 @@
 #pragma once
 
 #include "stdafx.h"
-#include "D3dUtil.h"
 #include "GameTimer.h"
 #include "MathHelper.h"
 #include "UploadBuffer.h"
 #include "FrameResource.h"
+#include "AssetsManager.h"
 
 using Microsoft::WRL::ComPtr;
 
@@ -13,7 +13,7 @@ class Mesh
 {
 public:
 	Mesh() {};
-	Mesh(MapItem MeshData)
+	Mesh(MeshRead MeshData)//由源数据构建Mesh资源
 	{
 		MeshName = MeshData.MeshName;
 		Vertices = MeshData.Vertices;
@@ -30,7 +30,7 @@ class DXMesh : public Mesh
 {
 public:
 	DXMesh() {};
-	DXMesh(MapItem MeshData):Mesh(MeshData)
+	DXMesh(MeshRead MeshData):Mesh(MeshData)
 	{
 		//Vertices Indices 大小
 		IbByteSize = (UINT)MeshData.Indices.size() * sizeof(std::uint16_t);

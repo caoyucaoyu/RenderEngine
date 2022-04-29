@@ -27,11 +27,17 @@ public:
 	virtual void DrawInstanced(UINT DrawIndexCount) override;
 	virtual void ResizeWindow(UINT32 Width, UINT32 Height) override;
 
+	virtual void SetRenderTargetBegin() override;
+	virtual void SetRenderTargetEnd() override;
+
+
+public:
 	void ExecuteCommandList();//将待执行的命令列表加入GPU的命令队列
 	void ResetCommandList(ComPtr<ID3D12CommandAllocator> CommandListAllocator);
 
 private:
 	void PrepareBufferHeap();
+
 
 private:
 	void CreateDevice();
@@ -47,6 +53,10 @@ private:
 	void CreateViewPortAndScissorRect();
 
 	void CreatCbvSrvUavHeap();
+	
+	//只读
+	D3D12_CPU_DESCRIPTOR_HANDLE CurrentBackBufferView() const;
+	D3D12_CPU_DESCRIPTOR_HANDLE DepthStencilView() const;
 
 private:
 	Window* Wd;

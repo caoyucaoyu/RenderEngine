@@ -20,25 +20,26 @@
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Source\Camera.cpp" />
-    <ClCompile Include="Source\Core\ForwardRenderer.cpp" />
+    <ClCompile Include="Source\Core\Primitive.cpp" />
+    <ClCompile Include="Source\Render\ForwardRenderer.cpp" />
     <ClCompile Include="Source\Core\Engine.cpp" />
     <ClCompile Include="Source\Core\GameTimer.cpp" />
     <ClCompile Include="Source\Core\Input.cpp" />
     <ClCompile Include="Source\Core\RenderScene.cpp" />
-    <ClCompile Include="Source\Core\Renderer.cpp" />
+    <ClCompile Include="Source\Render\Renderer.cpp" />
     <ClCompile Include="Source\Core\RenderThread.cpp" />
     <ClCompile Include="Source\Core\Task.cpp" />
     <ClCompile Include="Source\Core\Thread.cpp" />
     <ClCompile Include="Source\Core\Window.cpp" />
     <ClCompile Include="Source\Core\WindowWin32.cpp" />
-    <ClCompile Include="Source\DDSTextureLoader.cpp" />
+    <ClCompile Include="Source\DX\DDSTextureLoader.cpp" />
     <ClCompile Include="Source\DX\DescriptorHeap.cpp" />
     <ClCompile Include="Source\OldRenderer.cpp" />
-    <ClCompile Include="Source\AssetsManager.cpp" />
+    <ClCompile Include="Source\Scene\AssetsManager.cpp" />
     <ClCompile Include="Source\RHI\DX12RHI.cpp" />
     <ClCompile Include="Source\RHI\RHI.cpp" />
-    <ClCompile Include="Source\Scene.cpp" />
-    <ClCompile Include="Source\D3DUtil.cpp" />
+    <ClCompile Include="Source\Scene\Scene.cpp" />
+    <ClCompile Include="Source\DX\D3DUtil.cpp" />
     <ClCompile Include="Source\DX\FrameResource.cpp" />
     <ClCompile Include="Source\stdafx.cpp">
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Create</PrecompiledHeader>
@@ -48,27 +49,28 @@
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Source\Camera.h" />
-    <ClInclude Include="Source\Core\ForwardRenderer.h" />
+    <ClInclude Include="Source\Core\Primitive.h" />
+    <ClInclude Include="Source\Render\ForwardRenderer.h" />
     <ClInclude Include="Source\Core\Engine.h" />
     <ClInclude Include="Source\Core\GameTimer.h" />
     <ClInclude Include="Source\Core\Input.h" />
     <ClInclude Include="Source\Core\RenderScene.h" />
-    <ClInclude Include="Source\Core\Renderer.h" />
+    <ClInclude Include="Source\Render\Renderer.h" />
     <ClInclude Include="Source\Core\RenderThread.h" />
     <ClInclude Include="Source\Core\Task.h" />
     <ClInclude Include="Source\Core\Thread.h" />
     <ClInclude Include="Source\Core\Window.h" />
     <ClInclude Include="Source\Core\WindowWin32.h" />
-    <ClInclude Include="Source\DDSTextureLoader.h" />
+    <ClInclude Include="Source\DX\DDSTextureLoader.h" />
     <ClInclude Include="Source\DX\DescriptorHeap.h" />
     <ClInclude Include="Source\OldRenderer.h" />
     <ClInclude Include="Source\Material.h" />
-    <ClInclude Include="Source\AssetsManager.h" />
+    <ClInclude Include="Source\Scene\AssetsManager.h" />
     <ClInclude Include="Source\RHI\DX12RHI.h" />
     <ClInclude Include="Source\RHI\RHI.h" />
-    <ClInclude Include="Source\Scene.h" />
-    <ClInclude Include="Source\D3DUtil.h" />
-    <ClInclude Include="Source\d3dx12.h" />
+    <ClInclude Include="Source\Scene\Scene.h" />
+    <ClInclude Include="Source\DX\D3DUtil.h" />
+    <ClInclude Include="Source\DX\d3dx12.h" />
     <ClInclude Include="Source\DX\FrameResource.h" />
     <ClInclude Include="Source\stdafx.h" />
     <ClInclude Include="Source\MathHelper.h" />
@@ -136,7 +138,7 @@
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
     <LinkIncremental>true</LinkIncremental>
-    <IncludePath>.\Source;.\Source\Core;.\Source\DX;$(IncludePath)</IncludePath>
+    <IncludePath>.\Source;.\Source\Core;.\Source\DX;.\Source\Render;.\Source\Scene;$(IncludePath)</IncludePath>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
     <LinkIncremental>false</LinkIncremental>

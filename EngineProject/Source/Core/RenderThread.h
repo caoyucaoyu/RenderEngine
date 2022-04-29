@@ -31,11 +31,12 @@ protected:
 	std::condition_variable RenderCV;
 
 	//TaskQueue
-	struct RenderFrame
+	struct RenderFrameTaskQueue
 	{
 		std::queue<Task*> TaskQueue;
 	};
-	RenderFrame MRenderFrame[2];
+	RenderFrameTaskQueue MRenderFrame[2];
+
 	UINT32 CurrentFrameIndex;
 	UINT32 NextFrameIndex;
 	//都是0 最开始AddTask进Next=0，都进完，变Next=1，再进进1，DoTask执行0的，完事变1。

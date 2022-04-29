@@ -110,8 +110,10 @@ private:
 	int MaterialCount = 0;
 	int TextureCount = 0;
 
-	std::vector<MeshActor> DrawList;
+	std::vector<MeshActor> DrawList;//////////////////////////////////////////////////////////
 	std::unordered_map<std::string, DXMesh> DXMeshs;
+
+	//‘›«“≤ª”√
 	std::unordered_map<std::string, DXTexture> DXTextures;
 	std::unordered_map<std::string, Material> DXMaterials;
 

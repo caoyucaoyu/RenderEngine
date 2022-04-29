@@ -20,7 +20,7 @@ void ForwardRenderer::DestroyRenderer()
 void ForwardRenderer::Init()
 {
 	RHI::Get()->Init();
-	RHI::Get()->ResizeWindow(1920, 1080);
+	RHI::Get()->ResizeWindow(1280, 720);
 }
 
 void ForwardRenderer::RenderFrameBegin()
@@ -49,7 +49,9 @@ void ForwardRenderer::Update()
 
 void ForwardRenderer::HDRPass()
 {
+	RHI::Get()->SetRenderTargetBegin();
 
+	RHI::Get()->SetRenderTargetEnd();
 }
 
 

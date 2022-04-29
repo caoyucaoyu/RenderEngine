@@ -112,7 +112,9 @@ void DX12RHI::UpdateFrameResource()
 	{
 		HANDLE EventHandle = CreateEventEx(nullptr, false, false, EVENT_ALL_ACCESS);
 		ThrowIfFailed(Fence->SetEventOnCompletion(CurrFrameResource->Fence, EventHandle));
+
 		WaitForSingleObject(EventHandle, INFINITE);
+
 		CloseHandle(EventHandle);
 	}
 }
@@ -163,6 +165,31 @@ void DX12RHI::PrepareBufferHeap()
 	}
 }
 
+
+void DX12RHI::SetRenderTargetBegin()
+{
+	//后台缓冲资源从呈现状态转换到渲染目标状态
+	CommandList->ResourceBarrier(1, &CD3DX12_RESOURCE_BARRIER::Transition(SwapChainBuffers[CurrBackBuffer].Get(),
+		D3D12_RESOURCE_STATE_PRESENT, D3D12_RESOURCE_STATE_RENDER_TARGET));
+
+	//设置视口和裁剪矩形
+	CommandList->RSSetViewports(1, &ScreenViewport);
+	CommandList->RSSetScissorRects(1, &ScissorRect);
+
+	//清除后台缓冲区和深度缓冲区，并赋值
+	CommandList->ClearRenderTargetView(CurrentBackBufferView(), DirectX::Colors::LightPink, 0, nullptr);
+	CommandList->ClearDepthStencilView(DepthStencilView(), D3D12_CLEAR_FLAG_DEPTH | D3D12_CLEAR_FLAG_STENCIL, 1.0f, 0, 0, nullptr);
+
+	//指定将要渲染的缓冲区，指定RTV和DSV
+	CommandList->OMSetRenderTargets(1, &CurrentBackBufferView(), true, &DepthStencilView());
+}
+
+void DX12RHI::SetRenderTargetEnd()
+{
+	//后台缓冲区的状态改成呈现状态
+	CommandList->ResourceBarrier(1, &CD3DX12_RESOURCE_BARRIER::Transition(SwapChainBuffers[CurrBackBuffer].Get(),
+		D3D12_RESOURCE_STATE_RENDER_TARGET, D3D12_RESOURCE_STATE_PRESENT));
+}
 
 void DX12RHI::CreateDevice()
 {
@@ -313,4 +340,17 @@ void DX12RHI::CreateViewPortAndScissorRect()
 void DX12RHI::CreatCbvSrvUavHeap()
 {
 	CbvSrvUavHeap = std::make_unique<DescriptorHeap>(D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV, D3dDevice);
+}
+
+D3D12_CPU_DESCRIPTOR_HANDLE DX12RHI::CurrentBackBufferView() const
+{
+	return CD3DX12_CPU_DESCRIPTOR_HANDLE(
+		RtvHeap->GetCurrentHeap()->GetCPUDescriptorHandleForHeapStart(),
+		CurrBackBuffer,
+		RtvDescriptorSize);
+}
+
+D3D12_CPU_DESCRIPTOR_HANDLE DX12RHI::DepthStencilView() const
+{
+	return DsvHeap->GetCurrentHeap()->GetCPUDescriptorHandleForHeapStart();
 }

@@ -37,7 +37,7 @@ void Scene::Init()
 
 void Scene::LoadMapActors()
 {
-	for (auto MapMeshItem : Engine::Get()->GetAssetsManager()->GetMapMeshsData())
+	for (auto MapMeshItem : Engine::Get()->GetAssetsManager()->GetMeshReadData())
 	{
 		MeshActor AMeshActor(MapMeshItem);
 		SceneMeshActors.push_back(AMeshActor);

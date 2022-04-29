@@ -24,4 +24,7 @@ public:
 	virtual void FlushCommandQueue() = 0;
 	virtual void ResizeWindow(UINT32 Width, UINT32 Height) = 0;
 	virtual void DrawInstanced(UINT DrawIndexCount) = 0;
+
+	virtual void SetRenderTargetBegin() = 0;
+	virtual void SetRenderTargetEnd() = 0;
 };

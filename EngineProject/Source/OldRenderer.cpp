@@ -66,8 +66,6 @@ bool OldRenderer::InitDraw()
 	BuildShadersAndInputLayout();
 	BuildPSO();
 
-
-
 	//ExecuteCommandLists
 	ThrowIfFailed(CommandList->Close());
 	ID3D12CommandList* cmdLists[] = { CommandList.Get() };
@@ -75,7 +73,6 @@ bool OldRenderer::InitDraw()
 
 
 	FlushCommandQueue();
-
 
 	return true;
 }
@@ -139,9 +136,10 @@ void OldRenderer::Draw()
 	//Render Begin----------------------------------------------------
 	auto CurrentAllocator = CurrFrameResource->CmdListAlloc;//
 	CurrentAllocator->Reset();//
-	CommandList->Reset(CurrentAllocator.Get(), PSOs[0].Get());//
+	CommandList->Reset(CurrentAllocator.Get(), PSOs[0].Get());//********* nullptr now
 
 
+	//Set Render Target Begin----------------------------------------------------------------------------------------
 	//后台缓冲资源从呈现状态转换到渲染目标状态
 	CommandList->ResourceBarrier(1, &CD3DX12_RESOURCE_BARRIER::Transition(SwapChainBuffers[CurrBackBuffer].Get(),
 		D3D12_RESOURCE_STATE_PRESENT, D3D12_RESOURCE_STATE_RENDER_TARGET));
@@ -159,14 +157,15 @@ void OldRenderer::Draw()
 
 
 
-	//---
+	//PrepareBufferHeap------------------------------------
 	ID3D12DescriptorHeap* DescriptorHeaps[] = { CbvHeap.Get() };
 	CommandList->SetDescriptorHeaps(_countof(DescriptorHeaps), DescriptorHeaps);
 
 
+
+
+
 	CommandList->SetGraphicsRootSignature(RootSignature.Get());
-
-
 
 
 	int PasCbvIndex = OldFrameResourcesCount * DrawCount + CurrFrameResourceIndex;//3*n+Curr
@@ -224,7 +223,10 @@ void OldRenderer::Draw()
 		CommandList->DrawIndexedInstanced((UINT)DrawMesh.Indices.size(), 1, 0, 0, 0);//换为 同理
 	}
 
-	//---
+
+
+
+	//Set Render Target End----------------------------------------
 	//后台缓冲区的状态改成呈现状态
 	CommandList->ResourceBarrier(1, &CD3DX12_RESOURCE_BARRIER::Transition(SwapChainBuffers[CurrBackBuffer].Get(),
 		D3D12_RESOURCE_STATE_RENDER_TARGET, D3D12_RESOURCE_STATE_PRESENT));
@@ -318,6 +320,10 @@ void OldRenderer::BuildRenderData()
 	}
 }
 
+
+
+
+
 void OldRenderer::BuildTextures()
 {
 	Texture ATexture;
@@ -347,6 +353,7 @@ void OldRenderer::BuildTextures()
 	TextureCount= DXTextures.size();
 }
 
+
 void OldRenderer::BuildFrameResource()
 {
 	FrameResources.resize(OldFrameResourcesCount);
@@ -371,6 +378,8 @@ void OldRenderer::BuildDescriptorHeaps()
 	CbvHeapDesc.NodeMask = 0;
 	D3dDevice->CreateDescriptorHeap(&CbvHeapDesc, IID_PPV_ARGS(&CbvHeap));
 }
+
+
 
 void OldRenderer::BuildConstantBuffers()
 {
@@ -520,6 +529,9 @@ void OldRenderer::BuildPSO()
 	PSOs.push_back(Pso);
 	D3dDevice->CreateGraphicsPipelineState(&PsoDesc, IID_PPV_ARGS(&PSOs[1]));
 }
+
+
+
 
 DXMesh OldRenderer::FindRMesh(std::string MeshName)
 {

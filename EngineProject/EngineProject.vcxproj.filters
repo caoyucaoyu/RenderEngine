@@ -42,19 +42,19 @@
     <ClCompile Include="Source\MathHelper.cpp">
       <Filter>Source Files\DX</Filter>
     </ClCompile>
-    <ClCompile Include="Source\D3DUtil.cpp">
+    <ClCompile Include="Source\DX\D3DUtil.cpp">
       <Filter>Source Files\DX</Filter>
     </ClCompile>
     <ClCompile Include="Source\Camera.cpp">
       <Filter>Source Files\DX</Filter>
     </ClCompile>
-    <ClCompile Include="Source\DDSTextureLoader.cpp">
+    <ClCompile Include="Source\DX\DDSTextureLoader.cpp">
       <Filter>Source Files\DX</Filter>
     </ClCompile>
-    <ClCompile Include="Source\AssetsManager.cpp">
+    <ClCompile Include="Source\Scene\AssetsManager.cpp">
       <Filter>Source Files\Assset</Filter>
     </ClCompile>
-    <ClCompile Include="Source\Scene.cpp">
+    <ClCompile Include="Source\Scene\Scene.cpp">
       <Filter>Source Files\Assset</Filter>
     </ClCompile>
     <ClCompile Include="Source\RHI\RHI.cpp">
@@ -87,16 +87,19 @@
     <ClCompile Include="Source\Core\Task.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="Source\Core\Renderer.cpp">
+    <ClCompile Include="Source\Render\Renderer.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="Source\Core\ForwardRenderer.cpp">
+    <ClCompile Include="Source\Render\ForwardRenderer.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="Source\Core\RenderScene.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="Source\DX\DescriptorHeap.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="Source\Core\Primitive.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>
@@ -116,16 +119,16 @@
     <ClInclude Include="Source\UploadBuffer.h">
       <Filter>Source Files\DX</Filter>
     </ClInclude>
-    <ClInclude Include="Source\D3DUtil.h">
+    <ClInclude Include="Source\DX\D3DUtil.h">
       <Filter>Source Files\DX</Filter>
     </ClInclude>
-    <ClInclude Include="Source\d3dx12.h">
+    <ClInclude Include="Source\DX\d3dx12.h">
       <Filter>Source Files\DX</Filter>
     </ClInclude>
     <ClInclude Include="Source\Camera.h">
       <Filter>Source Files\DX</Filter>
     </ClInclude>
-    <ClInclude Include="Source\DDSTextureLoader.h">
+    <ClInclude Include="Source\DX\DDSTextureLoader.h">
       <Filter>Source Files\DX</Filter>
     </ClInclude>
     <ClInclude Include="Source\Material.h">
@@ -134,10 +137,10 @@
     <ClInclude Include="Source\Texture.h">
       <Filter>Source Files\Assset</Filter>
     </ClInclude>
-    <ClInclude Include="Source\Scene.h">
+    <ClInclude Include="Source\Scene\Scene.h">
       <Filter>Source Files\Assset</Filter>
     </ClInclude>
-    <ClInclude Include="Source\AssetsManager.h">
+    <ClInclude Include="Source\Scene\AssetsManager.h">
       <Filter>Source Files\Assset</Filter>
     </ClInclude>
     <ClInclude Include="Source\Mesh.h">
@@ -173,16 +176,19 @@
     <ClInclude Include="Source\Core\Task.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="Source\Core\Renderer.h">
+    <ClInclude Include="Source\Render\Renderer.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="Source\Core\ForwardRenderer.h">
+    <ClInclude Include="Source\Render\ForwardRenderer.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="Source\Core\RenderScene.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="Source\DX\DescriptorHeap.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Source\Core\Primitive.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>
