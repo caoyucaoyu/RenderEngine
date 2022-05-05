@@ -41,7 +41,6 @@ void Scene::LoadMapActors()
 	{
 		MeshActor AMeshActor(MapMeshItem);
 		SceneMeshActors.push_back(AMeshActor);
-		MeshActorNum++;
 	}
 }
 
@@ -64,12 +63,11 @@ void Scene::AddMeshActor(MeshActor NewActor)
 
 	SceneMeshActors.push_back(NewActor);
 
-	UpdateActorNum();
 }
 
-void Scene::UpdateActorNum()
+int Scene::GetMeshActorNum()
 {
-	MeshActorNum = SceneMeshActors.size();
+	return SceneMeshActors.size();
 }
 
 std::vector<MeshActor> Scene::GetSceneMeshActors()

@@ -19,7 +19,9 @@
     </ProjectConfiguration>
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="Source\Camera.cpp" />
+    <ClCompile Include="Source\DX\DX12GPUMeshBuffer.cpp" />
+    <ClCompile Include="Source\RHI\GPUMeshBuffer.cpp" />
+    <ClCompile Include="Source\Scene\Camera.cpp" />
     <ClCompile Include="Source\Core\Primitive.cpp" />
     <ClCompile Include="Source\Render\ForwardRenderer.cpp" />
     <ClCompile Include="Source\Core\Engine.cpp" />
@@ -41,6 +43,7 @@
     <ClCompile Include="Source\Scene\Scene.cpp" />
     <ClCompile Include="Source\DX\D3DUtil.cpp" />
     <ClCompile Include="Source\DX\FrameResource.cpp" />
+    <ClCompile Include="Source\Scene\StaticMesh.cpp" />
     <ClCompile Include="Source\stdafx.cpp">
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Create</PrecompiledHeader>
     </ClCompile>
@@ -48,7 +51,10 @@
     <ClCompile Include="Source\MathHelper.cpp" />
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="Source\Camera.h" />
+    <ClInclude Include="Source\CommonData.h" />
+    <ClInclude Include="Source\DX\DX12GPUMeshBuffer.h" />
+    <ClInclude Include="Source\RHI\GPUMeshBuffer.h" />
+    <ClInclude Include="Source\Scene\Camera.h" />
     <ClInclude Include="Source\Core\Primitive.h" />
     <ClInclude Include="Source\Render\ForwardRenderer.h" />
     <ClInclude Include="Source\Core\Engine.h" />
@@ -72,9 +78,9 @@
     <ClInclude Include="Source\DX\D3DUtil.h" />
     <ClInclude Include="Source\DX\d3dx12.h" />
     <ClInclude Include="Source\DX\FrameResource.h" />
+    <ClInclude Include="Source\Scene\StaticMesh.h" />
     <ClInclude Include="Source\stdafx.h" />
     <ClInclude Include="Source\MathHelper.h" />
-    <ClInclude Include="Source\Mesh.h" />
     <ClInclude Include="Source\Texture.h" />
     <ClInclude Include="Source\UploadBuffer.h" />
   </ItemGroup>
@@ -138,7 +144,7 @@
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
     <LinkIncremental>true</LinkIncremental>
-    <IncludePath>.\Source;.\Source\Core;.\Source\DX;.\Source\Render;.\Source\Scene;$(IncludePath)</IncludePath>
+    <IncludePath>.\Source;.\Source\Core;.\Source\DX;.\Source\Render;.\Source\Scene;.\Source\RHI;$(IncludePath)</IncludePath>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
     <LinkIncremental>false</LinkIncremental>

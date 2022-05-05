@@ -9,6 +9,7 @@
 
 using Microsoft::WRL::ComPtr;
 
+/*
 struct Float2
 {
 	Float2() {};
@@ -22,12 +23,12 @@ struct Float2
 };
 struct Float3
 {
-	Float3(){};
+	Float3() {};
 	Float3(float x, float y, float z)
 	{
-		X=x;
-		Y=y;
-		Z=z;
+		X = x;
+		Y = y;
+		Z = z;
 	}
 	float X;
 	float Y;
@@ -36,7 +37,7 @@ struct Float3
 struct Float4
 {
 	Float4() {};
-	Float4(float x, float y, float z,float w)
+	Float4(float x, float y, float z, float w)
 	{
 		X = x;
 		Y = y;
@@ -48,14 +49,7 @@ struct Float4
 	float Z;
 	float W;
 };
-
-struct Vertex
-{
-	DirectX::XMFLOAT3 Pos;
-	DirectX::XMFLOAT4 Color;
-	DirectX::XMFLOAT4 Normal;
-	DirectX::XMFLOAT2 UV;
-};
+*/
 
 
 ////读取文件，得到的数据项
@@ -69,6 +63,7 @@ struct Vertex
 //	std::vector<uint16_t> Indices;
 //};
 
+
 class D3DUtil
 {
 public:
@@ -77,6 +72,7 @@ public:
 		return (byteSize + 255) & ~255;//..
 	}
 
+	/*
 	static void ReadMeshFile(const std::string& filePath, std::vector<Vertex>& outVertexBuffer, std::vector<uint16_t>& outIndexBuffer)
 	{
 
@@ -146,7 +142,7 @@ public:
 		}
 
 		readFile.close();
-	}
+	}*/
 
 	//static void ReadMapFile(const std::string& filePath, std::vector<MapItem>& MeshData)
 	//{

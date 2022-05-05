@@ -19,7 +19,7 @@ public:
 
 		//DirectX::XMVECTORF32 g_XMIdentityR3 = { { { R.X, R.Y, R.Z, R.W } } };//auto x=DirectX::XMQuaternionIdentity();
 		//auto Quat = DirectX::XMMatrixRotationQuaternion(g_XMIdentityR3);//四元数得旋转矩阵
-
+		//
 		//XMStoreFloat4x4(&Location_Matrix, DirectX::XMMatrixTranslation(L.X, L.Y, L.Z));
 		//XMStoreFloat4x4(&Rotation_Matrix, Quat);
 		//XMStoreFloat4x4(&Scale3D_Matrix, DirectX::XMMatrixScaling(S.X, S.Y, S.Z));
@@ -42,17 +42,13 @@ public:
 		World_Matrix= Location_Matrix * Rotation_Matrix * Scale3D_Matrix;
 	}
 
+public:
+	std::string MeshName;
+	std::string MaterialName = "Default";
 	Float3 Location = Float3(0, 0, 0);
 	Float4 Rotation = Float4(0, 0, 0, 1);
 	Float3 Scale3D = Float3(1, 1, 1);
 
-	std::string MeshName;
-	std::string MaterialName = "Default";
-
-	//DirectX::XMFLOAT4X4 World_Matrix = MathHelper::Identity4x4();
-	//DirectX::XMFLOAT4X4 Location_Matrix = MathHelper::Identity4x4();
-	//DirectX::XMFLOAT4X4 Rotation_Matrix = MathHelper::Identity4x4();
-	//DirectX::XMFLOAT4X4 Scale3D_Matrix = MathHelper::Identity4x4();
 	glm::mat4 World_Matrix = MathHelper::GIdentity4x4();
 	glm::mat4 Location_Matrix = MathHelper::GIdentity4x4();
 	glm::mat4 Rotation_Matrix = MathHelper::GIdentity4x4();
@@ -64,14 +60,14 @@ class Scene
 public:
 	Scene();
 	~Scene();
-	
+
+	void Init();	
 	void Tick();
-	void Init();
 
 	void LoadMapActors();
 	void AddMeshActor(MeshActor NewActor);
 
-	void UpdateActorNum();
+	int GetMeshActorNum();
 
 	std::vector<MeshActor> GetSceneMeshActors();
 	Camera& GetMainCamera();
@@ -79,5 +75,4 @@ public:
 private:
 	Camera MainCamera;
 	std::vector<MeshActor> SceneMeshActors;
-	int MeshActorNum=0;
 };

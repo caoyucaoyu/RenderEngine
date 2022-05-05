@@ -19,7 +19,7 @@ public:
 	RenderScene* GetRenderScene();
 
 protected:
-	RenderScene* MRenderAssets;
+	RenderScene* MRenderScene;
 
 };
 

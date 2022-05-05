@@ -1,12 +1,12 @@
 #pragma once
 #include "DX\FrameResource.h"
-#include "Mesh.h"
+#include "GPUMeshBuffer.h"
 #include "Material.h"
 #include "Texture.h"
 #include "Camera.h"
 #include "Scene.h"
 #include <dxgi.h>
-
+#include "DX12GPUMeshBuffer.h"
 
 using Microsoft::WRL::ComPtr;
 using DirectX::XMConvertToRadians;
@@ -110,15 +110,15 @@ private:
 	int MaterialCount = 0;
 	int TextureCount = 0;
 
-	std::vector<MeshActor> DrawList;//////////////////////////////////////////////////////////
-	std::unordered_map<std::string, DXMesh> DXMeshs;
+	std::vector<MeshActor> DrawList;// RenderScene //////////////////////////////////////////////
 
+	std::unordered_map<std::string, DX12GPUMeshBuffer> DXMeshs;//////////////////
 	//‘›«“≤ª”√
 	std::unordered_map<std::string, DXTexture> DXTextures;
 	std::unordered_map<std::string, Material> DXMaterials;
 
 public:
-	DXMesh FindRMesh(std::string MeshName);
+	DX12GPUMeshBuffer FindRMesh(std::string MeshName);
 
 	bool CanFindRMesh(std::string MeshName);
 

@@ -30,6 +30,8 @@ public:
 	virtual void SetRenderTargetBegin() override;
 	virtual void SetRenderTargetEnd() override;
 
+	virtual void SetGraphicsPipeline() override;//...........................................................
+	virtual void IASetMeshBuffer(GPUMeshBuffer* GPUMeshbuffer) override;
 
 public:
 	void ExecuteCommandList();//将待执行的命令列表加入GPU的命令队列

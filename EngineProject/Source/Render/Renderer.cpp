@@ -13,5 +13,5 @@ Renderer::~Renderer()
 
 RenderScene* Renderer::GetRenderScene()
 {
-	return MRenderAssets;
+	return MRenderScene;
 }

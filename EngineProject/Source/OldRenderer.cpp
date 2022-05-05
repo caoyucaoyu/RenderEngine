@@ -58,8 +58,9 @@ bool OldRenderer::InitDraw()
 	//BuildGeometry();
 	BuildRenderData();
 	BuildTextures();
-	BuildFrameResource();
-	BuildDescriptorHeaps();
+	BuildFrameResource();//////////////////////////////////
+	BuildDescriptorHeaps();/////////////////////////////////
+
 	BuildConstantBuffers();
 
 	BuildRootSignature();
@@ -188,17 +189,20 @@ void OldRenderer::Draw()
 		if(!CanFindRMesh(DrawList[i].MeshName))
 			continue;
 
-		DXMesh DrawMesh= FindRMesh(DrawList[i].MeshName);
+		//绘制列表的 MeshName 找DXMesh
+		DX12GPUMeshBuffer DrawMesh= FindRMesh(DrawList[i].MeshName);
 
 		CommandList->SetPipelineState(PSOs[0].Get());
 
-		if (DrawMesh.Indices.size() == 2304)
-			CommandList->SetPipelineState(PSOs[1].Get());
+		if (DrawMesh.GetIndices().size() == 2304)
+			CommandList->SetPipelineState(PSOs[1].Get());//设置管线
 
+		//Set Mesh Buffer
 		CommandList->IASetVertexBuffers(0, 1, &DrawMesh.VertexBufferView());
 		CommandList->IASetIndexBuffer(&DrawMesh.IndexBufferView());
 		CommandList->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
 
+		//Set ResourceTable
 		CD3DX12_GPU_DESCRIPTOR_HANDLE ObjCbvHandle;
 		int ObjCbvIndex = CurrFrameResourceIndex * DrawCount + i;//
 		ObjCbvHandle = CD3DX12_GPU_DESCRIPTOR_HANDLE(CbvHeap->GetGPUDescriptorHandleForHeapStart());
@@ -220,7 +224,7 @@ void OldRenderer::Draw()
 		//PCbvAdress+= CbvSrvUavDescriptorSize* PasCbvIndex;
 		//CommandList->SetGraphicsRootConstantBufferView(1, PCbvAdress);
 
-		CommandList->DrawIndexedInstanced((UINT)DrawMesh.Indices.size(), 1, 0, 0, 0);//换为 同理
+		CommandList->DrawIndexedInstanced((UINT)DrawMesh.GetIndices().size(), 1, 0, 0, 0);//换为 同理
 	}
 
 
@@ -302,21 +306,21 @@ void OldRenderer::BuildRenderData()
 	DrawList.clear();
 	DXMeshs.clear();
 	DrawList = Engine::Get()->GetScene()->GetSceneMeshActors();
-	DrawCount = DrawList.size();
+	DrawCount = (int)DrawList.size();
 
 	for (auto DrawListActor : DrawList)
 	{
-		Mesh AMesh;
+		StaticMesh AMesh;
 
 		bool meshFinded = Engine::Get()->GetAssetsManager()->FindMesh(DrawListActor.MeshName, AMesh);
 
 		if (!meshFinded||DXMeshs.count(DrawListActor.MeshName))
 			continue;		
 
-		DXMesh ARenderMesh(AMesh);
+		//DX12GPUMeshBuffer ARenderMesh(AMesh);
 	
-		ARenderMesh.BuildDefaultBuffer(D3dDevice.Get(), CommandList.Get());
-		DXMeshs.insert(std::make_pair<>(DrawListActor.MeshName,ARenderMesh));//std::string,RenderMesh
+		//ARenderMesh.BuildDefaultBuffer(D3dDevice.Get(), CommandList.Get());
+		//DXMeshs.insert(std::make_pair<>(DrawListActor.MeshName,ARenderMesh));//std::string,RenderMesh
 	}
 }
 
@@ -349,8 +353,8 @@ void OldRenderer::BuildTextures()
 	//遍历绘制列表里Actor 对应材质 材质使用了贴图
 	//RenderScene 里的 Texture
 	//进行 CreateDDSTextureFromFile12
-	MaterialCount= DXMaterials.size();
-	TextureCount= DXTextures.size();
+	MaterialCount= (int)DXMaterials.size();
+	TextureCount= (int)DXTextures.size();
 }
 
 
@@ -360,7 +364,7 @@ void OldRenderer::BuildFrameResource()
 	for (int i = 0; i < OldFrameResourcesCount; i++)
 	{
 		FrameResources[i] = std::make_unique<FrameResource>(D3dDevice.Get());
-		FrameResources[i]->Init(1, DrawCount, MaterialCount);
+		FrameResources[i]->Resize(1, DrawCount);//, MaterialCount
 	}
 }
 
@@ -533,7 +537,7 @@ void OldRenderer::BuildPSO()
 
 
 
-DXMesh OldRenderer::FindRMesh(std::string MeshName)
+DX12GPUMeshBuffer OldRenderer::FindRMesh(std::string MeshName)
 {
 	return DXMeshs.at(MeshName);
 	//for(auto it : DrawMeshList)

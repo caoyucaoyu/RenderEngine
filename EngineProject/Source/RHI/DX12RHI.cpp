@@ -98,7 +98,7 @@ void DX12RHI::CreateFrameResource()
 	for (int i = 0; i < FrameResourcesCount; i++)
 	{
 		FrameResources[i] = std::make_unique<FrameResource>(D3dDevice.Get());
-		//FrameResources[i]->Init(1, DrawCount, MaterialCount);
+		//FrameResources[i]->Resize(1, 1);
 	}
 }
 
@@ -189,6 +189,19 @@ void DX12RHI::SetRenderTargetEnd()
 	//后台缓冲区的状态改成呈现状态
 	CommandList->ResourceBarrier(1, &CD3DX12_RESOURCE_BARRIER::Transition(SwapChainBuffers[CurrBackBuffer].Get(),
 		D3D12_RESOURCE_STATE_RENDER_TARGET, D3D12_RESOURCE_STATE_PRESENT));
+}
+
+void DX12RHI::SetGraphicsPipeline()
+{
+
+}
+
+void DX12RHI::IASetMeshBuffer(GPUMeshBuffer* GPUMeshbuffer)
+{
+	DX12GPUMeshBuffer* DX12Meshbuffer = static_cast<DX12GPUMeshBuffer*>(GPUMeshbuffer);
+	CommandList->IASetVertexBuffers(0, 1, &DX12Meshbuffer->VertexBufferView());
+	CommandList->IASetIndexBuffer(&DX12Meshbuffer->IndexBufferView());
+	CommandList->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
 }
 
 void DX12RHI::CreateDevice()

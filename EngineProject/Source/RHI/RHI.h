@@ -1,4 +1,5 @@
 #pragma once
+#include "GPUMeshBuffer.h"
 
 class RHI
 {
@@ -27,4 +28,7 @@ public:
 
 	virtual void SetRenderTargetBegin() = 0;
 	virtual void SetRenderTargetEnd() = 0;
+
+	virtual void SetGraphicsPipeline() = 0;
+	virtual void IASetMeshBuffer(GPUMeshBuffer* GPUMeshbuffer) = 0;
 };

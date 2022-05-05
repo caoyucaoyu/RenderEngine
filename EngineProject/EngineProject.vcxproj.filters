@@ -45,7 +45,7 @@
     <ClCompile Include="Source\DX\D3DUtil.cpp">
       <Filter>Source Files\DX</Filter>
     </ClCompile>
-    <ClCompile Include="Source\Camera.cpp">
+    <ClCompile Include="Source\Scene\Camera.cpp">
       <Filter>Source Files\DX</Filter>
     </ClCompile>
     <ClCompile Include="Source\DX\DDSTextureLoader.cpp">
@@ -102,6 +102,15 @@
     <ClCompile Include="Source\Core\Primitive.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="Source\DX\DX12GPUMeshBuffer.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="Source\RHI\GPUMeshBuffer.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="Source\Scene\StaticMesh.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Source\stdafx.h">
@@ -125,7 +134,7 @@
     <ClInclude Include="Source\DX\d3dx12.h">
       <Filter>Source Files\DX</Filter>
     </ClInclude>
-    <ClInclude Include="Source\Camera.h">
+    <ClInclude Include="Source\Scene\Camera.h">
       <Filter>Source Files\DX</Filter>
     </ClInclude>
     <ClInclude Include="Source\DX\DDSTextureLoader.h">
@@ -141,9 +150,6 @@
       <Filter>Source Files\Assset</Filter>
     </ClInclude>
     <ClInclude Include="Source\Scene\AssetsManager.h">
-      <Filter>Source Files\Assset</Filter>
-    </ClInclude>
-    <ClInclude Include="Source\Mesh.h">
       <Filter>Source Files\Assset</Filter>
     </ClInclude>
     <ClInclude Include="Source\RHI\RHI.h">
@@ -189,6 +195,18 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="Source\Core\Primitive.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Source\DX\DX12GPUMeshBuffer.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Source\RHI\GPUMeshBuffer.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Source\Scene\StaticMesh.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Source\CommonData.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

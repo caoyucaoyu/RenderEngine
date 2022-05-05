@@ -1,5 +1,4 @@
 #include "stdafx.h"
-#include "Mesh.h"
 #include "AssetsManager.h"
 
 AssetsManager::AssetsManager()
@@ -18,13 +17,12 @@ void AssetsManager::LoadMap(const std::string& filePath)
 
 	for (auto MeshItem : MeshReadData)
 	{	
-		if (MeshAssets.count(MeshItem.MeshName))
+		if (StaticMeshAssets.count(MeshItem.MeshName))
 			continue;
 	
-		Mesh AMesh(MeshItem);
-		MeshAssets.insert(std::make_pair(MeshItem.MeshName,AMesh));
+		StaticMesh AMesh(MeshItem);
+		StaticMeshAssets.insert(std::make_pair(MeshItem.MeshName,AMesh));
 	}
-
 }
 
 
@@ -51,22 +49,15 @@ const std::vector<MeshRead>& AssetsManager::GetMeshReadData()
 }
 
 
-
-
-
-
-
-
-
-bool AssetsManager::FindMesh(std::string Name, Mesh& NMesh)
+bool AssetsManager::FindMesh(std::string Name, StaticMesh& NMesh)
 {
-	if (!MeshAssets.count(Name))
+	if (!StaticMeshAssets.count(Name))
 	{
 		return false;
 	}
 	else
 	{
-		NMesh = MeshAssets.at(Name);
+		NMesh = StaticMeshAssets.at(Name);
 		return true;
 	}
 }
@@ -156,7 +147,7 @@ void AssetsManager::ReadMapFile(const std::string& filePath, std::vector<MeshRea
 
 			//ss << Vert.UV.x <<" "<< Vert.UV.y;
 			//Vert.Color = DirectX::XMFLOAT4(float(i + 1) / VCount * 2, float(i + 1) / VCount, 0, 1.0f);				
-			Vert.Color = DirectX::XMFLOAT4(Normal.X, Normal.Y, Normal.Z, 1.0f);
+			Vert.Color = glm::vec4(Normal.X, Normal.Y, Normal.Z, 1.0f);
 
 			Mesh.Vertices.push_back(Vert);
 		}
