@@ -1,9 +1,10 @@
 #pragma once
 #include "Thread.h"
+#include "Renderer.h"
 
 class Task;
-class Renderer;
 class ForwardRenderer;
+class RenderScene;
 class RenderThread :public Thread
 {
 public:
@@ -24,7 +25,7 @@ public:
 
 	int GetRenderNum() { return RenderNum; }
 	Renderer* GetRenderer() { return MRenderer; }
-
+	RenderScene* GetRenderScene() { return MRenderer->GetRenderScene(); }
 
 protected:
 	std::mutex Rendermtx;

@@ -111,6 +111,12 @@
     <ClCompile Include="Source\Scene\StaticMesh.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="Source\DX\DX12GPUCommonBuffer.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="Source\RHI\GPUCommonBuffer.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Source\stdafx.h">
@@ -125,7 +131,7 @@
     <ClInclude Include="Source\MathHelper.h">
       <Filter>Source Files\DX</Filter>
     </ClInclude>
-    <ClInclude Include="Source\UploadBuffer.h">
+    <ClInclude Include="Source\DX\DX12GPUCommonBuffer.h">
       <Filter>Source Files\DX</Filter>
     </ClInclude>
     <ClInclude Include="Source\DX\D3DUtil.h">
@@ -207,6 +213,9 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="Source\CommonData.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Source\RHI\GPUCommonBuffer.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

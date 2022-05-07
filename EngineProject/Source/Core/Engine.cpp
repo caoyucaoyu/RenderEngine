@@ -4,6 +4,7 @@
 #include "RenderThread.h"
 #include "RHI/RHI.h"
 
+
 Engine::Engine() : IsRunning(false)
 {
 
@@ -28,7 +29,7 @@ void Engine::Init()
 {
 	assert(MWindow == nullptr);
 	MWindow = Window::CreateAWindow(1280,720);
-	RenderThread::CreateRenderThread();//目前不是创建即运行
+	RenderThread::CreateRenderThread();
 
 	MScene = new Scene();
 	MTimer = new GameTimer();
@@ -67,11 +68,12 @@ void Engine::Run()
 	IsRunning=true;
 
 	MScene->LoadMapActors();
+	MScene->PresentCurrentMap();
 
 	//OldRun
 	//MOldRender->InitDraw();
 
-	RenderThread::Get()->Start();
+	//RenderThread::Get()->Start();
 
 #if PLATFORM_WINDOWS
 
@@ -95,7 +97,7 @@ void Engine::Tick()
 {
 	MTimer->Tick();
 	MScene->Tick();
-	MWindow->GetInput()->Update();
+	MWindow->GetInput()->Update(); //Input Update Moved to :Window Run 
 
 	RenderThread* RenderThread = RenderThread::Get();
 	RenderThread->TriggerRender();//Task give end

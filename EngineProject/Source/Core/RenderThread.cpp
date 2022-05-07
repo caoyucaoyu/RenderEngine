@@ -6,7 +6,6 @@
 #include "RenderScene.h"
 #include "Task.h"
 
-
 RenderThread* RenderThread::MRenderThread = nullptr;
 
 RenderThread::RenderThread()
@@ -24,7 +23,7 @@ void RenderThread::CreateRenderThread()
 	if (MRenderThread == nullptr)
 	{
 		MRenderThread = new RenderThread;
-		//MRenderThread->Start();
+		MRenderThread->Start();
 	}
 }
 
@@ -83,7 +82,6 @@ void RenderThread::Run()
 	}
 
 	MRenderer->Update();
-
 	DoTasks();
 	RenderNum--;
 
@@ -118,7 +116,7 @@ void RenderThread::AddTask(Task* RenderTask)
 
 void RenderThread::DoTasks()
 {
-	Task* TaskE;
+	Task* TaskE = nullptr;
 	while (!MRenderFrame[CurrentFrameIndex].TaskQueue.empty())
 	{
 		TaskE = MRenderFrame[CurrentFrameIndex].TaskQueue.front();

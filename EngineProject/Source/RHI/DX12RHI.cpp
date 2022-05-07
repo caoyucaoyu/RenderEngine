@@ -2,6 +2,8 @@
 #include "Engine.h"
 #include "DX12RHI.h"
 #include "DX\DescriptorHeap.h"
+#include "RenderScene.h"
+#include "DX12GPUCommonBuffer.h"
 
 using Microsoft::WRL::ComPtr;
 
@@ -39,11 +41,13 @@ void DX12RHI::Init()
 	CreateFrameResource();
 	CreatCbvSrvUavHeap();
 
+	//std::cout<<"DX12 Init Success\n"<<std::endl;
 	OutputDebugStringA("DX12 Init Success\n");
 }
 
 void DX12RHI::ResizeWindow(UINT32 Width, UINT32 Height)
 {
+	//std::cout << "DX12 Resize Window\n" << std::endl;
 	OutputDebugStringA("DX12 Resize Window\n");
 	assert(D3dDevice);
 	assert(SwapChain);
@@ -98,7 +102,14 @@ void DX12RHI::CreateFrameResource()
 	for (int i = 0; i < FrameResourcesCount; i++)
 	{
 		FrameResources[i] = std::make_unique<FrameResource>(D3dDevice.Get());
-		//FrameResources[i]->Resize(1, 1);
+	}
+}
+
+void DX12RHI::RebuildFrameResource(RenderScene* MRenderScene)
+{
+	for (int i = 0; i < FrameResourcesCount; i++)
+	{
+		FrameResources[i]->Resize(1, MRenderScene->GetPrimitivesCount());
 	}
 }
 
@@ -119,6 +130,16 @@ void DX12RHI::UpdateFrameResource()
 	}
 }
 
+int DX12RHI::GetCurFrameResourceIdx()
+{
+	return CurrFrameResourceIndex;
+}
+
+int DX12RHI::GetFrameResourceCount()
+{
+	return FrameResourcesCount;
+}
+
 void DX12RHI::FlushCommandQueue()
 {
 	CurrentFence++;
@@ -135,9 +156,9 @@ void DX12RHI::FlushCommandQueue()
 	}
 }
 
-void DX12RHI::DrawInstanced(UINT DrawIndexCount)
+void DX12RHI::DrawIndexedInstanced(UINT DrawIndexCount)
 {
-	CommandList->DrawInstanced(DrawIndexCount, 1, 0, 0);
+	CommandList->DrawIndexedInstanced(DrawIndexCount, 1, 0, 0, 0);
 }
 
 
@@ -177,7 +198,7 @@ void DX12RHI::SetRenderTargetBegin()
 	CommandList->RSSetScissorRects(1, &ScissorRect);
 
 	//清除后台缓冲区和深度缓冲区，并赋值
-	CommandList->ClearRenderTargetView(CurrentBackBufferView(), DirectX::Colors::LightPink, 0, nullptr);
+	CommandList->ClearRenderTargetView(CurrentBackBufferView(), DirectX::Colors::Black, 0, nullptr);
 	CommandList->ClearDepthStencilView(DepthStencilView(), D3D12_CLEAR_FLAG_DEPTH | D3D12_CLEAR_FLAG_STENCIL, 1.0f, 0, 0, nullptr);
 
 	//指定将要渲染的缓冲区，指定RTV和DSV
@@ -193,7 +214,16 @@ void DX12RHI::SetRenderTargetEnd()
 
 void DX12RHI::SetGraphicsPipeline()
 {
+	CommandList->SetGraphicsRootSignature(RootSignature.Get());
+	CommandList->SetPipelineState(PSOs[1].Get());
+}
 
+void DX12RHI::SetRenderResourceTable(int Nu, UINT32 HeapOffset)
+{
+	auto CbvHandle = CD3DX12_GPU_DESCRIPTOR_HANDLE(CbvSrvUavHeap->GetCurrentHeap()->GetGPUDescriptorHandleForHeapStart());
+	CbvHandle.Offset(HeapOffset, CbvSrvUavDescriptorSize);
+
+	CommandList->SetGraphicsRootDescriptorTable(Nu, CbvHandle);
 }
 
 void DX12RHI::IASetMeshBuffer(GPUMeshBuffer* GPUMeshbuffer)
@@ -202,6 +232,65 @@ void DX12RHI::IASetMeshBuffer(GPUMeshBuffer* GPUMeshbuffer)
 	CommandList->IASetVertexBuffers(0, 1, &DX12Meshbuffer->VertexBufferView());
 	CommandList->IASetIndexBuffer(&DX12Meshbuffer->IndexBufferView());
 	CommandList->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
+}
+
+GPUMeshBuffer* DX12RHI::CreateMeshBuffer()
+{
+	return new DX12GPUMeshBuffer();
+}
+
+void DX12RHI::UpdateMeshBuffer(GPUMeshBuffer* GpuMeshBuffer)
+{
+	ResetCommandList(CommandListAllocator);
+
+	DX12GPUMeshBuffer* DX12GpuMeshBuffer = static_cast<DX12GPUMeshBuffer*>(GpuMeshBuffer);
+	DX12GpuMeshBuffer->BuildDefaultBuffer(D3dDevice.Get(),CommandList.Get());
+	
+	ExecuteCommandList();
+	FlushCommandQueue();
+}
+
+GPUCommonBuffer* DX12RHI::CreateCommonBuffer(UINT ElementCount, bool IsConstantBuffer, UINT ElementByteSize)
+{
+	DX12GPUCommonBuffer* CommonBuffer = new DX12GPUCommonBuffer(D3dDevice.Get(), ElementCount, IsConstantBuffer, ElementByteSize);
+
+	auto HandleAndOffset = CbvSrvUavHeap->Allocate(ElementCount);
+
+	CommonBuffer->SetBufferHandle(HandleAndOffset.Handle);
+	CommonBuffer->SetHandleOffset(HandleAndOffset.Offset);
+
+	for (size_t index = 0; index < ElementCount; index++)
+	{
+		//Create View
+		D3D12_GPU_VIRTUAL_ADDRESS CBAddress = CommonBuffer->Resource()->GetGPUVirtualAddress();
+		CBAddress+=index* CommonBuffer->GetElementByteSize();
+
+		D3D12_CONSTANT_BUFFER_VIEW_DESC CbvDesc;
+		CbvDesc.BufferLocation = CBAddress;
+		CbvDesc.SizeInBytes = CommonBuffer->GetElementByteSize();
+		D3dDevice->CreateConstantBufferView(&CbvDesc, CommonBuffer->GetHandle());
+	}
+
+	return CommonBuffer;
+}
+
+void DX12RHI::UpdateCommonBuffer(GPUCommonBuffer* GpuCommonBuffer, std::shared_ptr<void> Data,int elementIndex)
+{
+	GpuCommonBuffer->CopyData(elementIndex,Data);//??? 0?
+}
+
+
+void DX12RHI::AddCommonBuffer(int FrameSourceIndex,std::string CommonBufferTag, GPUCommonBuffer* GpuCommonBuffer)
+{
+	FrameResources[FrameSourceIndex]->CommonBuffers.push_back(GpuCommonBuffer);
+}
+
+void DX12RHI::XXX()
+{
+	BuildRootSignature();
+	BuildShadersAndInputLayout();
+	BuildPSO();
+
 }
 
 void DX12RHI::CreateDevice()
@@ -352,7 +441,7 @@ void DX12RHI::CreateViewPortAndScissorRect()
 
 void DX12RHI::CreatCbvSrvUavHeap()
 {
-	CbvSrvUavHeap = std::make_unique<DescriptorHeap>(D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV, D3dDevice);
+	CbvSrvUavHeap = std::make_unique<DescriptorHeap>(D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV, D3dDevice ,2048);
 }
 
 D3D12_CPU_DESCRIPTOR_HANDLE DX12RHI::CurrentBackBufferView() const
@@ -366,4 +455,85 @@ D3D12_CPU_DESCRIPTOR_HANDLE DX12RHI::CurrentBackBufferView() const
 D3D12_CPU_DESCRIPTOR_HANDLE DX12RHI::DepthStencilView() const
 {
 	return DsvHeap->GetCurrentHeap()->GetCPUDescriptorHandleForHeapStart();
+}
+
+void DX12RHI::BuildShadersAndInputLayout()
+{
+	MvsByteCode[0] = D3DUtil::CompileShader(L"Shaders\\color.hlsl", nullptr, "VS", "vs_5_0");
+	MpsByteCode[0] = D3DUtil::CompileShader(L"Shaders\\color.hlsl", nullptr, "PS", "ps_5_0");
+
+	MvsByteCode[1] = D3DUtil::CompileShader(L"Shaders\\colorOffset.hlsl", nullptr, "VS", "vs_5_0");
+	MpsByteCode[1] = D3DUtil::CompileShader(L"Shaders\\colorOffset.hlsl", nullptr, "PS", "ps_5_0");
+
+	InputLayout =
+	{
+		{ "POSITION", 0, DXGI_FORMAT_R32G32B32_FLOAT, 0, 0, D3D12_INPUT_CLASSIFICATION_PER_VERTEX_DATA, 0 }
+		,{ "NORMAL", 0, DXGI_FORMAT_R32G32B32A32_FLOAT, 0, 12, D3D12_INPUT_CLASSIFICATION_PER_VERTEX_DATA, 0 }
+		,{ "TEXCOORD", 0, DXGI_FORMAT_R32G32_FLOAT, 0, 28, D3D12_INPUT_CLASSIFICATION_PER_VERTEX_DATA, 0 }
+
+	};
+}
+
+void DX12RHI::BuildPSO()
+{
+	D3D12_GRAPHICS_PIPELINE_STATE_DESC PsoDesc;
+	ZeroMemory(&PsoDesc, sizeof(D3D12_GRAPHICS_PIPELINE_STATE_DESC));
+	PsoDesc.InputLayout = { InputLayout.data(), (UINT)InputLayout.size() };
+	PsoDesc.pRootSignature = RootSignature.Get();
+	PsoDesc.VS = { reinterpret_cast<BYTE*>(MvsByteCode[0]->GetBufferPointer()),MvsByteCode[0]->GetBufferSize() };
+	PsoDesc.PS = { reinterpret_cast<BYTE*>(MpsByteCode[0]->GetBufferPointer()),MpsByteCode[0]->GetBufferSize() };
+
+	PsoDesc.RasterizerState = CD3DX12_RASTERIZER_DESC(D3D12_DEFAULT);
+	//PsoDesc.RasterizerState.FillMode = D3D12_FILL_MODE_WIREFRAME;  //线框模式
+
+	PsoDesc.RasterizerState.FrontCounterClockwise = TRUE;
+	PsoDesc.BlendState = CD3DX12_BLEND_DESC(D3D12_DEFAULT);
+	PsoDesc.DepthStencilState = CD3DX12_DEPTH_STENCIL_DESC(D3D12_DEFAULT);
+	PsoDesc.SampleMask = UINT_MAX;
+	PsoDesc.PrimitiveTopologyType = D3D12_PRIMITIVE_TOPOLOGY_TYPE_TRIANGLE;
+	PsoDesc.NumRenderTargets = 1;
+	PsoDesc.RTVFormats[0] = DXGI_FORMAT_R8G8B8A8_UNORM;//DXGI_FORMAT mBackBufferFormat
+	PsoDesc.SampleDesc.Count = 1;//m4xMsaaState ? 4 : 1;
+	PsoDesc.SampleDesc.Quality = 0;//m4xMsaaState ? (m4xMsaaQuality - 1) : 0;
+	PsoDesc.DSVFormat = DXGI_FORMAT_D24_UNORM_S8_UINT;//DXGI_FORMAT mDepthStencilFormat
+
+	auto Pso = ComPtr<ID3D12PipelineState>();
+	PSOs.push_back(Pso);
+	D3dDevice->CreateGraphicsPipelineState(&PsoDesc, IID_PPV_ARGS(&PSOs[0]));
+
+	//PsoDesc.RasterizerState.FillMode = D3D12_FILL_MODE_WIREFRAME;  //线框模式
+	PsoDesc.VS = { reinterpret_cast<BYTE*>(MvsByteCode[1]->GetBufferPointer()),MvsByteCode[1]->GetBufferSize() };
+	PsoDesc.PS = { reinterpret_cast<BYTE*>(MpsByteCode[1]->GetBufferPointer()),MpsByteCode[1]->GetBufferSize() };
+
+	PSOs.push_back(Pso);
+	D3dDevice->CreateGraphicsPipelineState(&PsoDesc, IID_PPV_ARGS(&PSOs[1]));
+}
+void DX12RHI::BuildRootSignature()
+{
+	//RootSignature
+	CD3DX12_ROOT_PARAMETER SlotRootParameter[3];//根参数
+
+	CD3DX12_DESCRIPTOR_RANGE CbvTable0;
+	CbvTable0.Init(D3D12_DESCRIPTOR_RANGE_TYPE_CBV, 1, 0);
+	CD3DX12_DESCRIPTOR_RANGE CbvTable1;
+	CbvTable1.Init(D3D12_DESCRIPTOR_RANGE_TYPE_CBV, 1, 1);
+
+	SlotRootParameter[0].InitAsDescriptorTable(1, &CbvTable0);
+	SlotRootParameter[1].InitAsDescriptorTable(1, &CbvTable1);
+
+	SlotRootParameter[2].InitAsConstantBufferView(2);
+	//SlotRootParameter[1].InitAsConstantBufferView(1);
+
+
+	CD3DX12_ROOT_SIGNATURE_DESC RootSigDesc(
+		3,//3个根参数
+		SlotRootParameter,//根参数指针
+		0, nullptr, D3D12_ROOT_SIGNATURE_FLAG_ALLOW_INPUT_ASSEMBLER_INPUT_LAYOUT);
+
+	ComPtr<ID3DBlob> SerializedRootSig = nullptr;
+	ComPtr<ID3DBlob> ErrorBlob = nullptr;
+	D3D12SerializeRootSignature(&RootSigDesc, D3D_ROOT_SIGNATURE_VERSION_1, SerializedRootSig.GetAddressOf(), ErrorBlob.GetAddressOf());
+
+	D3dDevice->CreateRootSignature(0, SerializedRootSig->GetBufferPointer(), SerializedRootSig->GetBufferSize(), IID_PPV_ARGS(&RootSignature));
+
 }

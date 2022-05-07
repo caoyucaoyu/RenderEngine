@@ -29,8 +29,8 @@ struct VertexOut
 VertexOut VS(VertexIn vin)
 {
 	VertexOut vout;
-	//float4x4 gWorld = mul(mul(gScale, gRotation), gLocation);
-	float4x4 gWorld = mul(gLocation, mul(gRotation,gScale));
+
+	float4x4 gWorld = mul(mul(gScale, gRotation), gLocation);
 
 	float3 PosW = mul(float4(vin.PosL, 1.0f), gWorld).xyz;
 

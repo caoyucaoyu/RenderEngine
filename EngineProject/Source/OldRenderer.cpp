@@ -61,8 +61,9 @@ bool OldRenderer::InitDraw()
 	BuildFrameResource();//////////////////////////////////
 	BuildDescriptorHeaps();/////////////////////////////////
 
-	BuildConstantBuffers();
+	BuildConstantBuffers();////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
+	//Copy Use
 	BuildRootSignature();
 	BuildShadersAndInputLayout();
 	BuildPSO();
@@ -105,9 +106,10 @@ void OldRenderer::RendererUpdate(const GameTimer* Gt)
 
 	PassConstants PasConstant;
 	PasConstant.Time = Gt->TotalTime();
+
 	PasConstant.ViewProj_M = glm::transpose(VP_Matrix);
 
-	CurrFrameResource->PassCB->CopyData(0, PasConstant);//数据拷贝至GPU缓存
+	//CurrFrameResource->PassCB->CopyData(0, PasConstant);//数据拷贝至GPU缓存
 
 
 	//物体位置
@@ -121,7 +123,7 @@ void OldRenderer::RendererUpdate(const GameTimer* Gt)
 		ObjConstant.Location_M= glm::transpose(L);
 		ObjConstant.Rotation_M= glm::transpose(R);
 		ObjConstant.Scale3D_M= glm::transpose(S);
-		CurrFrameResource->ObjectCB->CopyData(i, ObjConstant);
+		//CurrFrameResource->ObjectCB->CopyData(i, ObjConstant);
 	}
 
 	//for (int i = 0; i < DrawCount; i++)
@@ -164,8 +166,7 @@ void OldRenderer::Draw()
 
 
 
-
-
+	//SetGraphicsPipeline---------------------------------------------------
 	CommandList->SetGraphicsRootSignature(RootSignature.Get());
 
 
@@ -192,6 +193,7 @@ void OldRenderer::Draw()
 		//绘制列表的 MeshName 找DXMesh
 		DX12GPUMeshBuffer DrawMesh= FindRMesh(DrawList[i].MeshName);
 
+		//SetGraphicsPipeline---------------------------------------------------
 		CommandList->SetPipelineState(PSOs[0].Get());
 
 		if (DrawMesh.GetIndices().size() == 2304)
@@ -209,6 +211,7 @@ void OldRenderer::Draw()
 		ObjCbvHandle.Offset(ObjCbvIndex, CbvSrvUavDescriptorSize);
 
 		CommandList->SetGraphicsRootDescriptorTable(0, ObjCbvHandle);
+
 
 		//CD3DX12_GPU_DESCRIPTOR_HANDLE MatCbvHandle;
 		//int MatCbvIndex = CurrFrameResourceIndex * DrawCount + i;//
@@ -305,7 +308,7 @@ void OldRenderer::BuildRenderData()
 {
 	DrawList.clear();
 	DXMeshs.clear();
-	DrawList = Engine::Get()->GetScene()->GetSceneMeshActors();
+	//DrawList = Engine::Get()->GetScene()->GetSceneMeshActors();
 	DrawCount = (int)DrawList.size();
 
 	for (auto DrawListActor : DrawList)
@@ -391,46 +394,57 @@ void OldRenderer::BuildConstantBuffers()
 	UINT PassCBByteSize = D3DUtil::CalcConstantBufferByteSize(sizeof(PassConstants));
 	UINT MatCBByteSize = D3DUtil::CalcConstantBufferByteSize(sizeof(MaterialConstants));
 
-	int HeapIndexN = 0;
-	//前三组
-	//ObjCBV
-	for (int FrameIndex = 0; FrameIndex < OldFrameResourcesCount; FrameIndex++)
-	{
-		auto CurObjectCB = FrameResources[FrameIndex]->ObjectCB->Resource();
-		for (int i = 0; i < DrawCount; i++)
-		{
-			D3D12_GPU_VIRTUAL_ADDRESS ObjCBAddress = CurObjectCB->GetGPUVirtualAddress();
+	//int HeapIndexN = 0;
+	////前三组
+	////ObjCBV
+	//for (int FrameIndex = 0; FrameIndex < OldFrameResourcesCount; FrameIndex++)
+	//{
+	//	auto CurObjectCB = FrameResources[FrameIndex]->ObjectCB->Resource();
+	//	for (int i = 0; i < DrawCount; i++)
+	//	{
+	//		D3D12_GPU_VIRTUAL_ADDRESS ObjCBAddress = CurObjectCB->GetGPUVirtualAddress();
 
-			ObjCBAddress += i * ObjCBByteSize;//缓冲区 第i个常量缓冲区偏移量 得到起始位置
+	//		ObjCBAddress += i * ObjCBByteSize;//缓冲区 第i个常量缓冲区偏移量 得到起始位置
 
-			int HeapIndex = FrameIndex * DrawCount + i;//CBV堆 当前帧当前物体对应CB的序号
-			HeapIndexN++;
+	//		int HeapIndex = FrameIndex * DrawCount + i;//CBV堆 当前帧当前物体对应CB的序号
+	//		HeapIndexN++;
 
-			auto Handle = CD3DX12_CPU_DESCRIPTOR_HANDLE(CbvHeap->GetCPUDescriptorHandleForHeapStart());//获得CBV堆首地址
-			Handle.Offset(HeapIndex, CbvSrvUavDescriptorSize);
+	//		auto Handle = CD3DX12_CPU_DESCRIPTOR_HANDLE(CbvHeap->GetCPUDescriptorHandleForHeapStart());//获得CBV堆首地址
+	//		Handle.Offset(HeapIndex, CbvSrvUavDescriptorSize);
 
-			D3D12_CONSTANT_BUFFER_VIEW_DESC CbvDesc;
-			CbvDesc.BufferLocation = ObjCBAddress;
-			CbvDesc.SizeInBytes = ObjCBByteSize;
-			D3dDevice->CreateConstantBufferView(&CbvDesc, Handle);
-		}
-	}
+	//		D3D12_CONSTANT_BUFFER_VIEW_DESC CbvDesc;
+	//		CbvDesc.BufferLocation = ObjCBAddress;
+	//		CbvDesc.SizeInBytes = ObjCBByteSize;
+	//		D3dDevice->CreateConstantBufferView(&CbvDesc, Handle);
+	//	}
+	//}
 
-	//3帧3个
-	for (int FrameIndex = 0; FrameIndex < OldFrameResourcesCount; FrameIndex++)
-	{
-		D3D12_GPU_VIRTUAL_ADDRESS PassCBAddress = FrameResources[FrameIndex]->PassCB->Resource()->GetGPUVirtualAddress();
-		int HeapIndex = DrawCount * OldFrameResourcesCount + FrameIndex;
-		HeapIndexN++;
+	////3帧3个
+	//for (int FrameIndex = 0; FrameIndex < OldFrameResourcesCount; FrameIndex++)
+	//{
+	//	D3D12_GPU_VIRTUAL_ADDRESS PassCBAddress = FrameResources[FrameIndex]->PassCB->Resource()->GetGPUVirtualAddress();
+	//	int HeapIndex = DrawCount * OldFrameResourcesCount + FrameIndex;
+	//	HeapIndexN++;
 
-		auto Handle = CD3DX12_CPU_DESCRIPTOR_HANDLE(CbvHeap->GetCPUDescriptorHandleForHeapStart());//获得CBV堆首地址
-		Handle.Offset(HeapIndex, CbvSrvUavDescriptorSize);
+	//	auto Handle = CD3DX12_CPU_DESCRIPTOR_HANDLE(CbvHeap->GetCPUDescriptorHandleForHeapStart());//获得CBV堆首地址
+	//	Handle.Offset(HeapIndex, CbvSrvUavDescriptorSize);
 
-		D3D12_CONSTANT_BUFFER_VIEW_DESC CbvDesc;
-		CbvDesc.BufferLocation = PassCBAddress;
-		CbvDesc.SizeInBytes = PassCBByteSize;  // D3DUtil::CalcConstantBufferByteSize(sizeof(ObjectConstants));
-		D3dDevice->CreateConstantBufferView(&CbvDesc, Handle);
-	}
+	//	D3D12_CONSTANT_BUFFER_VIEW_DESC CbvDesc;
+	//	CbvDesc.BufferLocation = PassCBAddress;
+	//	CbvDesc.SizeInBytes = PassCBByteSize;  // D3DUtil::CalcConstantBufferByteSize(sizeof(ObjectConstants));
+	//	D3dDevice->CreateConstantBufferView(&CbvDesc, Handle);
+	//}
+
+
+
+
+
+
+
+
+
+
+
 
 	//for (int FrameIndex = 0; FrameIndex < FrameResourcesCount; FrameIndex++)
 	//{

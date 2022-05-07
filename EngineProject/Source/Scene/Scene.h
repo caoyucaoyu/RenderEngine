@@ -1,9 +1,10 @@
 #pragma once
+#include "Camera.h"
 
 struct MeshActor
 {
 public:
-	MeshActor(){};
+	//MeshActor(){};
 	MeshActor(MeshRead MapMeshItem)
 	{
 		MeshName = MapMeshItem.MeshName;
@@ -65,14 +66,17 @@ public:
 	void Tick();
 
 	void LoadMapActors();
-	void AddMeshActor(MeshActor NewActor);
+	void PresentCurrentMap();
+
+	void AddMeshActor(MeshActor* NewActor);
 
 	int GetMeshActorNum();
 
-	std::vector<MeshActor> GetSceneMeshActors();
+	std::vector<MeshActor*> GetSceneMeshActors();
 	Camera& GetMainCamera();
 
 private:
 	Camera MainCamera;
-	std::vector<MeshActor> SceneMeshActors;
+	std::vector<MeshActor*> SceneMeshActors;
+	void UpdateCameraBuffer();
 };

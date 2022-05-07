@@ -18,4 +18,6 @@ public:
 
 private:
 	void HDRPass();
-;};
+
+	int CurrentRenderIndex = 0;
+};

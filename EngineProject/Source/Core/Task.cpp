@@ -1,7 +1,7 @@
 #include "stdafx.h"
 #include "Task.h"
 
-Task::Task(const std::function<void()>& Func)
+Task::Task(const std::function<void()>& Func) : ExecuteFunc(Func)
 {
 
 }

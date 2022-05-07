@@ -19,7 +19,9 @@
     </ProjectConfiguration>
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="Source\DX\DX12GPUCommonBuffer.cpp" />
     <ClCompile Include="Source\DX\DX12GPUMeshBuffer.cpp" />
+    <ClCompile Include="Source\RHI\GPUCommonBuffer.cpp" />
     <ClCompile Include="Source\RHI\GPUMeshBuffer.cpp" />
     <ClCompile Include="Source\Scene\Camera.cpp" />
     <ClCompile Include="Source\Core\Primitive.cpp" />
@@ -53,6 +55,7 @@
   <ItemGroup>
     <ClInclude Include="Source\CommonData.h" />
     <ClInclude Include="Source\DX\DX12GPUMeshBuffer.h" />
+    <ClInclude Include="Source\RHI\GPUCommonBuffer.h" />
     <ClInclude Include="Source\RHI\GPUMeshBuffer.h" />
     <ClInclude Include="Source\Scene\Camera.h" />
     <ClInclude Include="Source\Core\Primitive.h" />
@@ -82,7 +85,7 @@
     <ClInclude Include="Source\stdafx.h" />
     <ClInclude Include="Source\MathHelper.h" />
     <ClInclude Include="Source\Texture.h" />
-    <ClInclude Include="Source\UploadBuffer.h" />
+    <ClInclude Include="Source\DX\DX12GPUCommonBuffer.h" />
   </ItemGroup>
   <PropertyGroup Label="Globals">
     <VCProjectVersion>16.0</VCProjectVersion>

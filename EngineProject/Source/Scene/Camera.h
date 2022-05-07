@@ -44,7 +44,7 @@ private:
 	glm::mat4 View;
 	glm::mat4 Proj;
 
-	float Speed=1;
+	float Speed=20;
 
 	glm::vec3 Camera::Transform(glm::mat4x4 m, glm::vec3 v);
 };

@@ -162,6 +162,7 @@ void WindowWin32::OnResize()
 
 int WindowWin32::Run()
 {
+	//MInput->Update();
 	bool Quit=false;	
 	MSG msg = {};
 	while (PeekMessage(&msg, NULL, 0, 0, PM_REMOVE))

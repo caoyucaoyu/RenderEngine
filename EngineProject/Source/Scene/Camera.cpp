@@ -1,7 +1,8 @@
 #include "stdafx.h"
 #include "Camera.h"
 #include "Input.h"
-using namespace DirectX;
+
+//using namespace DirectX;
 
 Camera::Camera()
 {
