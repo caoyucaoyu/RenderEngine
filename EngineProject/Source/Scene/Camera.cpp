@@ -16,10 +16,11 @@ Camera::~Camera()
 
 void Camera::Update()
 {	
+
 	static float Lastx = 0;
 	static float Lasty = 0;
 
-	if (Input::GetKeyState(Key::RM)==KeyState::BtnHold)
+	if (Input::GetKeyState(Key::RM) == KeyState::BtnHold|| Input::GetKeyState(Key::RM) == KeyState::BtnDown)
 	{
 		float dx = glm::radians(0.15f * static_cast<float>(Input::GetMousePose().x - Lastx));
 		float dy = glm::radians(0.15f * static_cast<float>(Input::GetMousePose().y - Lasty));
@@ -27,20 +28,21 @@ void Camera::Update()
 		RotateZ(dx);
 	}
 
-	Lastx= Input::GetMousePose().x;
-	Lasty= Input::GetMousePose().y;
+	Lastx = Input::GetMousePose().x;
+	Lasty = Input::GetMousePose().y;
 
 
-	if(Input::GetKeyState(Key::W)==KeyState::BtnHold)
+
+	if (Input::GetKeyState(Key::W) == KeyState::BtnHold || Input::GetKeyState(Key::W) == KeyState::BtnDown)
 		Walk(Speed);
 
-	if (Input::GetKeyState(Key::S) == KeyState::BtnHold)
+	if (Input::GetKeyState(Key::S) == KeyState::BtnHold || Input::GetKeyState(Key::S) == KeyState::BtnDown)
 		Walk(-Speed);
 
-	if (Input::GetKeyState(Key::A) == KeyState::BtnHold)
+	if (Input::GetKeyState(Key::A) == KeyState::BtnHold || Input::GetKeyState(Key::A) == KeyState::BtnDown)
 		Strafe(-Speed);
 
-	if (Input::GetKeyState(Key::D) == KeyState::BtnHold)
+	if (Input::GetKeyState(Key::D) == KeyState::BtnHold || Input::GetKeyState(Key::D) == KeyState::BtnDown)
 		Strafe(Speed);
 
 

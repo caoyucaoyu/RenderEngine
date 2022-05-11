@@ -87,10 +87,6 @@ void RenderScene::AddPrimitive(MeshActor* AMeshActor)
 		Trans->Rotation_M = glm::transpose(R);
 		Trans->Scale3D_M = glm::transpose(S);
 
-		//Trans->Location_M = glm::transpose(AMeshActor->Location_Matrix);
-		//Trans->Rotation_M = glm::transpose(AMeshActor->Rotation_Matrix);
-		//Trans->Scale3D_M = glm::transpose(AMeshActor->Scale3D_Matrix);
-
 		std::shared_ptr<void> TransData = Trans;
 		RHI::Get()->UpdateCommonBuffer(GpuCommonBuffer, Trans, 0);
 		RHI::Get()->AddCommonBuffer(i, AMeshActor->MeshName, GpuCommonBuffer);

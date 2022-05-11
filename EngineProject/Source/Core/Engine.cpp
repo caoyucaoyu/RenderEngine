@@ -96,8 +96,9 @@ void Engine::Run()
 void Engine::Tick()
 {
 	MTimer->Tick();
-	MScene->Tick();
 	MWindow->GetInput()->Update(); //Input Update Moved to :Window Run 
+	MScene->Tick();
+
 
 	RenderThread* RenderThread = RenderThread::Get();
 	RenderThread->TriggerRender();//Task give end

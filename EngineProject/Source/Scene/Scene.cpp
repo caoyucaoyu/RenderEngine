@@ -109,7 +109,7 @@ Camera& Scene::GetMainCamera()
 
 void Scene::UpdateCameraBuffer()
 {
-	glm::mat4 VP_Matrix =  MainCamera.GetProj()* MainCamera.GetView();
+	glm::mat4 VP_Matrix = MainCamera.GetProj() * MainCamera.GetView();
 
 	PassConstants NewPasConstants;
 	NewPasConstants.Time = Engine::Get()->GetTimer()->TotalTime();
