@@ -15,6 +15,8 @@
 #include <glm/ext/scalar_constants.hpp> // glm::pi
 
 
+
+
 class MathHelper
 {
 public:
@@ -36,5 +38,26 @@ public:
 		return x<low? low:(x>high ? high:x);
 	}
 
+	static glm::vec3 SphericalToCartesian(float radius, float theta, float phi)
+	{
+		return glm::vec3( 
+			//-radius * sinf(phi) * sinf(theta),
+			//-radius * sinf(phi) * cosf(theta),
+			//radius * cosf(phi)
+			// 
+			//radius * sinf(phi) * cosf(theta),
+			//radius * cosf(phi),
+			//radius * sinf(phi) * sinf(theta)
+			// 
+			radius * sinf(theta) * cosf(phi),
+			radius * sinf(theta) * sinf(phi),
+			radius * cosf(theta)
+		);
+	}
+
 	static const float Pi;
+	static const float PIDIV4;
 };
+
+const float MathHelper::Pi = 3.1415926535f;
+const float MathHelper::PIDIV4 = 0.785398163;

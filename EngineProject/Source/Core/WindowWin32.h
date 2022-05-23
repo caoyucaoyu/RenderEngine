@@ -19,7 +19,7 @@ public:
 	virtual int GetWidth() { return Width; }
 
 	bool InitWindow();
-
+	void CalculateFrameStats();
 protected:
 
 	int Width = 1280;
@@ -27,6 +27,7 @@ protected:
 
 	HWND HMainWnd;
 
+	std::wstring MainWndCaption = L"Hello";
 	///
 	bool IsAppPaused = false; 
 	bool IsMinimized = false; 

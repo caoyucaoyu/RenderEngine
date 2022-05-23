@@ -1,9 +1,11 @@
 #pragma once
+#include "Light.h"
 
 #include "glm/vec2.hpp"
 #include "glm/vec3.hpp"
 #include "glm/vec4.hpp"
 
+#define MAX_LIGHTS 16
 
 struct Float2
 {
@@ -66,7 +68,6 @@ struct MeshRead
 	std::vector<uint16_t> Indices;
 };
 
-
 struct ObjectConstants
 {
 	//glm::mat4 World_M = MathHelper::GIdentity4x4();
@@ -77,14 +78,22 @@ struct ObjectConstants
 
 struct PassConstants
 {
+	Light lights[MAX_LIGHTS];
+
 	glm::mat4 ViewProj_M = MathHelper::GIdentity4x4();
+	glm::mat4 CameraPos_M = MathHelper::GIdentity4x4();
+
+	glm::vec4 ambientLight = { 0.0f,0.0f,0.0f,1.0f };
+
+	glm::vec3 CameraPos;
 	float Time = 0;
 };
 
 struct MaterialConstants
 {
-	glm::vec4 DiffuseAlbedo = { 1.0f, 1.0f, 1.0f, 1.0f };
-	glm::vec3 FresnelR0 = { 0.01f, 0.01f, 0.01f };
-	float Roughness = 0.25f;
 	glm::mat4 MatTransform = glm::mat4(1.0f);
+	glm::vec4 DiffuseAlbedo = { 1.0f, 1.0f, 1.0f, 1.0f };//≤ƒ÷ ∑¥’’¬ 
+	float Roughness = 0.2f;
+	glm::vec3 FresnelR0 = glm::vec3(0.05f, 0.05f, 0.05f);
+
 };

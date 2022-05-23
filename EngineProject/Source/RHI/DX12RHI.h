@@ -1,12 +1,13 @@
 #pragma once
 #include "RHI.h"
 
-using Microsoft::WRL::ComPtr;
+//using Microsoft::WRL::ComPtr;
 
 class Window;
 class DescriptorHeap;
 class FrameResource;
-const int FrameResourcesCount = 2;
+
+const int FrameResourcesCount = 4;
 
 class DX12RHI : public RHI
 {
@@ -33,8 +34,8 @@ public:
 	virtual void SetRenderTargetBegin() override;
 	virtual void SetRenderTargetEnd() override;
 
-	virtual void SetGraphicsPipeline() override;//...........................................................
-	virtual void SetRenderResourceTable(int Nu, UINT32 HeapOffset) override;//............................................................................
+	virtual void SetGraphicsPipeline(Pipeline* NPipeline) override;
+	virtual void SetRenderResourceTable(int Nu, UINT32 HeapOffset) override;//............
 	virtual void IASetMeshBuffer(GPUMeshBuffer* GPUMeshbuffer) override;
 
 
@@ -44,6 +45,12 @@ public:
 	virtual GPUCommonBuffer* CreateCommonBuffer(UINT ElementCount, bool IsConstantBuffer, UINT ElementByteSize) override;
 	virtual void UpdateCommonBuffer(GPUCommonBuffer* GpuCommonBuffer, std::shared_ptr<void> Data, int elementIndex) override;
 	virtual void AddCommonBuffer(int FrameSourceIndex,std::string, GPUCommonBuffer* GpuCommonBuffer) override;
+
+	virtual GPUTexture* CreateTexture(std::string TextureName, std::wstring FileName) override;
+	virtual GPUTexture* CreateTexture(std::string TextureName) override;
+
+	virtual GPURenderTarget* CreateRenderTarget(std::string RTName, UINT W, UINT H) override;
+	virtual GPURenderTargetBuffer* CreateRenderTargetBuffer(RTBufferType Type, UINT W, UINT H) override;
 
 	virtual void XXX() override;
 
@@ -64,16 +71,18 @@ private:
 	void CreateSwapChain();
 
 	void CreateRtvAndDsvDescriptorHeaps();
+	void ResetBuffers();
 	void CreateRTV();
 	void CreateDSV();
 	void CreateViewPortAndScissorRect();
+	void CreateBackRenderTerget();
 
 	void CreatCbvSrvUavHeap();
 	
 	//Ö»¶Á
 	D3D12_CPU_DESCRIPTOR_HANDLE CurrentBackBufferView() const;
 	D3D12_CPU_DESCRIPTOR_HANDLE DepthStencilView() const;
-
+	ComPtr<ID3D12Resource> GetCurrentBackBuffer() const;
 private:
 	Window* Wd;
 	ComPtr<IDXGIFactory> DxgiFactory;
@@ -87,8 +96,11 @@ private:
 	UINT DsvDescriptorSize;
 	UINT CbvSrvUavDescriptorSize;
 	D3D12_FEATURE_DATA_MULTISAMPLE_QUALITY_LEVELS MsaaQualityLevels;
+	UINT MsaaQuality4X;
 	HWND HMainWnd;
+
 	static const int SwapChainBufferCount = 2;
+
 	ComPtr<ID3D12Resource> SwapChainBuffers[2];
 	ComPtr<ID3D12Resource> DepthStencilBuffer;
 
@@ -97,7 +109,7 @@ private:
 	std::unique_ptr<DescriptorHeap> CbvSrvUavHeap;
 
 	UINT64 CurrentFence = 0;
-	UINT64 CurrBackBuffer = 0;
+	UINT64 CurrentBackBufferIndex = 0;
 
 	D3D12_VIEWPORT ScreenViewport;
 	D3D12_RECT ScissorRect;
@@ -116,7 +128,6 @@ private:
 	std::vector<ComPtr<ID3D12PipelineState>> PSOs;
 	void BuildPSO();
 
-
-
-
+	std::array<const CD3DX12_STATIC_SAMPLER_DESC, 6> GetStaticSamplers();
+	
 };

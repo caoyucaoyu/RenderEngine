@@ -8,6 +8,8 @@ public:
 	float TotalTime()const;
 	float DeltaTime()const;
 
+	bool GetIsStoped();
+
 	void Reset();
 	void Start();
 	void Stop();

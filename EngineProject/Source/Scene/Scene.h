@@ -78,5 +78,5 @@ public:
 private:
 	Camera MainCamera;
 	std::vector<MeshActor*> SceneMeshActors;
-	void UpdateCameraBuffer();
+	void UpdateMainPassBuffer();
 };

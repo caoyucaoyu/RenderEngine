@@ -2,7 +2,7 @@
 
 #include "Renderer.h"
 
-
+class GPURenderTarget;
 class ForwardRenderer :public Renderer
 {
 public:
@@ -18,6 +18,12 @@ public:
 
 private:
 	void HDRPass();
+	void ShadowMapPass();
 
+private:
+	int Width = 1280;
+	int Hight = 720;
 	int CurrentRenderIndex = 0;
+
+	GPURenderTarget* RTShadowMap;
 };

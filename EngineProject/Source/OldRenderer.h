@@ -114,8 +114,8 @@ private:
 
 	std::unordered_map<std::string, DX12GPUMeshBuffer> DXMeshs;//////////////////
 	//‘›«“≤ª”√
-	std::unordered_map<std::string, DXTexture> DXTextures;
-	std::unordered_map<std::string, Material> DXMaterials;
+	//std::unordered_map<std::string, DXTexture> DXTextures;
+	//std::unordered_map<std::string, Material> DXMaterials;
 
 public:
 	DX12GPUMeshBuffer FindRMesh(std::string MeshName);

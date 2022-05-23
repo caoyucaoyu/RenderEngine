@@ -19,10 +19,20 @@
     </ProjectConfiguration>
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="Source\Core\Shader.cpp" />
+    <ClCompile Include="Source\DX\DX12GPURenderTarget.cpp" />
+    <ClCompile Include="Source\DX\DX12GPURenderTargetBuffer.cpp" />
+    <ClCompile Include="Source\DX\DX12Pipeline.cpp" />
+    <ClCompile Include="Source\Core\Pipeline.cpp" />
     <ClCompile Include="Source\DX\DX12GPUCommonBuffer.cpp" />
     <ClCompile Include="Source\DX\DX12GPUMeshBuffer.cpp" />
+    <ClCompile Include="Source\DX\DX12Shader.cpp" />
+    <ClCompile Include="Source\DX\DX12GPUTexture.cpp" />
     <ClCompile Include="Source\RHI\GPUCommonBuffer.cpp" />
     <ClCompile Include="Source\RHI\GPUMeshBuffer.cpp" />
+    <ClCompile Include="Source\RHI\GPURenderTarget.cpp" />
+    <ClCompile Include="Source\RHI\GPURenderTargetBuffer.cpp" />
+    <ClCompile Include="Source\RHI\GPUTexture.cpp" />
     <ClCompile Include="Source\Scene\Camera.cpp" />
     <ClCompile Include="Source\Core\Primitive.cpp" />
     <ClCompile Include="Source\Render\ForwardRenderer.cpp" />
@@ -42,21 +52,32 @@
     <ClCompile Include="Source\Scene\AssetsManager.cpp" />
     <ClCompile Include="Source\RHI\DX12RHI.cpp" />
     <ClCompile Include="Source\RHI\RHI.cpp" />
+    <ClCompile Include="Source\Scene\Light.cpp" />
+    <ClCompile Include="Source\Scene\Material.cpp" />
     <ClCompile Include="Source\Scene\Scene.cpp" />
     <ClCompile Include="Source\DX\D3DUtil.cpp" />
     <ClCompile Include="Source\DX\FrameResource.cpp" />
-    <ClCompile Include="Source\Scene\StaticMesh.cpp" />
+    <ClCompile Include="Source\Main.cpp" />
     <ClCompile Include="Source\stdafx.cpp">
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">false</ExcludedFromBuild>
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Create</PrecompiledHeader>
     </ClCompile>
-    <ClCompile Include="Source\Main.cpp" />
-    <ClCompile Include="Source\MathHelper.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="Source\Core\Shader.h" />
+    <ClInclude Include="Source\DX\DX12GPURenderTarget.h" />
+    <ClInclude Include="Source\DX\DX12GPURenderTargetBuffer.h" />
+    <ClInclude Include="Source\DX\DX12Pipeline.h" />
     <ClInclude Include="Source\CommonData.h" />
+    <ClInclude Include="Source\Core\Pipeline.h" />
     <ClInclude Include="Source\DX\DX12GPUMeshBuffer.h" />
+    <ClInclude Include="Source\DX\DX12Shader.h" />
+    <ClInclude Include="Source\DX\DX12GPUTexture.h" />
     <ClInclude Include="Source\RHI\GPUCommonBuffer.h" />
     <ClInclude Include="Source\RHI\GPUMeshBuffer.h" />
+    <ClInclude Include="Source\RHI\GPURenderTarget.h" />
+    <ClInclude Include="Source\RHI\GPURenderTargetBuffer.h" />
+    <ClInclude Include="Source\RHI\GPUTexture.h" />
     <ClInclude Include="Source\Scene\Camera.h" />
     <ClInclude Include="Source\Core\Primitive.h" />
     <ClInclude Include="Source\Render\ForwardRenderer.h" />
@@ -73,7 +94,8 @@
     <ClInclude Include="Source\DX\DDSTextureLoader.h" />
     <ClInclude Include="Source\DX\DescriptorHeap.h" />
     <ClInclude Include="Source\OldRenderer.h" />
-    <ClInclude Include="Source\Material.h" />
+    <ClInclude Include="Source\Scene\Light.h" />
+    <ClInclude Include="Source\Scene\Material.h" />
     <ClInclude Include="Source\Scene\AssetsManager.h" />
     <ClInclude Include="Source\RHI\DX12RHI.h" />
     <ClInclude Include="Source\RHI\RHI.h" />
@@ -84,7 +106,7 @@
     <ClInclude Include="Source\Scene\StaticMesh.h" />
     <ClInclude Include="Source\stdafx.h" />
     <ClInclude Include="Source\MathHelper.h" />
-    <ClInclude Include="Source\Texture.h" />
+    <ClInclude Include="Source\Scene\Texture.h" />
     <ClInclude Include="Source\DX\DX12GPUCommonBuffer.h" />
   </ItemGroup>
   <PropertyGroup Label="Globals">
@@ -192,7 +214,7 @@
       <PrecompiledHeader>Use</PrecompiledHeader>
     </ClCompile>
     <Link>
-      <SubSystem>Windows</SubSystem>
+      <SubSystem>Console</SubSystem>
       <GenerateDebugInformation>true</GenerateDebugInformation>
     </Link>
   </ItemDefinitionGroup>

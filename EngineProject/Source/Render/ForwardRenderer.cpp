@@ -30,16 +30,17 @@ void ForwardRenderer::Init()
 	RHI::Get()->Init();
 	RHI::Get()->ResizeWindow(1280, 720);
 	MRenderScene->Init();//创建CameraAndTime ConstantBuffer
+	RHI::Get()->XXX();
 }
 
 void ForwardRenderer::RenderFrameBegin()
 {
 	RHI::Get()->BeginFrame();
-	RHI::Get()->XXX();
 }
 
 void ForwardRenderer::Render()
 {
+	ShadowMapPass();
 	HDRPass();
 
 	//Engine::Get()->GetRender()->Render();
@@ -56,10 +57,19 @@ void ForwardRenderer::Update()
 	CurrentRenderIndex = RHI::Get()->GetCurFrameResourceIdx();
 }
 
+void ForwardRenderer::ShadowMapPass()
+{
+	if (!RTShadowMap)
+	{
+		RTShadowMap = RHI::Get()->CreateRenderTarget("ShadowMap", Width, Hight);
+	}
+}
+
 void ForwardRenderer::HDRPass()
 {
 	RHI::Get()->SetRenderTargetBegin();
-	RHI::Get()->SetGraphicsPipeline();
+
+	RHI::Get()->SetGraphicsPipeline(nullptr);
 
 	GPUCommonBuffer* CameraBuffer = MRenderScene->GetCameraBuffer(CurrentRenderIndex);
 	RHI::Get()->SetRenderResourceTable(1, CameraBuffer->GetHandleOffset());
@@ -67,12 +77,23 @@ void ForwardRenderer::HDRPass()
 	auto Primitives = MRenderScene->GetPrimitives();
 	for (auto Primitive : Primitives)
 	{
+		//Pipeline* PrimitivePipeline = Primitive->GetPipeline(0);
+
+		//RHI::Get()->SetGraphicsPipeline(PrimitivePipeline);
+		
 		RHI::Get()->IASetMeshBuffer(Primitive->GetMeshBuffer());
-		RHI::Get()->SetRenderResourceTable(0,Primitive->GetObjectCommonBuffer(CurrentRenderIndex)->GetHandleOffset());
+
+		RHI::Get()->SetRenderResourceTable(0, Primitive->GetObjectCommonBuffer(CurrentRenderIndex)->GetHandleOffset());//根参数Index
+		RHI::Get()->SetRenderResourceTable(2, Primitive->GetMaterialCommonBuffer(CurrentRenderIndex)->GetHandleOffset());//根参数Index
+
+		RHI::Get()->SetRenderResourceTable(3, MRenderScene->FindGPUTexture("Head_diff")->GetHandleOffset());
+		RHI::Get()->SetRenderResourceTable(4, MRenderScene->FindGPUTexture("Head_norm")->GetHandleOffset());
+
 		RHI::Get()->DrawIndexedInstanced(Primitive->GetMeshBuffer()->GetIndices().size());
 	}
 
 	RHI::Get()->SetRenderTargetEnd();
 }
+
 
 

@@ -37,7 +37,6 @@ void Engine::Init()
 
 	MTimer->Reset();
 	MTimer->Start();
-
 	MScene->Init();
 
 	//OldRun
@@ -72,7 +71,6 @@ void Engine::Run()
 
 	//OldRun
 	//MOldRender->InitDraw();
-
 	//RenderThread::Get()->Start();
 
 #if PLATFORM_WINDOWS
@@ -95,8 +93,8 @@ void Engine::Run()
 
 void Engine::Tick()
 {
+	//Input Update Moved to :Window Run 
 	MTimer->Tick();
-	MWindow->GetInput()->Update(); //Input Update Moved to :Window Run 
 	MScene->Tick();
 
 

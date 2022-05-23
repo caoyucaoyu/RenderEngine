@@ -4,6 +4,8 @@
 
 RHI* RHI::MRHI = nullptr;
 
+GPURenderTarget* RHI::BackBufferRT = nullptr;
+
 RHI* RHI::Get()
 {
 	return MRHI;
@@ -41,5 +43,9 @@ RHI::RHI()
 
 RHI::~RHI()
 {
-
+	if (BackBufferRT != nullptr)
+	{
+		delete BackBufferRT;
+		BackBufferRT = nullptr;
+	}
 }

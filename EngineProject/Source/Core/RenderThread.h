@@ -5,6 +5,7 @@
 class Task;
 class ForwardRenderer;
 class RenderScene;
+
 class RenderThread :public Thread
 {
 public:

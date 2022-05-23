@@ -8,7 +8,7 @@ GPUCommonBuffer::GPUCommonBuffer()
 
 GPUCommonBuffer::~GPUCommonBuffer()
 {
-
+	
 }
 
 void GPUCommonBuffer::SetHandleOffset(UINT32 Offset)

@@ -6,7 +6,7 @@
 
 Camera::Camera()
 {
-	SetLens(0.25f * MathHelper::Pi, 16.0f/9.0f, 1.0f, 10000.0f);
+	SetLens(0.25f * MathHelper::Pi, 16.0f/9.0f, 1.0f, 50000.0f);
 }
 
 Camera::~Camera()
@@ -31,8 +31,6 @@ void Camera::Update()
 	Lastx = Input::GetMousePose().x;
 	Lasty = Input::GetMousePose().y;
 
-
-
 	if (Input::GetKeyState(Key::W) == KeyState::BtnHold || Input::GetKeyState(Key::W) == KeyState::BtnDown)
 		Walk(Speed);
 
@@ -45,7 +43,7 @@ void Camera::Update()
 	if (Input::GetKeyState(Key::D) == KeyState::BtnHold || Input::GetKeyState(Key::D) == KeyState::BtnDown)
 		Strafe(Speed);
 
-
+	UpdatePositionMatrix();
 	UpdateViewMatrix();
 }
 
@@ -135,6 +133,14 @@ void Camera::UpdateViewMatrix()
 }
 
 
+void Camera::UpdatePositionMatrix()
+{
+	glm::mat4 M = glm::mat4(1.0f);
+	glm::vec3 l = { Position.x,Position.y,Position.z };
+
+	Position_Matrix = glm::translate(M, l);
+}
+
 glm::mat4 Camera::GetView()
 {
 	return View;
@@ -145,6 +151,11 @@ glm::mat4 Camera::GetProj()
 	return Proj;
 }
 
+
+glm::mat4 Camera::GetPosM()
+{
+	return Position_Matrix;
+}
 
 glm::vec3 VectorMultiplyAdd(glm::vec3 MultiplyV1, glm::vec3 MultiplyV2, glm::vec3 addV) {
 	glm::vec3 result;

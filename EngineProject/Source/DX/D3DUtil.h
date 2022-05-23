@@ -9,59 +9,6 @@
 
 using Microsoft::WRL::ComPtr;
 
-/*
-struct Float2
-{
-	Float2() {};
-	Float2(float x, float y)
-	{
-		X = x;
-		Y = y;
-	}
-	float X;
-	float Y;
-};
-struct Float3
-{
-	Float3() {};
-	Float3(float x, float y, float z)
-	{
-		X = x;
-		Y = y;
-		Z = z;
-	}
-	float X;
-	float Y;
-	float Z;
-};
-struct Float4
-{
-	Float4() {};
-	Float4(float x, float y, float z, float w)
-	{
-		X = x;
-		Y = y;
-		Z = z;
-		W = w;
-	}
-	float X;
-	float Y;
-	float Z;
-	float W;
-};
-*/
-
-
-////读取文件，得到的数据项
-//struct MapItem
-//{
-//	std::string MeshName;
-//	Float3 Location;
-//	Float4 Rotation;
-//	Float3 Scale3D;
-//	std::vector<Vertex> Vertices;
-//	std::vector<uint16_t> Indices;
-//};
 
 
 class D3DUtil

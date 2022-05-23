@@ -27,7 +27,7 @@ public:
 		}
 	};
 
-	std::vector<GPUCommonBuffer*> CommonBuffers;// 删除功能不要了
+	std::vector<GPUCommonBuffer*> CommonBuffers;//删除功能不要了
 
 	UINT64 Fence = 0;
 	Microsoft::WRL::ComPtr<ID3D12CommandAllocator> CmdListAlloc = nullptr;
@@ -35,20 +35,6 @@ public:
 
 private:
 	ID3D12Device* Device = nullptr;
-
-
-public:
-	void Resize(INT PassCount, UINT ObjectCount)//, UINT MaterialCount
-	{	
-		//3个
-		//PassCB = std::make_unique<DX12GPUCommonBuffer<PassConstants>>(Device, PassCount, true);
-		//ObjectCB = std::make_unique<DX12GPUCommonBuffer<ObjectConstants>>(Device, ObjectCount, true);
-		//MaterialCB = std::make_unique<UploadBuffer<MaterialConstants>>(Device, MaterialCount, true);
-	}
-
-	//std::unique_ptr<DX12GPUCommonBuffer<PassConstants>> PassCB = nullptr;
-	//std::unique_ptr<DX12GPUCommonBuffer<ObjectConstants>> ObjectCB = nullptr;
-	//std::unique_ptr<UploadBuffer<MaterialConstants>> MaterialCB = nullptr;
 };
 
 

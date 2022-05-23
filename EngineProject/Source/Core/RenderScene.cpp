@@ -5,6 +5,8 @@
 #include "Engine.h"
 #include "RHI.h"
 
+using namespace std;
+
 
 RenderScene::RenderScene()
 {
@@ -29,7 +31,7 @@ void RenderScene::Init()
 
 void RenderScene::DestroyRenderScene()
 {
-	for (auto it : MeshBuffers)
+	for (auto it : GPUMeshBuffers)
 	{
 		if (it.second != nullptr)
 		{
@@ -37,12 +39,18 @@ void RenderScene::DestroyRenderScene()
 			it.second = nullptr;
 		}
 	}
-	//for (auto it : Primitives)
+	for (auto it : GPUTextures)
+	{
+		if (it.second != nullptr)
+		{
+			delete it.second;
+			it.second = nullptr;
+		}
+	}
 }
 
 void RenderScene::AddMapData(std::vector<MeshActor*> MeshActors)
 {
-	//std::cout << "Wei!" << std::endl;
 	for (auto AMeshActor : MeshActors)
 	{
 		AddMeshBuffer(AMeshActor);
@@ -52,7 +60,7 @@ void RenderScene::AddMapData(std::vector<MeshActor*> MeshActors)
 
 void RenderScene::AddMeshBuffer(MeshActor* AMeshActor)
 {
-	if (MeshBuffers.count(AMeshActor->MeshName))
+	if (GPUMeshBuffers.count(AMeshActor->MeshName))
 		return;
 
 	StaticMesh StaticMeshData;
@@ -61,7 +69,7 @@ void RenderScene::AddMeshBuffer(MeshActor* AMeshActor)
 		GPUMeshBuffer* InMeshBuffer = RHI::Get()->CreateMeshBuffer();
 		InMeshBuffer->SetData(StaticMeshData);
 		RHI::Get()->UpdateMeshBuffer(InMeshBuffer);
-		MeshBuffers.insert({ AMeshActor->MeshName , InMeshBuffer });
+		GPUMeshBuffers.insert({ AMeshActor->MeshName , InMeshBuffer });
 	}
 }
 
@@ -69,35 +77,68 @@ void RenderScene::AddPrimitive(MeshActor* AMeshActor)
 {
 	auto MeshBuffer = GetMeshBuffer(AMeshActor->MeshName);
 	if (!MeshBuffer)return;
-	Primitive* NewPrimitive = new Primitive();
 
+	Primitive* NewPrimitive = new Primitive();
 	NewPrimitive->SetMeshBuffer(MeshBuffer);
+
+	Material* AMaterial = Engine::Get()->GetAssetsManager()->GetMaterial(AMeshActor->MaterialName);
+
+	if (AMaterial != nullptr && GPUMaterials.count(AMaterial->Name) == 0)
+	{
+		GPUMaterials.insert({AMaterial->Name,AMaterial});
+		for (auto ATexture : AMaterial->Textures)
+		{
+			//Ð´³ÉAddTextureÒ²ÐÐ
+			auto InTexture = ATexture.second;
+
+			if (GPUTextures.count(InTexture->Name))break;
+			GPUTexture* GTexture = RHI::Get()->CreateTexture(InTexture->Name, InTexture->Filename);
+			GPUTextures.insert({ GTexture->Name,GTexture });
+		}
+	}
+	else
+	{
+		AMaterial = Engine::Get()->GetAssetsManager()->GetDefaultMaterial();
+	}
+	NewPrimitive->SetMaterial(AMaterial);
+
 
 	for (int i = 0; i < RHI::Get()->GetFrameResourceCount(); i++)
 	{
-		GPUCommonBuffer* GpuCommonBuffer = RHI::Get()->CreateCommonBuffer(1, true, sizeof(ObjectConstants));
-	
+		GPUCommonBuffer* ObjectCommonBuffer = RHI::Get()->CreateCommonBuffer(1, true, sizeof(ObjectConstants));
+
 		auto Trans = std::make_shared<ObjectConstants>();
-
-		glm::mat4 L = AMeshActor->Location_Matrix;
-		glm::mat4 R = AMeshActor->Rotation_Matrix;
-		glm::mat4 S = AMeshActor->Scale3D_Matrix;
-
-		Trans->Location_M = glm::transpose(L);
-		Trans->Rotation_M = glm::transpose(R);
-		Trans->Scale3D_M = glm::transpose(S);
+		Trans->Location_M = glm::transpose(AMeshActor->Location_Matrix);
+		Trans->Rotation_M = glm::transpose(AMeshActor->Rotation_Matrix);
+		Trans->Scale3D_M = glm::transpose(AMeshActor->Scale3D_Matrix);
 
 		std::shared_ptr<void> TransData = Trans;
-		RHI::Get()->UpdateCommonBuffer(GpuCommonBuffer, Trans, 0);
-		RHI::Get()->AddCommonBuffer(i, AMeshActor->MeshName, GpuCommonBuffer);
+		RHI::Get()->UpdateCommonBuffer(ObjectCommonBuffer, Trans, 0);
+		RHI::Get()->AddCommonBuffer(i, AMeshActor->MeshName, ObjectCommonBuffer);
+		NewPrimitive->SetObjectCommonBuffer(ObjectCommonBuffer);
+		
 
-		NewPrimitive->SetObjectCommonBuffer(GpuCommonBuffer);
+		GPUCommonBuffer* MaterialCommonBuffer = RHI::Get()->CreateCommonBuffer(1, true, sizeof(MaterialConstants));
+
+		auto Mat = std::make_shared<MaterialConstants>();
+		Mat->MatTransform = glm::mat4(1.0f);
+		Mat->DiffuseAlbedo = AMaterial->DiffuseAlbedo;
+		Mat->FresnelR0 = AMaterial->FresnelR0;
+		Mat->Roughness = AMaterial->Roughness;
+
+		std::shared_ptr<void> MatData = Mat;
+		RHI::Get()->UpdateCommonBuffer(MaterialCommonBuffer, Mat, 0);
+		RHI::Get()->AddCommonBuffer(i, "Material Name", MaterialCommonBuffer);
+		NewPrimitive->SetMaterialCommonBuffer(MaterialCommonBuffer);
+
+		//NewPrimitive->SetPipeline();
 	}
 
 	Primitives.push_back(NewPrimitive);
 }
 
-void RenderScene::UpdateCameraBuffer(PassConstants NewPasConstants)
+
+void RenderScene::UpdateMainPassBuffer(PassConstants NewPasConstants)
 {
 	std::shared_ptr<void> CameraData = std::make_shared<PassConstants>(NewPasConstants);
 	int Idx = RHI::Get()->GetCurFrameResourceIdx();
@@ -108,9 +149,9 @@ void RenderScene::UpdateCameraBuffer(PassConstants NewPasConstants)
 
 GPUMeshBuffer* RenderScene::GetMeshBuffer(std::string MeshBufferName)
 {
-	if (MeshBuffers.count(MeshBufferName))
+	if (GPUMeshBuffers.count(MeshBufferName))
 	{
-		return MeshBuffers.at(MeshBufferName);
+		return GPUMeshBuffers.at(MeshBufferName);
 	}
 	return nullptr;
 }
@@ -118,4 +159,16 @@ GPUMeshBuffer* RenderScene::GetMeshBuffer(std::string MeshBufferName)
 GPUCommonBuffer* RenderScene::GetCameraBuffer(int Idx)
 {
 	return CameraCommonBuffers[Idx];
+}
+
+GPUTexture* RenderScene::FindGPUTexture(std::string Name)
+{
+	if (GPUTextures.count(Name))
+	{
+		return GPUTextures.at(Name);
+	}
+	else
+	{
+		return nullptr;
+	}
 }

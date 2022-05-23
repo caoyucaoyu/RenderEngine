@@ -22,10 +22,13 @@ public:
 	void RotateZ(float angle);
 
 	void UpdateViewMatrix();
+	void UpdatePositionMatrix();
 
 	glm::mat4  GetView();
 	glm::mat4  GetProj();
-
+	glm::mat4  GetPosM();
+	glm::vec3  GetPos(){return Position;}
+	glm::vec3  GetDir(){return Look-Position;}
 private:
 	glm::vec3 Position = { 0.0f, 0.0f, 0.0f };
 	glm::vec3 Right = { -1.0f, 0.0f, 0.0f };
@@ -43,8 +46,9 @@ private:
 
 	glm::mat4 View;
 	glm::mat4 Proj;
+	glm::mat4 Position_Matrix;
 
-	float Speed = 25;
+	float Speed = 5;
 
 	glm::vec3 Camera::Transform(glm::mat4x4 m, glm::vec3 v);
 };

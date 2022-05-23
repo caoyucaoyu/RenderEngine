@@ -19,7 +19,8 @@ Scene::~Scene()
 void Scene::Tick()
 {
 	MainCamera.Update();
-	UpdateCameraBuffer();
+
+	UpdateMainPassBuffer();
 	//if (Input::GetKeyState(Key::LM) == KeyState::BtnDown)
 	//{
 		//MeshActor* ma;
@@ -30,7 +31,7 @@ void Scene::Tick()
 
 void Scene::Init()
 {
-	glm::vec3 Position = { 3000.f, 0.0f, 1000.0f };
+	glm::vec3 Position = { 3000.0f, 0.0f, 1000.0f };
 	glm::vec3 Target = { 0.0f, 0.0f, 0.0f };
 	glm::vec3 Up = { 0.0f, 0.0f, 1.0f };
 
@@ -40,13 +41,22 @@ void Scene::Init()
 }
 
 void Scene::LoadMapActors()
-{
+{	
+	int HeadNum=0;
 	for (auto MapMeshItem : Engine::Get()->GetAssetsManager()->GetMeshReadData())
 	{
 		MeshActor* AMeshActor = new MeshActor(MapMeshItem);
+		//if (AMeshActor->MeshName == "Shape_Sphere")
+		//{
+			AMeshActor->MaterialName = "Head";
+			HeadNum++;
+		//}
 		AMeshActor->UpdateMatrix();
 		SceneMeshActors.push_back(AMeshActor);
 	}
+	std::stringstream ss;
+	ss << "SS HeadActorNum: " << HeadNum << "\n";
+	OutputDebugStringA(ss.str().c_str());
 
 }
 
@@ -60,15 +70,6 @@ void Scene::PresentCurrentMap()
 	RenderThread* RenderT= RenderThread::Get();
 	Task* task = new Task([=]() {RenderT->GetRenderScene()->AddMapData(SceneMeshActors); });
 	RenderT->AddTask(task);
-
-
-	//for (auto AMeshActor : SceneMeshActors)
-	//{
-	//	Task* task1 = new Task([=]() {RenderT->GetRenderScene()->AddMeshBuffer(AMeshActor); });
-	//	RenderT->AddTask(task1);
-	//	Task* task2 = new Task([=]() {RenderT->GetRenderScene()->AddPrimitive(AMeshActor); });
-	//	RenderT->AddTask(task2);
-	//}
 }
 
 void Scene::AddMeshActor(MeshActor* NewActor)
@@ -107,16 +108,44 @@ Camera& Scene::GetMainCamera()
 	return MainCamera;
 }
 
-void Scene::UpdateCameraBuffer()
+void Scene::UpdateMainPassBuffer()
 {
 	glm::mat4 VP_Matrix = MainCamera.GetProj() * MainCamera.GetView();
+	glm::mat4 Po_Matrix = MainCamera.GetPosM();
 
 	PassConstants NewPasConstants;
+	//Time
 	NewPasConstants.Time = Engine::Get()->GetTimer()->TotalTime();
+	//Camera
 	NewPasConstants.ViewProj_M = glm::transpose(VP_Matrix);
+	NewPasConstants.CameraPos_M = Po_Matrix;
+	NewPasConstants.CameraPos = MainCamera.GetPos();
+	//Light
+	NewPasConstants.ambientLight = { 0.25f,0.25f,0.35f,1.0f };
+	NewPasConstants.lights[0].strength = { 1.0f,1.0f,1.0f };
+	NewPasConstants.lights[0].direction = { 1.0f, 0.0f, 0.0f };//计算方向
+	NewPasConstants.lights[0].direction = glm::normalize(NewPasConstants.lights[0].direction);
+
+	static float sunPhi = 0;
+	static float sunThe = MathHelper::Pi / 4;
+	const float dt = Engine::Get()->GetTimer()->DeltaTime();
+
+	//写Input里去
+	if (GetAsyncKeyState(VK_LEFT) & 0x8000)
+		sunPhi -= 1.0f * dt;
+	if (GetAsyncKeyState(VK_RIGHT) & 0x8000)
+		sunPhi += 1.0f * dt;
+	if (GetAsyncKeyState(VK_UP) & 0x8000)
+		sunThe -= 1.0f * dt;
+	if (GetAsyncKeyState(VK_DOWN) & 0x8000)
+		sunThe += 1.0f * dt;
+
+	sunThe = MathHelper::Clamp(sunThe, 0.01f, MathHelper::Pi * 0.55f);
+	glm::vec3 sunDir = -MathHelper::SphericalToCartesian(1.0f, sunThe, sunPhi);
+	NewPasConstants.lights[0].direction = sunDir;
 
 	RenderThread* RenderT = RenderThread::Get();
-	Task* task = new Task([=]() {RenderT->GetRenderScene()->UpdateCameraBuffer(NewPasConstants); });
+	Task* task = new Task([=]() {RenderT->GetRenderScene()->UpdateMainPassBuffer(NewPasConstants); });
 	RenderT->AddTask(task);
 }
 

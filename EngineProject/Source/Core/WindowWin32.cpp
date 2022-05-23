@@ -135,7 +135,6 @@ bool WindowWin32::InitWindow()
 	int Width = R.right - R.left;
 	int Height = R.bottom - R.top;
 
-	std::wstring MainWndCaption = L"Hello";
 	HMainWnd = CreateWindow(L"MainWnd", MainWndCaption.c_str(), WS_OVERLAPPEDWINDOW, CW_USEDEFAULT, CW_USEDEFAULT, Width, Height, 0, 0, hInstance, 0);
 	
 	ShowWindow(HMainWnd, SW_SHOW);
@@ -144,6 +143,38 @@ bool WindowWin32::InitWindow()
 	return true;
 }
 
+
+void WindowWin32::CalculateFrameStats()
+{
+	// Code computes the average frames per second, and also the 
+	// average time it takes to render one frame.  These stats 
+	// are appended to the window caption bar.
+
+	static int frameCnt = 0;
+	static float timeElapsed = 0.0f;
+
+	frameCnt++;
+
+	// Compute averages over one second period.
+	if ((Engine::Get()->GetTimer()->TotalTime() - timeElapsed) >= 1.0f)
+	{
+		float fps = (float)frameCnt; // fps = frameCnt / 1
+		float mspf = 1000.0f / fps;
+
+		std::wstring fpsStr = std::to_wstring(fps);
+		std::wstring mspfStr = std::to_wstring(mspf);
+
+		std::wstring windowText = MainWndCaption +
+			L"     " + fpsStr;
+			// + L"   mspf: " + mspfStr;
+
+		SetWindowText(HMainWnd, windowText.c_str());
+
+		// Reset for next average.
+		frameCnt = 0;
+		timeElapsed += 1.0f;
+	}
+}
 
 WindowWin32::~WindowWin32()
 {
@@ -162,7 +193,8 @@ void WindowWin32::OnResize()
 
 int WindowWin32::Run()
 {
-	//MInput->Update();
+	MInput->Update();
+
 	bool Quit=false;	
 	MSG msg = {};
 	while (PeekMessage(&msg, NULL, 0, 0, PM_REMOVE))
@@ -174,7 +206,7 @@ int WindowWin32::Run()
 			Quit=true;
 		}
 	}
-
+	CalculateFrameStats();
 	return !Quit;
 }
 

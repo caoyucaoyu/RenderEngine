@@ -46,7 +46,7 @@ bool OldRenderer::InitDirect3D()
 	CreateDSV();
 	CreateViewPortAndScissorRect();
 
-	OutputDebugStringA("DxInit Success\n");
+	OutputDebugStringA("SS DxInit Success\n");
 	return true;
 }
 
@@ -259,7 +259,7 @@ void OldRenderer::Draw()
 //ok
 void OldRenderer::RendererReset()
 {
-	OutputDebugStringA("Render Reset \n");
+	OutputDebugStringA("SS Render Reset \n");
 	assert(D3dDevice);
 	assert(SwapChain);
 	assert(CommandListAlloc);
@@ -321,7 +321,7 @@ void OldRenderer::BuildRenderData()
 			continue;		
 
 		//DX12GPUMeshBuffer ARenderMesh(AMesh);
-	
+
 		//ARenderMesh.BuildDefaultBuffer(D3dDevice.Get(), CommandList.Get());
 		//DXMeshs.insert(std::make_pair<>(DrawListActor.MeshName,ARenderMesh));//std::string,RenderMesh
 	}
@@ -333,31 +333,31 @@ void OldRenderer::BuildRenderData()
 
 void OldRenderer::BuildTextures()
 {
-	Texture ATexture;
-	for (auto DrawListActor : DrawList)
-	{
-		Material AMaterial;
-		bool MaterialFinded = Engine::Get()->GetAssetsManager()->FindMaterial(DrawListActor.MaterialName, AMaterial);
-		if (!MaterialFinded || DXMaterials.count(DrawListActor.MaterialName))//没有此材质 或 已经加载到
-			continue;
-		DXMaterials[AMaterial.Name] = AMaterial;
+	//Texture ATexture;
+	//for (auto DrawListActor : DrawList)
+	//{
+	//	Material AMaterial;
+	//	bool MaterialFinded = Engine::Get()->GetAssetsManager()->FindMaterial(DrawListActor.MaterialName, AMaterial);
+	//	if (!MaterialFinded || DXMaterials.count(DrawListActor.MaterialName))//没有此材质 或 已经加载到
+	//		continue;
+	//	DXMaterials[AMaterial.Name] = AMaterial;
 
-		Texture Atexture;
-		bool TextureFinded = Engine::Get()->GetAssetsManager()->FindTexture(AMaterial.TextureName, Atexture);
-		if (!TextureFinded || DXTextures.count(Atexture.Name))
-			continue;
+	//	Texture Atexture;
+	//	bool TextureFinded = Engine::Get()->GetAssetsManager()->FindTexture(AMaterial.TextureName, Atexture);
+	//	if (!TextureFinded || DXTextures.count(Atexture.Name))
+	//		continue;
 
-		DXTexture ADxtexture(Atexture);
-		ThrowIfFailed(
-			DirectX::CreateDDSTextureFromFile12(D3dDevice.Get(), CommandList.Get(), ADxtexture.Filename.c_str(), ADxtexture.Resource, ADxtexture.UploadHeap));
-		DXTextures[ADxtexture.Name] = ADxtexture;
+	//	//DX12Texture ADxtexture(Atexture);
+	//	//ThrowIfFailed(
+	//	//	DirectX::CreateDDSTextureFromFile12(D3dDevice.Get(), CommandList.Get(), ADxtexture.Filename.c_str(), ADxtexture.Resource, ADxtexture.UploadHeap));
+	//	//DXTextures[ADxtexture.Name] = ADxtexture;
 
-	}
-	//遍历绘制列表里Actor 对应材质 材质使用了贴图
-	//RenderScene 里的 Texture
-	//进行 CreateDDSTextureFromFile12
-	MaterialCount= (int)DXMaterials.size();
-	TextureCount= (int)DXTextures.size();
+	//}
+	////遍历绘制列表里Actor 对应材质 材质使用了贴图
+	////RenderScene 里的 Texture
+	////进行 CreateDDSTextureFromFile12
+	//MaterialCount= (int)DXMaterials.size();
+	//TextureCount= (int)DXTextures.size();
 }
 
 
@@ -367,7 +367,6 @@ void OldRenderer::BuildFrameResource()
 	for (int i = 0; i < OldFrameResourcesCount; i++)
 	{
 		FrameResources[i] = std::make_unique<FrameResource>(D3dDevice.Get());
-		FrameResources[i]->Resize(1, DrawCount);//, MaterialCount
 	}
 }
 

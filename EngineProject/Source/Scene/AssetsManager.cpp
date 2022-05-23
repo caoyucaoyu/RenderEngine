@@ -3,12 +3,29 @@
 
 AssetsManager::AssetsManager()
 {
-
+	Material* DefaultMaterial = new Material;
+	DefaultMaterial->Name = "Default";
+	AddMaterial("Default", DefaultMaterial);
 }
 
 AssetsManager::~AssetsManager()
 {
-
+	for (auto mat : MaterialAssets)
+	{
+		if (mat.second != nullptr)
+		{
+			delete mat.second;
+			mat.second = nullptr;
+		}
+	}
+	for (auto tex : TextureAssets)
+	{
+		if (tex.second != nullptr)
+		{
+			delete tex.second;
+			tex.second = nullptr;
+		}
+	}
 }
 
 void AssetsManager::LoadMap(const std::string& filePath)
@@ -26,20 +43,33 @@ void AssetsManager::LoadMap(const std::string& filePath)
 }
 
 
-
-void AssetsManager::LoadTexture(std::string Name, const std::string& filePath)
+void AssetsManager::LoadTexture(std::string Name, const std::wstring& filePath)
 {
-	Texture Tex;
-	Tex.Name = Name;
-	Tex.Filename = L"../../Textures/WoodCrate01.dds";//Use filePath
-	//ThrowIfFailed(
-	//DirectX::CreateDDSTextureFromFile12(md3dDevice.Get(),mCommandList.Get(), woodCrateTex->Filename.c_str(),woodCrateTex->Resource, woodCrateTex->UploadHeap));
-	TextureAssets[Tex.Name] = Tex;
+	Texture* Tex=new Texture();
+	Tex->Name = Name;
+	Tex->Filename = filePath;
+
+	AddTexture(Name,Tex);
 }
 
-void AssetsManager::AddMaterial(std::string Name, Material NMaterial)
+
+void AssetsManager::CreateMaterial()
 {
-	MaterialAssets[Name] = NMaterial;
+	Material* HeadMaterial = new Material;
+	HeadMaterial->Name = "Head";
+	Texture* ATexture = GetTexture("Head_diff");
+	if (ATexture != nullptr)
+	{
+		HeadMaterial->AddTexure("Head_diff", ATexture);
+		OutputDebugStringA("SS Add Head_diff Succeed\n");
+	}
+	ATexture = GetTexture("Head_norm");
+	if (ATexture != nullptr)
+	{
+		HeadMaterial->AddTexure("Head_norm", ATexture);
+		OutputDebugStringA("SS Add Head_norm Succeed\n");
+	}
+	AddMaterial("Head", HeadMaterial);
 }
 
 
@@ -62,30 +92,52 @@ bool AssetsManager::FindMesh(std::string Name, StaticMesh& NMesh)
 	}
 }
 
-bool AssetsManager::FindMaterial(std::string Name, Material& NMaterial)
-{
-	if (!MaterialAssets.count(Name))
-	{
-		return false;
-	}
-	else
-	{
-		NMaterial = MaterialAssets.at(Name);
-		return true;
-	}
-}
 
-bool AssetsManager::FindTexture(std::string Name, Texture& NTexture)
+
+Texture* AssetsManager::GetTexture(std::string Name)
 {
+	Texture* RTexture;
 	if (!TextureAssets.count(Name))
 	{
-		return false;
+		RTexture = nullptr;
 	}
 	else
 	{
-		NTexture = TextureAssets.at(Name);
-		return true;
+		RTexture = TextureAssets.at(Name);
 	}
+	return RTexture;
+}
+
+Material* AssetsManager::GetMaterial(std::string Name)
+{
+	Material* RMaterial;
+	if (!MaterialAssets.count(Name))
+	{
+		RMaterial = nullptr;
+	}
+	else
+	{
+		RMaterial = MaterialAssets.at(Name);
+	}
+	return RMaterial;
+}
+
+Material* AssetsManager::GetDefaultMaterial()
+{
+	return MaterialAssets["Default"];
+}
+
+void AssetsManager::AddTexture(std::string Name, Texture* NTexture)
+{
+	if (TextureAssets.count(Name) != 0)
+		return;
+	TextureAssets.insert({Name,NTexture});
+}
+void AssetsManager::AddMaterial(std::string Name, Material* NMaterial)
+{
+	if(MaterialAssets.count(Name)!=0)
+		return;
+	MaterialAssets.insert({Name,NMaterial});
 }
 
 void AssetsManager::ReadMapFile(const std::string& filePath, std::vector<MeshRead>& MeshData)
@@ -94,10 +146,10 @@ void AssetsManager::ReadMapFile(const std::string& filePath, std::vector<MeshRea
 	readFile.open(filePath, std::ios::in | std::ios::binary);
 	if (!readFile)
 	{
-		OutputDebugStringA("Error opening file When ReadFile \n");
+		OutputDebugStringA("SS Error opening file When ReadFile \n");
 		return;
 	}
-	OutputDebugStringA("Opening file When ReadFile \n");
+	OutputDebugStringA("SS Opening file When ReadFile \n");
 
 
 	int Num;
