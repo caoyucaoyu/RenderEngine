@@ -56,12 +56,14 @@ void DX12RHI::ResizeWindow(UINT32 Width, UINT32 Height)
 	FlushCommandQueue();
 	ResetCommandList(CommandListAllocator);
 
-	//ResetBuffers();
-	//SwapChain->ResizeBuffers(SwapChainBufferCount, Width, Height, DXGI_FORMAT_R8G8B8A8_UNORM, DXGI_SWAP_CHAIN_FLAG_ALLOW_MODE_SWITCH);
+	//
+	ResetBuffers();
+	SwapChain->ResizeBuffers(SwapChainBufferCount, Width, Height, DXGI_FORMAT_R8G8B8A8_UNORM, DXGI_SWAP_CHAIN_FLAG_ALLOW_MODE_SWITCH);
 	CurrentBackBufferIndex = 0;
-
-	//CreateRTV();
-	//CreateDSV();
+	//
+	CreateRTV();
+	//
+	CreateDSV();
 
 	CreateViewPortAndScissorRect();
 
@@ -457,7 +459,7 @@ void DX12RHI::ResetBuffers()
 	//	SwapChainBuffers[i].Reset();
 	//}
 	//DepthStencilBuffer.Reset();
-
+	//
 	//if (!BackBufferRT)
 	//{
 	//	return;
@@ -491,17 +493,18 @@ void DX12RHI::CreateRTV()
 	//Create RenderTargetView
 	for (UINT i = 0; i < SwapChainBufferCount; i++)
 	{	
-		//auto RTBuffer = static_cast<DX12GPURenderTargetBuffer*>(BackBufferRT->GetColorBuffer(i));
-		//SwapChain->GetBuffer(i, IID_PPV_ARGS(&RTBuffer->GetResource()));
-		//auto Allocation = RtvHeap->Allocate(1);
-		//RTBuffer->SetHandleOffset(Allocation.Offset);
-		//RTBuffer->CreateView(D3dDevice.Get(), Allocation);
+		auto RTBuffer = static_cast<DX12GPURenderTargetBuffer*>(BackBufferRT->GetColorBuffer(i));
+		SwapChain->GetBuffer(i, IID_PPV_ARGS(&RTBuffer->GetResource()));
+
+		auto Allocation = RtvHeap->Allocate(1);
+		RTBuffer->SetHandleOffset(Allocation.Offset);
+		RTBuffer->CreateView(D3dDevice.Get(), Allocation);
 		//
 		//
 		//
-		SwapChain->GetBuffer(i, IID_PPV_ARGS(&SwapChainBuffers[i]));
-		auto RtvAllocation = RtvHeap->Allocate(1);
-		D3dDevice->CreateRenderTargetView(SwapChainBuffers[i].Get(), nullptr, RtvAllocation.Handle);
+		//SwapChain->GetBuffer(i, IID_PPV_ARGS(&SwapChainBuffers[i]));
+		//auto RtvAllocation = RtvHeap->Allocate(1);
+		//D3dDevice->CreateRenderTargetView(SwapChainBuffers[i].Get(), nullptr, RtvAllocation.Handle);
 	}
 
 }
@@ -509,41 +512,41 @@ void DX12RHI::CreateRTV()
 void DX12RHI::CreateDSV()
 {
 	//Create Depth/Stencil Resource Then Create View
-	
-	D3D12_RESOURCE_DESC DepthStencilDesc;
-	DepthStencilDesc.Dimension = D3D12_RESOURCE_DIMENSION_TEXTURE2D;
-	DepthStencilDesc.Alignment = 0;
-	DepthStencilDesc.Width = Wd->GetWidth();
-	DepthStencilDesc.Height = Wd->GetHeight();
-	DepthStencilDesc.DepthOrArraySize = 1;
-	DepthStencilDesc.MipLevels = 1;
-	DepthStencilDesc.Format = DXGI_FORMAT_R24G8_TYPELESS;
-	DepthStencilDesc.SampleDesc.Count = 1;
-	DepthStencilDesc.SampleDesc.Quality = 0;
-	DepthStencilDesc.Layout = D3D12_TEXTURE_LAYOUT_UNKNOWN;
-	DepthStencilDesc.Flags = D3D12_RESOURCE_FLAG_ALLOW_DEPTH_STENCIL;
-	
-	D3D12_CLEAR_VALUE OptClear;
-	OptClear.Format = DXGI_FORMAT_D24_UNORM_S8_UINT;//DXGI_FORMAT DepthStencilFormat
-	OptClear.DepthStencil.Depth = 1.0f;
-	OptClear.DepthStencil.Stencil = 0;
-	D3dDevice->CreateCommittedResource(&CD3DX12_HEAP_PROPERTIES(D3D12_HEAP_TYPE_DEFAULT),
-		D3D12_HEAP_FLAG_NONE,
-		&DepthStencilDesc,
-		D3D12_RESOURCE_STATE_DEPTH_WRITE,
-		&OptClear,
-		IID_PPV_ARGS(DepthStencilBuffer.GetAddressOf()));
-	
-	DepthStencilBuffer->SetName(L"MyDSBuffer");
-	
-	D3D12_DEPTH_STENCIL_VIEW_DESC DsvDesc;
-	DsvDesc.Flags = D3D12_DSV_FLAG_NONE;
-	DsvDesc.ViewDimension = D3D12_DSV_DIMENSION_TEXTURE2D;
-	DsvDesc.Format = DXGI_FORMAT_D24_UNORM_S8_UINT;//DXGI_FORMAT mDepthStencilFormat
-	DsvDesc.Texture2D.MipSlice = 0;
-	
-	auto DsvAllocation = DsvHeap->Allocate(1);
-	D3dDevice->CreateDepthStencilView(DepthStencilBuffer.Get(), &DsvDesc, DsvAllocation.Handle);
+	//
+	//D3D12_RESOURCE_DESC DepthStencilDesc;
+	//DepthStencilDesc.Dimension = D3D12_RESOURCE_DIMENSION_TEXTURE2D;
+	//DepthStencilDesc.Alignment = 0;
+	//DepthStencilDesc.Width = Wd->GetWidth();
+	//DepthStencilDesc.Height = Wd->GetHeight();
+	//DepthStencilDesc.DepthOrArraySize = 1;
+	//DepthStencilDesc.MipLevels = 1;
+	//DepthStencilDesc.Format = DXGI_FORMAT_R24G8_TYPELESS;
+	//DepthStencilDesc.SampleDesc.Count = 1;
+	//DepthStencilDesc.SampleDesc.Quality = 0;
+	//DepthStencilDesc.Layout = D3D12_TEXTURE_LAYOUT_UNKNOWN;
+	//DepthStencilDesc.Flags = D3D12_RESOURCE_FLAG_ALLOW_DEPTH_STENCIL;
+	//
+	//D3D12_CLEAR_VALUE OptClear;
+	//OptClear.Format = DXGI_FORMAT_D24_UNORM_S8_UINT;//DXGI_FORMAT DepthStencilFormat
+	//OptClear.DepthStencil.Depth = 1.0f;
+	//OptClear.DepthStencil.Stencil = 0;
+	//D3dDevice->CreateCommittedResource(&CD3DX12_HEAP_PROPERTIES(D3D12_HEAP_TYPE_DEFAULT),
+	//	D3D12_HEAP_FLAG_NONE,
+	//	&DepthStencilDesc,
+	//	D3D12_RESOURCE_STATE_DEPTH_WRITE,
+	//	&OptClear,
+	//	IID_PPV_ARGS(DepthStencilBuffer.GetAddressOf()));
+	//
+	//DepthStencilBuffer->SetName(L"MyDSBuffer");
+	//
+	//D3D12_DEPTH_STENCIL_VIEW_DESC DsvDesc;
+	//DsvDesc.Flags = D3D12_DSV_FLAG_NONE;
+	//DsvDesc.ViewDimension = D3D12_DSV_DIMENSION_TEXTURE2D;
+	//DsvDesc.Format = DXGI_FORMAT_D24_UNORM_S8_UINT;//DXGI_FORMAT mDepthStencilFormat
+	//DsvDesc.Texture2D.MipSlice = 0;
+	//
+	//auto DsvAllocation = DsvHeap->Allocate(1);
+	//D3dDevice->CreateDepthStencilView(DepthStencilBuffer.Get(), &DsvDesc, DsvAllocation.Handle);
 
 	//new
 	auto RTBuffer = static_cast<DX12GPURenderTargetBuffer*>(BackBufferRT->GetDepthStencilBuffer());
@@ -551,6 +554,7 @@ void DX12RHI::CreateDSV()
 	RTBuffer->SetHandleOffset(Allocation.Offset);
 	RTBuffer->CreateView(D3dDevice.Get(), Allocation);
 }
+
 
 void DX12RHI::CreateViewPortAndScissorRect()
 {
@@ -585,7 +589,6 @@ D3D12_CPU_DESCRIPTOR_HANDLE DX12RHI::CurrentBackBufferView() const
 	//	CurrentBackBufferIndex,
 	//	RtvDescriptorSize);
 
-	
 	auto Buffer = BackBufferRT->GetColorBuffer(CurrentBackBufferIndex);
 	auto Handle = CD3DX12_CPU_DESCRIPTOR_HANDLE(RtvHeap->GetCurrentHeap()->GetCPUDescriptorHandleForHeapStart());
 	Handle.Offset(Buffer->GetHandleOffset(), RtvDescriptorSize);

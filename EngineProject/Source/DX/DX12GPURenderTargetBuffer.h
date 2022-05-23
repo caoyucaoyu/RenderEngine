@@ -25,6 +25,7 @@ public:
 	D3D12_CLEAR_VALUE OptClear;
 
 	Microsoft::WRL::ComPtr<ID3D12Resource> GetResource() { return RTResource; }
+
 private:
 	Microsoft::WRL::ComPtr<ID3D12Resource> RTResource;
 

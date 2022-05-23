@@ -17,12 +17,6 @@ public:
 
 	virtual void SetHandleOffset(UINT32 Offset) 
 	{ 
-		//out
-		if (Type == RTBufferType::Color)
-			cout << "Set Color RTBuffer Offset: " << Offset << endl << endl;
-		else if (Type == RTBufferType::DepthStencil)
-			cout << "Set Depth RTBuffer Offset: " << Offset << endl << endl;
-
 		HandleOffset = Offset;
 	};
 	virtual UINT32 GetHandleOffset() { return HandleOffset; }

@@ -32,6 +32,7 @@ void DX12GPURenderTargetBuffer::CreateResource(ID3D12Device* Device)
 		ResourceState,
 		&OptClear,
 		IID_PPV_ARGS(RTResource.GetAddressOf()));
+	cout<<"Create RT Resource"<<endl;
 }
 
 void DX12GPURenderTargetBuffer::CreateView(ID3D12Device* Device, FAllocation Allocation)
@@ -58,7 +59,6 @@ void DX12GPURenderTargetBuffer::CreateView(ID3D12Device* Device, FAllocation All
 
 void DX12GPURenderTargetBuffer::ResetResource()
 {
-	OutputDebugStringA("SS ResetDXResource\n");
 	RTResource.Reset();
 }
 
@@ -93,7 +93,6 @@ void DX12GPURenderTargetBuffer::InitDepthStencilType()
 		&OptClear,
 		IID_PPV_ARGS(DepthStencilBuffer.GetAddressOf()));*/
 
-	cout<<"Init DSVRTBuffer"<<endl;
 }
 
 void DX12GPURenderTargetBuffer::InitColorType()
@@ -118,6 +117,4 @@ void DX12GPURenderTargetBuffer::InitColorType()
 	OptClear.Color[1] = 0;
 	OptClear.Color[2] = 0;
 	OptClear.Color[3] = 0;
-
-	cout << "Init RTVRTBuffer" << endl;
 }
