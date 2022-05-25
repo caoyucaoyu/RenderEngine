@@ -39,9 +39,6 @@ void Engine::Init()
 	MTimer->Start();
 	MScene->Init();
 
-	//OldRun
-	//MOldRender = new OldRenderer();
-	//MOldRender->Init();
 }
 
 void Engine::Destroy()
@@ -49,9 +46,6 @@ void Engine::Destroy()
 	if (MEngine)
 	{
 		RenderThread::DestroyRenderThread();
-
-		//OldRun
-		//delete MEngine->MOldRender;
 
 		delete MEngine->MScene;
 		delete MEngine->MAssetsManager;
@@ -69,8 +63,6 @@ void Engine::Run()
 	MScene->LoadMapActors();
 	MScene->PresentCurrentMap();
 
-	//OldRun
-	//MOldRender->InitDraw();
 	//RenderThread::Get()->Start();
 
 #if PLATFORM_WINDOWS
@@ -96,7 +88,6 @@ void Engine::Tick()
 	//Input Update Moved to :Window Run 
 	MTimer->Tick();
 	MScene->Tick();
-
 
 	RenderThread* RenderThread = RenderThread::Get();
 	RenderThread->TriggerRender();//Task give end

@@ -9,5 +9,6 @@ public:
 	DX12GPURenderTarget(std::string Name, UINT W, UINT H);
 	~DX12GPURenderTarget() {};
 
-
+	D3D12_VIEWPORT Viewport;
+	D3D12_RECT ScissorRect;
 };

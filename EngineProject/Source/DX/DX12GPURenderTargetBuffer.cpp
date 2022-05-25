@@ -18,58 +18,12 @@ DX12GPURenderTargetBuffer::DX12GPURenderTargetBuffer(RTBufferType Type, UINT W, 
 		InitColorType();
 }
 
-DX12GPURenderTargetBuffer::~DX12GPURenderTargetBuffer()
-{
-
-}
-
-void DX12GPURenderTargetBuffer::CreateResource(ID3D12Device* Device)
-{
-	Device->CreateCommittedResource(
-		&CD3DX12_HEAP_PROPERTIES(D3D12_HEAP_TYPE_DEFAULT),
-		D3D12_HEAP_FLAG_NONE,
-		&Desc,
-		ResourceState,
-		&OptClear,
-		IID_PPV_ARGS(RTResource.GetAddressOf()));
-	cout<<"Create RT Resource"<<endl;
-}
-
-void DX12GPURenderTargetBuffer::CreateView(ID3D12Device* Device, FAllocation Allocation)
-{
-	
-	if (Type == RTBufferType::Color)
-	{
-		D3D12_RENDER_TARGET_VIEW_DESC RtvDesc = {};
-		RtvDesc.Format = DXGI_FORMAT_R8G8B8A8_UNORM;
-		RtvDesc.ViewDimension = D3D12_RTV_DIMENSION_TEXTURE2D;
-		RtvDesc.Texture2D.PlaneSlice = 0;
-		Device->CreateRenderTargetView(RTResource.Get(), &RtvDesc, Allocation.Handle);
-	}
-	else if (Type == RTBufferType::DepthStencil)
-	{
-		D3D12_DEPTH_STENCIL_VIEW_DESC DsvDesc;
-		DsvDesc.Flags = D3D12_DSV_FLAG_NONE;
-		DsvDesc.ViewDimension = D3D12_DSV_DIMENSION_TEXTURE2D;
-		DsvDesc.Format = DXGI_FORMAT_D24_UNORM_S8_UINT;//DXGI_FORMAT_D24_UNORM_S8_UINT
-		DsvDesc.Texture2D.MipSlice = 0;
-		Device->CreateDepthStencilView(RTResource.Get(), &DsvDesc, Allocation.Handle);
-	}
-}
-
-void DX12GPURenderTargetBuffer::ResetResource()
-{
-	RTResource.Reset();
-}
-
-void DX12GPURenderTargetBuffer::SetResourceName(std::string ResourceName)
-{
-	RTResource->SetName((LPCWSTR)ResourceName.c_str());
-}
-
 void DX12GPURenderTargetBuffer::InitDepthStencilType()
 {
-	ResourceState = D3D12_RESOURCE_STATES::D3D12_RESOURCE_STATE_DEPTH_WRITE;//D3D12_RESOURCE_STATE_GENERIC_READ;
+	ResourceState = D3D12_RESOURCE_STATES::D3D12_RESOURCE_STATE_GENERIC_READ; 
+	//D3D12_RESOURCE_STATE_DEPTH_WRITE
+	//D3D12_RESOURCE_STATE_GENERIC_READ
+	//D3D12_RESOURCE_STATE_DEPTH_WRITE
 
 	Desc.Dimension = D3D12_RESOURCE_DIMENSION_TEXTURE2D;
 	Desc.Alignment = 0;
@@ -117,4 +71,52 @@ void DX12GPURenderTargetBuffer::InitColorType()
 	OptClear.Color[1] = 0;
 	OptClear.Color[2] = 0;
 	OptClear.Color[3] = 0;
+}
+
+DX12GPURenderTargetBuffer::~DX12GPURenderTargetBuffer()
+{
+
+}
+
+void DX12GPURenderTargetBuffer::CreateResource(ID3D12Device* Device)
+{
+	Device->CreateCommittedResource(
+		&CD3DX12_HEAP_PROPERTIES(D3D12_HEAP_TYPE_DEFAULT),
+		D3D12_HEAP_FLAG_NONE,
+		&Desc,
+		ResourceState,
+		&OptClear,
+		IID_PPV_ARGS(RTResource.GetAddressOf()));
+	//cout<<"Create RT Resource"<<endl;
+}
+
+void DX12GPURenderTargetBuffer::CreateView(ID3D12Device* Device, FAllocation Allocation)
+{	
+	if (Type == RTBufferType::Color)
+	{
+		D3D12_RENDER_TARGET_VIEW_DESC RtvDesc = {};
+		RtvDesc.Format = DXGI_FORMAT_R8G8B8A8_UNORM;
+		RtvDesc.ViewDimension = D3D12_RTV_DIMENSION_TEXTURE2D;
+		RtvDesc.Texture2D.PlaneSlice = 0;
+		Device->CreateRenderTargetView(RTResource.Get(), &RtvDesc, Allocation.Handle);
+	}
+	else if (Type == RTBufferType::DepthStencil)
+	{
+		D3D12_DEPTH_STENCIL_VIEW_DESC DsvDesc;
+		DsvDesc.Flags = D3D12_DSV_FLAG_NONE;
+		DsvDesc.ViewDimension = D3D12_DSV_DIMENSION_TEXTURE2D;
+		DsvDesc.Format = DXGI_FORMAT_D24_UNORM_S8_UINT;//DXGI_FORMAT_D24_UNORM_S8_UINT
+		DsvDesc.Texture2D.MipSlice = 0;
+		Device->CreateDepthStencilView(RTResource.Get(), &DsvDesc, Allocation.Handle);
+	}
+}
+
+void DX12GPURenderTargetBuffer::ResetResource()
+{
+	RTResource.Reset();
+}
+
+void DX12GPURenderTargetBuffer::SetResourceName(std::string ResourceName)
+{
+	RTResource->SetName((LPCWSTR)ResourceName.c_str());
 }

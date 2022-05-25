@@ -27,8 +27,7 @@ public:
 	void UpdateMainPassBuffer(PassConstants NewPasConstants);
 	
 	GPUMeshBuffer* GetMeshBuffer(std::string MeshBufferName);
-	GPUCommonBuffer* GetCameraBuffer(int Idx);
-
+	GPUCommonBuffer* GetMainPassBuffer(int Idx);
 	GPUTexture* FindGPUTexture(std::string Name);
 
 private:
@@ -37,10 +36,12 @@ private:
 
 	std::unordered_map<std::string, GPUMeshBuffer*> GPUMeshBuffers;
 
-	std::vector<GPUCommonBuffer*> CameraCommonBuffers;
+	//我RenderScene有MainPassCommonBuffer了
+	//现在就是换了个Shader，俩Shader接不同的值，就一个P矩阵不一样,我他妈需要再创建一个CommonBuffer，感觉有点怪啊。
+	std::vector<GPUCommonBuffer*> MainPassCommonBuffers;
+	std::vector<GPUCommonBuffer*> MainPassCommonBuffersLight;
 
-	//选用哪一个？
-	//std::vector<GPUTexture*>Textures;
+
 	std::unordered_map<std::string, GPUTexture*> GPUTextures;
 
 	std::unordered_map<std::string, Material*> GPUMaterials;

@@ -19,8 +19,10 @@ Scene::~Scene()
 void Scene::Tick()
 {
 	MainCamera.Update();
+	MainLight.Update();
 
 	UpdateMainPassBuffer();
+
 	//if (Input::GetKeyState(Key::LM) == KeyState::BtnDown)
 	//{
 		//MeshActor* ma;
@@ -108,6 +110,7 @@ Camera& Scene::GetMainCamera()
 	return MainCamera;
 }
 
+
 void Scene::UpdateMainPassBuffer()
 {
 	glm::mat4 VP_Matrix = MainCamera.GetProj() * MainCamera.GetView();
@@ -124,28 +127,11 @@ void Scene::UpdateMainPassBuffer()
 	NewPasConstants.ambientLight = { 0.25f,0.25f,0.35f,1.0f };
 	NewPasConstants.lights[0].strength = { 1.0f,1.0f,1.0f };
 	NewPasConstants.lights[0].direction = { 1.0f, 0.0f, 0.0f };//计算方向
-	NewPasConstants.lights[0].direction = glm::normalize(NewPasConstants.lights[0].direction);
-
-	static float sunPhi = 0;
-	static float sunThe = MathHelper::Pi / 4;
-	const float dt = Engine::Get()->GetTimer()->DeltaTime();
-
-	//写Input里去
-	if (GetAsyncKeyState(VK_LEFT) & 0x8000)
-		sunPhi -= 1.0f * dt;
-	if (GetAsyncKeyState(VK_RIGHT) & 0x8000)
-		sunPhi += 1.0f * dt;
-	if (GetAsyncKeyState(VK_UP) & 0x8000)
-		sunThe -= 1.0f * dt;
-	if (GetAsyncKeyState(VK_DOWN) & 0x8000)
-		sunThe += 1.0f * dt;
-
-	sunThe = MathHelper::Clamp(sunThe, 0.01f, MathHelper::Pi * 0.55f);
-	glm::vec3 sunDir = -MathHelper::SphericalToCartesian(1.0f, sunThe, sunPhi);
-	NewPasConstants.lights[0].direction = sunDir;
+	NewPasConstants.lights[0].direction = MainLight.GetSunLightDir();
 
 	RenderThread* RenderT = RenderThread::Get();
 	Task* task = new Task([=]() {RenderT->GetRenderScene()->UpdateMainPassBuffer(NewPasConstants); });
 	RenderT->AddTask(task);
+
 }
 

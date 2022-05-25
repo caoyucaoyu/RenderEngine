@@ -78,7 +78,7 @@ struct ObjectConstants
 
 struct PassConstants
 {
-	Light lights[MAX_LIGHTS];
+	LightDate lights[MAX_LIGHTS];
 
 	glm::mat4 ViewProj_M = MathHelper::GIdentity4x4();
 	glm::mat4 CameraPos_M = MathHelper::GIdentity4x4();
@@ -87,6 +87,14 @@ struct PassConstants
 
 	glm::vec3 CameraPos;
 	float Time = 0;
+
+	//ShadowMap Added
+	glm::vec2 RenderTargetSize = { 0.0f,0.0f };
+	float nearZ = 0.0f;
+	float farZ = 0.0f;
+
+	glm::mat4 ShadowTransform = MathHelper::GIdentity4x4();
+
 };
 
 struct MaterialConstants

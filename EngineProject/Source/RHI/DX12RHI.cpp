@@ -56,13 +56,10 @@ void DX12RHI::ResizeWindow(UINT32 Width, UINT32 Height)
 	FlushCommandQueue();
 	ResetCommandList(CommandListAllocator);
 
-	//
 	ResetBuffers();
 	SwapChain->ResizeBuffers(SwapChainBufferCount, Width, Height, DXGI_FORMAT_R8G8B8A8_UNORM, DXGI_SWAP_CHAIN_FLAG_ALLOW_MODE_SWITCH);
 	CurrentBackBufferIndex = 0;
-	//
 	CreateRTV();
-	//
 	CreateDSV();
 
 	CreateViewPortAndScissorRect();
@@ -101,11 +98,6 @@ void DX12RHI::CreateFrameResource()
 	{
 		FrameResources[i] = std::make_unique<FrameResource>(D3dDevice.Get());
 	}
-}
-
-void DX12RHI::RebuildFrameResource(RenderScene* MRenderScene)
-{
-
 }
 
 void DX12RHI::UpdateFrameResource()
@@ -178,7 +170,7 @@ void DX12RHI::PrepareBufferHeap()
 }
 
 
-void DX12RHI::SetRenderTargetBegin()
+void DX12RHI::SetBackBufferBegin()
 {
 	//后台缓冲资源从呈现状态转换到渲染目标状态
 	CommandList->ResourceBarrier(1, &CD3DX12_RESOURCE_BARRIER::Transition(GetCurrentBackBuffer().Get(),
@@ -196,15 +188,95 @@ void DX12RHI::SetRenderTargetBegin()
 	CommandList->OMSetRenderTargets(1, &CurrentBackBufferView(), true, &DepthStencilView());
 }
 
-void DX12RHI::SetRenderTargetEnd()
+void DX12RHI::SetBackBufferEnd()
 {
 	//后台缓冲区的状态改成呈现状态
 	CommandList->ResourceBarrier(1, &CD3DX12_RESOURCE_BARRIER::Transition(GetCurrentBackBuffer().Get(),
 		D3D12_RESOURCE_STATE_RENDER_TARGET, D3D12_RESOURCE_STATE_PRESENT));
 }
 
+void DX12RHI::SetRenderTargetBegin(GPURenderTarget* RenderTarget)
+{
+	auto DxRT = static_cast<DX12GPURenderTarget*>(RenderTarget);
 
-void DX12RHI::SetGraphicsPipeline(Pipeline* NPipeline)
+	//设置视口和裁剪矩形
+	CommandList->RSSetViewports(1, &DxRT->Viewport);
+	CommandList->RSSetScissorRects(1, &DxRT->ScissorRect);
+
+	//RenderTarget CPU Descriptor Handle
+	const D3D12_CPU_DESCRIPTOR_HANDLE* RtvHandleP = nullptr;
+	auto RTBuffer = DxRT->GetColorBuffer(0);//这里取 0 ，交换链2个ColorBuffer特殊情况，用了特殊函数特定处理，其他都是一个ColorBuffer，遇到多个也可以再改
+	if (RTBuffer != nullptr)
+	{
+		auto RTBufferHandle = CD3DX12_CPU_DESCRIPTOR_HANDLE(RtvHeap->GetCurrentHeap()->GetCPUDescriptorHandleForHeapStart());
+		RTBufferHandle.Offset(RTBuffer->GetHandleOffset(), RtvDescriptorSize);
+		RtvHandleP = &RTBufferHandle;
+	}
+
+	//DepthStencil CPU Descriptor Handle
+	const D3D12_CPU_DESCRIPTOR_HANDLE* DsvHandleP = nullptr;
+	auto DSBuffer = DxRT->GetDepthStencilBuffer();
+	if (DSBuffer != nullptr)
+	{
+		auto DSBufferHandle = CD3DX12_CPU_DESCRIPTOR_HANDLE(DsvHeap->GetCurrentHeap()->GetCPUDescriptorHandleForHeapStart());
+		DSBufferHandle.Offset(DSBuffer->GetHandleOffset(), DsvDescriptorSize);
+		DsvHandleP = &DSBufferHandle;
+	}
+
+	//指定将要渲染的缓冲区，指定RTV和DSV
+	CommandList->OMSetRenderTargets(0, RtvHandleP, false, DsvHandleP);
+
+	////清除后台缓冲区和深度缓冲区，并赋值
+	if(RtvHandleP !=nullptr)
+		CommandList->ClearRenderTargetView(*RtvHandleP, DirectX::Colors::Black, 0, nullptr);
+	if(DsvHandleP !=nullptr)
+		CommandList->ClearDepthStencilView(*DsvHandleP, D3D12_CLEAR_FLAG_DEPTH | D3D12_CLEAR_FLAG_STENCIL, 1.0f, 0, 0, nullptr);
+}
+
+void DX12RHI::SetRenderTargetBufferBegin(GPURenderTarget* RenderTarget)
+{
+	for (auto ColorBuffer : RenderTarget->GetColorBuffers())
+	{
+		auto DxColorBuffer = static_cast<DX12GPURenderTargetBuffer*>(ColorBuffer);
+
+		CommandList->ResourceBarrier(1, &CD3DX12_RESOURCE_BARRIER::Transition(DxColorBuffer->GetResource().Get(),
+			D3D12_RESOURCE_STATE_COMMON, D3D12_RESOURCE_STATE_RENDER_TARGET));
+	}
+
+	auto DSBuffer = RenderTarget->GetDepthStencilBuffer();
+	if (DSBuffer)
+	{
+		auto DxDSBuffer = static_cast<DX12GPURenderTargetBuffer*>(DSBuffer);
+
+		CommandList->ResourceBarrier(1, &CD3DX12_RESOURCE_BARRIER::Transition(DxDSBuffer->GetResource().Get(),
+			D3D12_RESOURCE_STATE_GENERIC_READ, D3D12_RESOURCE_STATE_DEPTH_WRITE));
+	}
+}
+
+void DX12RHI::SetRenderTargetBufferEnd(GPURenderTarget* RenderTarget)
+{
+	for (auto ColorBuffer : RenderTarget->GetColorBuffers())
+	{
+		auto DxColorBuffer = static_cast<DX12GPURenderTargetBuffer*>(ColorBuffer);
+
+		//后台缓冲资源从呈现状态转换到渲染目标状态
+		CommandList->ResourceBarrier(1, &CD3DX12_RESOURCE_BARRIER::Transition(DxColorBuffer->GetResource().Get(),
+			D3D12_RESOURCE_STATE_RENDER_TARGET, D3D12_RESOURCE_STATE_COMMON));
+	}
+
+	auto DSBuffer = RenderTarget->GetDepthStencilBuffer();
+	if (DSBuffer)
+	{
+		auto DxDSBuffer = static_cast<DX12GPURenderTargetBuffer*>(DSBuffer);
+
+		//资源从写入状态转换到只读目标状态
+		CommandList->ResourceBarrier(1, &CD3DX12_RESOURCE_BARRIER::Transition(DxDSBuffer->GetResource().Get(),
+			D3D12_RESOURCE_STATE_DEPTH_WRITE, D3D12_RESOURCE_STATE_GENERIC_READ));
+	}
+}
+
+
+void DX12RHI::SetGraphicsPipeline(Pipeline* NPipeline, int TemporaryType)
 {
 	//DX12Pipeline* InDX12Pipeline = static_cast<DX12Pipeline*>(NPipeline);
 	//CommandList->SetPipelineState(InDX12Pipeline->GetPipelineState().Get());
@@ -212,7 +284,13 @@ void DX12RHI::SetGraphicsPipeline(Pipeline* NPipeline)
 	//DX12Shader* PipelineShader = static_cast<DX12Shader*>(InDX12Pipeline->GetShader());
 	//CommandList->SetGraphicsRootSignature(PipelineShader->GetRootSignatureDx().Get());
 
-	CommandList->SetPipelineState(PSOs[1].Get());
+	if (TemporaryType == 0)
+		CommandList->SetPipelineState(PSOs[0].Get());
+	else if (TemporaryType == 1)
+		CommandList->SetPipelineState(PSOs[1].Get());
+	else if (TemporaryType == 2)
+		CommandList->SetPipelineState(PSOs[2].Get());
+
 	CommandList->SetGraphicsRootSignature(RootSignature.Get());
 }
 
@@ -316,10 +394,12 @@ GPUTexture* DX12RHI::CreateTexture(std::string TextureName, std::wstring FileNam
 	return RTexture;
 }
 
-GPUTexture* DX12RHI::CreateTexture(std::string TextureName)
+GPUTexture* DX12RHI::CreateTexture(std::string TextureName, GPURenderTargetBuffer* RTBuffer)
 {
 	DX12GPUTexture* RTexture = new DX12GPUTexture();
 	RTexture->Name = TextureName;
+
+	auto DxRtBuffer = static_cast<DX12GPURenderTargetBuffer*>(RTBuffer);
 
 	auto HandleAndOffset = CbvSrvUavHeap->Allocate(1);
 	RTexture->SetHandleOffset(HandleAndOffset.Offset);
@@ -335,9 +415,14 @@ GPUTexture* DX12RHI::CreateTexture(std::string TextureName)
 	srvDesc.Texture2D.MostDetailedMip = 0;//细节最详尽的mipmap层级为0
 	srvDesc.Texture2D.MipLevels = 1;//RTexture->TResource->GetDesc().MipLevels;//mipmap 层级数量
 	srvDesc.Texture2D.ResourceMinLODClamp = 0.0f;//可访问的mipmap最小层级数为0
-	//创建SRV
-	D3dDevice->CreateShaderResourceView(RTexture->TResource.Get(), &srvDesc, Handle);
 
+	//创建SRV
+	//D3dDevice->CreateShaderResourceView(RTexture->TResource.Get(), &srvDesc, Handle);
+
+	//创建SRV
+	//使用RenderTargetBuffer的Resource创建SRV
+	//RenderTargetBuffer里的Texture存Offset
+	D3dDevice->CreateShaderResourceView(DxRtBuffer->GetResource().Get(), &srvDesc, Handle);
 
 	return RTexture;
 }
@@ -354,17 +439,23 @@ GPURenderTargetBuffer* DX12RHI::CreateRenderTargetBuffer(RTBufferType Type, UINT
 	Buffer->CreateResource(D3dDevice.Get());
 
 	FAllocation Allocation;
-	if(Type == RTBufferType::Color)
+	if (Type == RTBufferType::Color)
+	{
 		Allocation = RtvHeap->Allocate(1);
-	else if (Type == RTBufferType::DepthStencil)
+	}
+	else
+	{
 		Allocation = DsvHeap->Allocate(1);
-	
+	}
+
 	Buffer->SetHandleOffset(Allocation.Offset);
 	Buffer->CreateView(D3dDevice.Get(), Allocation);
+
+
 	return Buffer;
 }
 
-void DX12RHI::XXX()
+void DX12RHI::RootSignatureAndPSO()
 {
 	BuildRootSignature();
 	BuildShadersAndInputLayout();
@@ -449,7 +540,7 @@ void DX12RHI::CreateSwapChain()
 void DX12RHI::CreateRtvAndDsvDescriptorHeaps()
 {
 	RtvHeap = std::make_unique<DescriptorHeap>(D3D12_DESCRIPTOR_HEAP_TYPE_RTV, D3dDevice, SwapChainBufferCount);
-	DsvHeap = std::make_unique<DescriptorHeap>(D3D12_DESCRIPTOR_HEAP_TYPE_DSV, D3dDevice, 1);
+	DsvHeap = std::make_unique<DescriptorHeap>(D3D12_DESCRIPTOR_HEAP_TYPE_DSV, D3dDevice);
 }
 
 void DX12RHI::ResetBuffers()
@@ -482,7 +573,6 @@ void DX12RHI::ResetBuffers()
 	GPURenderTargetBuffer* DSBuffer = BackBufferRT->GetDepthStencilBuffer();
 	if (DSBuffer != nullptr)
 		DSBuffer->ResetResource();
-
 	RTBufferdx = static_cast<DX12GPURenderTargetBuffer*>(DSBuffer);
 	RTBufferdx->CreateResource(D3dDevice.Get());
 	DsvHeap->Deallocate(RTBufferdx->GetHandleOffset(), 1);
@@ -494,19 +584,28 @@ void DX12RHI::CreateRTV()
 	for (UINT i = 0; i < SwapChainBufferCount; i++)
 	{	
 		auto RTBuffer = static_cast<DX12GPURenderTargetBuffer*>(BackBufferRT->GetColorBuffer(i));
-		SwapChain->GetBuffer(i, IID_PPV_ARGS(&RTBuffer->GetResource()));
 
+		//错误
+		/*	SwapChain->GetBuffer(i, IID_PPV_ARGS(&RTBuffer->GetResource()));
+			cout<<"GetBuffer\n";
+
+			auto Allocation = RtvHeap->Allocate(1);
+			RTBuffer->SetHandleOffset(Allocation.Offset);
+			RTBuffer->CreateView(D3dDevice.Get(), Allocation);*/
+		
+		//正确
+		ComPtr<ID3D12Resource> Res;
+		SwapChain->GetBuffer(i, IID_PPV_ARGS(&Res));
+		RTBuffer->SetResource(Res);
 		auto Allocation = RtvHeap->Allocate(1);
 		RTBuffer->SetHandleOffset(Allocation.Offset);
 		RTBuffer->CreateView(D3dDevice.Get(), Allocation);
-		//
-		//
-		//
+
+		//原有
 		//SwapChain->GetBuffer(i, IID_PPV_ARGS(&SwapChainBuffers[i]));
 		//auto RtvAllocation = RtvHeap->Allocate(1);
 		//D3dDevice->CreateRenderTargetView(SwapChainBuffers[i].Get(), nullptr, RtvAllocation.Handle);
 	}
-
 }
 
 void DX12RHI::CreateDSV()
@@ -616,11 +715,21 @@ ComPtr<ID3D12Resource> DX12RHI::GetCurrentBackBuffer() const
 
 void DX12RHI::BuildShadersAndInputLayout()
 {
+	//Default
 	MvsByteCode[0] = D3DUtil::CompileShader(L"Shaders\\color.hlsl", nullptr, "VS", "vs_5_0");
 	MpsByteCode[0] = D3DUtil::CompileShader(L"Shaders\\color.hlsl", nullptr, "PS", "ps_5_0");
 
+	//Dynamic
 	MvsByteCode[1] = D3DUtil::CompileShader(L"Shaders\\colorOffset.hlsl", nullptr, "VS", "vs_5_0");
 	MpsByteCode[1] = D3DUtil::CompileShader(L"Shaders\\colorOffset.hlsl", nullptr, "PS", "ps_5_0");
+
+	//ShadowMap
+	MvsByteCode[2] = D3DUtil::CompileShader(L"Shaders\\ShadowMap.hlsl", nullptr, "VS", "vs_5_0");
+	MpsByteCode[2] = D3DUtil::CompileShader(L"Shaders\\ShadowMap.hlsl", nullptr, "PS", "ps_5_0");
+
+	//ShadowMap
+	//MvsByteCode[3] = D3DUtil::CompileShader(L"Shaders\\ShadowMap.hlsl", nullptr, "VS", "vs_5_0");
+	//MpsByteCode[3] = D3DUtil::CompileShader(L"Shaders\\ShadowMap.hlsl", nullptr, "PS", "ps_5_0");
 
 	InputLayout =
 	{
@@ -658,12 +767,61 @@ void DX12RHI::BuildPSO()
 	PSOs.push_back(Pso);
 	D3dDevice->CreateGraphicsPipelineState(&PsoDesc, IID_PPV_ARGS(&PSOs[0]));
 
+
 	//PsoDesc.RasterizerState.FillMode = D3D12_FILL_MODE_WIREFRAME;  //线框模式
 	PsoDesc.VS = { reinterpret_cast<BYTE*>(MvsByteCode[1]->GetBufferPointer()),MvsByteCode[1]->GetBufferSize() };
 	PsoDesc.PS = { reinterpret_cast<BYTE*>(MpsByteCode[1]->GetBufferPointer()),MpsByteCode[1]->GetBufferSize() };
 
 	PSOs.push_back(Pso);
 	D3dDevice->CreateGraphicsPipelineState(&PsoDesc, IID_PPV_ARGS(&PSOs[1]));
+
+
+
+	D3D12_GRAPHICS_PIPELINE_STATE_DESC opaquePsoDesc = {};
+	ZeroMemory(&opaquePsoDesc, sizeof(D3D12_GRAPHICS_PIPELINE_STATE_DESC));
+	opaquePsoDesc.InputLayout = { InputLayout.data(), (UINT)InputLayout.size() };
+	opaquePsoDesc.pRootSignature = RootSignature.Get();
+	//opaquePsoDesc.VS = { reinterpret_cast<BYTE*>(MvsByteCode[2]->GetBufferPointer()),MvsByteCode[2]->GetBufferSize() };
+	//opaquePsoDesc.PS = { reinterpret_cast<BYTE*>(MpsByteCode[2]->GetBufferPointer()),MpsByteCode[2]->GetBufferSize() };
+	// 
+	//opaquePsoDesc.VS =
+	//{
+	//	reinterpret_cast<BYTE*>(shaders["standardVS"]->GetBufferPointer()),
+	//	shaders["standardVS"]->GetBufferSize()
+	//};
+	//opaquePsoDesc.PS =
+	//{
+	//	reinterpret_cast<BYTE*>(shaders["opaquePS"]->GetBufferPointer()),
+	//	shaders["opaquePS"]->GetBufferSize()
+	//};
+	opaquePsoDesc.RasterizerState = CD3DX12_RASTERIZER_DESC(D3D12_DEFAULT);
+	//opaquePsoDesc.RasterizerState.FillMode = D3D12_FILL_MODE_WIREFRAME;
+	opaquePsoDesc.BlendState = CD3DX12_BLEND_DESC(D3D12_DEFAULT);
+	opaquePsoDesc.DepthStencilState = CD3DX12_DEPTH_STENCIL_DESC(D3D12_DEFAULT);
+	opaquePsoDesc.SampleMask = UINT_MAX;	//0xffffffff,全部采样，没有遮罩
+	opaquePsoDesc.PrimitiveTopologyType = D3D12_PRIMITIVE_TOPOLOGY_TYPE_TRIANGLE;
+	//opaquePsoDesc.PrimitiveTopologyType = D3D12_PRIMITIVE_TOPOLOGY_TYPE_LINE;
+	opaquePsoDesc.NumRenderTargets = 1;
+	opaquePsoDesc.RTVFormats[0] = DXGI_FORMAT_R8G8B8A8_UNORM;	//归一化的无符号整型
+	opaquePsoDesc.DSVFormat = DXGI_FORMAT_D24_UNORM_S8_UINT;
+	opaquePsoDesc.SampleDesc.Count = 1;	//不使用4XMSAA
+	opaquePsoDesc.SampleDesc.Quality = 0;	////不使用4XMSAA
+	//PSOs.push_back(Pso);
+	//D3dDevice->CreateGraphicsPipelineState(&opaquePsoDesc, IID_PPV_ARGS(&PSOs[2]));
+	//ThrowIfFailed(D3dDevice->CreateGraphicsPipelineState(&opaquePsoDesc, IID_PPV_ARGS(&PSOs[2])));
+
+	D3D12_GRAPHICS_PIPELINE_STATE_DESC shadowMapPsoDesc = opaquePsoDesc;
+	//shadowMapPsoDesc.RasterizerState.DepthBias = 100000;//固定的偏移量
+	//shadowMapPsoDesc.RasterizerState.DepthBiasClamp = 0.0f;// 允许的最大深度偏移量
+	//shadowMapPsoDesc.RasterizerState.SlopeScaledDepthBias = 1.0f;//根据多边形斜率来控制偏移成都的缩放因子
+	shadowMapPsoDesc.pRootSignature = RootSignature.Get();
+	shadowMapPsoDesc.VS = { reinterpret_cast<BYTE*>(MvsByteCode[2]->GetBufferPointer()),MvsByteCode[2]->GetBufferSize() };
+	shadowMapPsoDesc.PS = { reinterpret_cast<BYTE*>(MpsByteCode[2]->GetBufferPointer()),MpsByteCode[2]->GetBufferSize() };
+	// 阴影图的渲染过程无需涉及渲染目标
+	shadowMapPsoDesc.RTVFormats[0] = DXGI_FORMAT_UNKNOWN;
+	shadowMapPsoDesc.NumRenderTargets = 0;	//没有渲染目标，禁止颜色输出
+	PSOs.push_back(Pso);
+	ThrowIfFailed(D3dDevice->CreateGraphicsPipelineState(&shadowMapPsoDesc, IID_PPV_ARGS(&PSOs[2])));
 }
 
 void DX12RHI::BuildRootSignature()
@@ -676,26 +834,29 @@ void DX12RHI::BuildRootSignature()
 
 
 	//RootSignature
-	CD3DX12_ROOT_PARAMETER SlotRootParameter[5];//根参数
+	CD3DX12_ROOT_PARAMETER SlotRootParameter[ParameterNum];//根参数
 
 	//创建描述符表
 	CD3DX12_DESCRIPTOR_RANGE CbvTable0;
 	CbvTable0.Init(D3D12_DESCRIPTOR_RANGE_TYPE_CBV, 1, 0);// 描述符类型 数量 寄存器槽号
 	CD3DX12_DESCRIPTOR_RANGE CbvTable1;
 	CbvTable1.Init(D3D12_DESCRIPTOR_RANGE_TYPE_CBV, 1, 1);
-	CD3DX12_DESCRIPTOR_RANGE CbvTable2;//新添加
+	CD3DX12_DESCRIPTOR_RANGE CbvTable2;
 	CbvTable2.Init(D3D12_DESCRIPTOR_RANGE_TYPE_CBV, 1, 2);
 
 	CD3DX12_DESCRIPTOR_RANGE TexTable0;
 	TexTable0.Init(D3D12_DESCRIPTOR_RANGE_TYPE_SRV, 1, 0);
 	CD3DX12_DESCRIPTOR_RANGE TexTable1;
 	TexTable1.Init(D3D12_DESCRIPTOR_RANGE_TYPE_SRV, 1, 1);
+	CD3DX12_DESCRIPTOR_RANGE TexTable2;
+	TexTable2.Init(D3D12_DESCRIPTOR_RANGE_TYPE_SRV, 1, 2);
 
 	SlotRootParameter[0].InitAsDescriptorTable(1, &CbvTable0);
 	SlotRootParameter[1].InitAsDescriptorTable(1, &CbvTable1);
-	SlotRootParameter[2].InitAsDescriptorTable(1, &CbvTable2);//新添加的
+	SlotRootParameter[2].InitAsDescriptorTable(1, &CbvTable2);
 	SlotRootParameter[3].InitAsDescriptorTable(1, &TexTable0, D3D12_SHADER_VISIBILITY_PIXEL);
 	SlotRootParameter[4].InitAsDescriptorTable(1, &TexTable1, D3D12_SHADER_VISIBILITY_PIXEL);
+	SlotRootParameter[5].InitAsDescriptorTable(1, &TexTable2, D3D12_SHADER_VISIBILITY_PIXEL);
 
 	//SlotRootParameter[2].InitAsConstantBufferView(2);//新添加 之后 删掉的
 
@@ -709,7 +870,7 @@ void DX12RHI::BuildRootSignature()
 
 	auto StaticSamplers = GetStaticSamplers();
 	CD3DX12_ROOT_SIGNATURE_DESC RootSigDesc(
-		5,//3个根参数
+		ParameterNum,//3个根参数
 		SlotRootParameter,//根参数指针
 		(UINT)StaticSamplers.size(),
 		StaticSamplers.data(),

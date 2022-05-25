@@ -206,7 +206,7 @@ int WindowWin32::Run()
 			Quit=true;
 		}
 	}
-	CalculateFrameStats();
+	//CalculateFrameStats();
 	return !Quit;
 }
 

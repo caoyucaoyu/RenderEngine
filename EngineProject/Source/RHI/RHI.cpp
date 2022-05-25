@@ -34,6 +34,11 @@ void RHI::DestroyRHI()
 		delete(MRHI);
 		MRHI = nullptr;
 	}
+	//if (BackBufferRT != nullptr)
+	//{
+	//	delete(BackBufferRT);
+	//	BackBufferRT = nullptr;
+	//}
 }
 
 RHI::RHI()

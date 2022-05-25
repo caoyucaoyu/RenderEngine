@@ -1,5 +1,6 @@
 #pragma once
 #include "Camera.h"
+#include "Light.h"
 
 struct MeshActor
 {
@@ -72,11 +73,15 @@ public:
 
 	int GetMeshActorNum();
 
-	std::vector<MeshActor*> GetSceneMeshActors();
 	Camera& GetMainCamera();
+	Light& GetMainLight() {return MainLight;}
+	std::vector<MeshActor*> GetSceneMeshActors();
+
+private:
+	void UpdateMainPassBuffer();
 
 private:
 	Camera MainCamera;
+	Light  MainLight;
 	std::vector<MeshActor*> SceneMeshActors;
-	void UpdateMainPassBuffer();
 };

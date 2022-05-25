@@ -63,7 +63,8 @@ void Camera::SetLens(float fovY, float aspect, float zn, float zf)
 	NearWindowHeight = 2.0f * NearZ * tanf(0.5f * FovY);
 	FarWindowHeight = 2.0f * FarZ * tanf(0.5f * FovY);
 
-	Proj= glm::perspectiveLH_ZO(FovY, Aspect, NearZ, FarZ);
+	Proj = glm::perspectiveLH_ZO(FovY, Aspect, NearZ, FarZ);
+
 }
 
 void Camera::LookAt(glm::vec3 pos, glm::vec3 target, glm::vec3 worldUp)

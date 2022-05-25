@@ -1,4 +1,5 @@
 #pragma once
+#include "DX12GPUTexture.h"
 
 enum class RTBufferType
 {
@@ -26,9 +27,10 @@ public:
 	UINT32 Hight;
 	RTBufferType Type;
 
+	GPUTexture* RenderTargetTexture;
+
 private:
 	UINT32 HandleOffset;
-
 };
 
 

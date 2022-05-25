@@ -26,9 +26,7 @@ public:
 	virtual void EndFrame() = 0;
 
 	virtual void CreateFrameResource() = 0;
-	virtual void RebuildFrameResource(RenderScene* MRenderScene) = 0;
 	virtual void UpdateFrameResource() = 0;
-
 	virtual int GetCurFrameResourceIdx() = 0;
 	virtual int GetFrameResourceCount() = 0;
 
@@ -36,10 +34,13 @@ public:
 	virtual void ResizeWindow(UINT32 Width, UINT32 Height) = 0;
 	virtual void DrawIndexedInstanced(UINT DrawIndexCount) = 0;
 
-	virtual void SetRenderTargetBegin() = 0;
-	virtual void SetRenderTargetEnd() = 0;
+	virtual void SetBackBufferBegin() = 0;
+	virtual void SetBackBufferEnd() = 0;
+	virtual void SetRenderTargetBegin(GPURenderTarget* RenderTarget) = 0;
+	virtual void SetRenderTargetBufferBegin(GPURenderTarget* RenderTarget) = 0;
+	virtual void SetRenderTargetBufferEnd(GPURenderTarget* RenderTarget) = 0;
 
-	virtual void SetGraphicsPipeline(Pipeline* NPipeline) = 0;
+	virtual void SetGraphicsPipeline(Pipeline* NPipeline,int TemporaryType) = 0;
 	virtual void SetRenderResourceTable(int Nu, UINT32 HeapOffset) = 0;//.....................................................
 	virtual void IASetMeshBuffer(GPUMeshBuffer* GPUMeshbuffer) = 0;
 
@@ -51,12 +52,12 @@ public:
 	virtual void AddCommonBuffer(int FrameSourceIndex, std::string, GPUCommonBuffer* GpuCommonBuffer) = 0;
 
 	virtual GPUTexture* CreateTexture(std::string TextureName, std::wstring FileName) = 0;
-	virtual GPUTexture* CreateTexture(std::string TextureName) = 0;
+	virtual GPUTexture* CreateTexture(std::string TextureName, GPURenderTargetBuffer* RTBuffer) = 0;
 
 	virtual GPURenderTarget* CreateRenderTarget(std::string RTName, UINT W, UINT H) = 0;
 	virtual GPURenderTargetBuffer* CreateRenderTargetBuffer(RTBufferType Type, UINT W, UINT H) = 0;
 
-	virtual void XXX() = 0;
+	virtual void RootSignatureAndPSO() = 0;
 
 protected:
 	static GPURenderTarget* BackBufferRT;

@@ -16,6 +16,8 @@
 
 Texture2D    gDiffuseMap : register(t0);
 Texture2D    gNormalMap : register(t1);
+Texture2D    gShadowMap : register(t2);
+
 
 SamplerState gSamPointWrap : register(s0);
 SamplerState gSamPointClamp : register(s1);
@@ -23,7 +25,6 @@ SamplerState gSamLinearWarp : register(s2);
 SamplerState gSamLinearClamp : register(s3);
 SamplerState gSamAnisotropicWarp : register(s4);
 SamplerState gSamAnisotropicClamp : register(s5);
-
 
 cbuffer cbPerObject : register(b0)
 {
@@ -77,7 +78,6 @@ VertexOut VS(VertexIn vin)
 
 	float3 PosW = mul(float4(vin.PosL, 1.0f), gWorld).xyz;//世界变换
 
-
 	vout.PosW = PosW;
 
 	vout.PosH = mul(float4(PosW, 1.0f), gViewProj);//MVP矩阵
@@ -86,36 +86,30 @@ VertexOut VS(VertexIn vin)
 	return vout;
 }
 
+
 float4 PS(VertexOut pin) : SV_Target
+//void PS(VertexOut pin) //: SV_Target
 {
 	float4 diffuseAlbedo = gNormalMap.Sample(gSamAnisotropicWarp, pin.TexC) * gDiffuseAlbedo;
-
-
-
+	
 	pin.NormalW = normalize(pin.NormalW);
-
+	
 	float3 toEyeW = normalize(gEyePosW - pin.PosW);//点指向相机向量
-
+	
 	const float shininess = 1.0f - gRoughness;
 	Material mat = { diffuseAlbedo, gFresnelR0, shininess };
 	float3 shadowFactor = 1.0f;//阴影系数
-
+	
 	//直接光照
 	float4 directLight = ComputeLighting(gLights, mat, pin.PosW, pin.NormalW, toEyeW, shadowFactor);
 	//环境光照
 	float4 ambient = gAmbientLight * diffuseAlbedo;
-
+	
 	float4 finalCol = directLight + ambient;
-
+	
 	finalCol.a = gDiffuseAlbedo.a;
-
+	
 	return finalCol;
 
-	//return gNormalMap.Sample(gSamAnisotropicWarp, pin.TexC);
-	//return gDiffuseMap.Sample(gSamAnisotropicWarp, pin.TexC);
-	//return pow((pin.NormalW + 1) * 0.5,1/2.2f);
 }
-
-
-
 
