@@ -870,7 +870,7 @@ void DX12RHI::BuildRootSignature()
 
 	auto StaticSamplers = GetStaticSamplers();
 	CD3DX12_ROOT_SIGNATURE_DESC RootSigDesc(
-		ParameterNum,//3个根参数
+		ParameterNum,//个根参数
 		SlotRootParameter,//根参数指针
 		(UINT)StaticSamplers.size(),
 		StaticSamplers.data(),
@@ -889,7 +889,7 @@ void DX12RHI::BuildRootSignature()
 
 
 
-std::array<const CD3DX12_STATIC_SAMPLER_DESC, 6> DX12RHI::GetStaticSamplers()
+std::array<const CD3DX12_STATIC_SAMPLER_DESC, 7> DX12RHI::GetStaticSamplers()
 {
 	// Applications usually only need a handful of samplers.  So just define them all up front
 		// and keep them available as part of the root signature.  
@@ -940,8 +940,19 @@ std::array<const CD3DX12_STATIC_SAMPLER_DESC, 6> DX12RHI::GetStaticSamplers()
 		0.0f,                              // mipLODBias
 		8);                                // maxAnisotropy
 
+	const CD3DX12_STATIC_SAMPLER_DESC shadow(6, // 着色器寄存器
+		D3D12_FILTER_COMPARISON_MIN_MAG_LINEAR_MIP_POINT, // filter
+		D3D12_TEXTURE_ADDRESS_MODE_BORDER,  // U方向上的寻址模式为BORDER
+		D3D12_TEXTURE_ADDRESS_MODE_BORDER,  // V方向上的寻址模式为BORDER
+		D3D12_TEXTURE_ADDRESS_MODE_BORDER,  // W方向上的寻址模式为BORDER
+		0.0f,                               // mipLODBias
+		16,                                 // maxAnisotropy
+		D3D12_COMPARISON_FUNC_LESS_EQUAL,	//执行阴影图的比较测试
+		D3D12_STATIC_BORDER_COLOR_OPAQUE_BLACK);
+
+
 	return {
 		pointWrap, pointClamp,
 		linearWrap, linearClamp,
-		anisotropicWrap, anisotropicClamp };
+		anisotropicWrap, anisotropicClamp, shadow};
 }

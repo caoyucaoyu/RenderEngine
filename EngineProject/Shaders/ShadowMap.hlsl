@@ -86,30 +86,33 @@ VertexOut VS(VertexIn vin)
 	return vout;
 }
 
-
-float4 PS(VertexOut pin) : SV_Target
-//void PS(VertexOut pin) //: SV_Target
+void PS(VertexOut pin)
 {
-	float4 diffuseAlbedo = gNormalMap.Sample(gSamAnisotropicWarp, pin.TexC) * gDiffuseAlbedo;
-	
-	pin.NormalW = normalize(pin.NormalW);
-	
-	float3 toEyeW = normalize(gEyePosW - pin.PosW);//点指向相机向量
-	
-	const float shininess = 1.0f - gRoughness;
-	Material mat = { diffuseAlbedo, gFresnelR0, shininess };
-	float3 shadowFactor = 1.0f;//阴影系数
-	
-	//直接光照
-	float4 directLight = ComputeLighting(gLights, mat, pin.PosW, pin.NormalW, toEyeW, shadowFactor);
-	//环境光照
-	float4 ambient = gAmbientLight * diffuseAlbedo;
-	
-	float4 finalCol = directLight + ambient;
-	
-	finalCol.a = gDiffuseAlbedo.a;
-	
-	return finalCol;
 
 }
+
+
+//float4 PS(VertexOut pin) : SV_Target
+//{
+//	float4 diffuseAlbedo = gNormalMap.Sample(gSamAnisotropicWarp, pin.TexC) * gDiffuseAlbedo;
+//	
+//	pin.NormalW = normalize(pin.NormalW);
+//	
+//	float3 toEyeW = normalize(gEyePosW - pin.PosW);//点指向相机向量
+//	
+//	const float shininess = 1.0f - gRoughness;
+//	Material mat = { diffuseAlbedo, gFresnelR0, shininess };
+//	float3 shadowFactor = 1.0f;//阴影系数
+//	
+//	//直接光照
+//	float4 directLight = ComputeLighting(gLights, mat, pin.PosW, pin.NormalW, toEyeW, shadowFactor);
+//	//环境光照
+//	float4 ambient = gAmbientLight * diffuseAlbedo;
+//	
+//	float4 finalCol = directLight + ambient;
+//	
+//	finalCol.a = gDiffuseAlbedo.a;
+//	
+//	return finalCol;
+//}
 

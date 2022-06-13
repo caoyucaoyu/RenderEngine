@@ -21,11 +21,19 @@ RenderScene::~RenderScene()
 void RenderScene::Init()
 {	
 	int FRCount = RHI::Get()->GetFrameResourceCount();
+
 	MainPassCommonBuffers.resize(FRCount);
 	for (int i = 0; i < FRCount; i++)
 	{
 		MainPassCommonBuffers[i] = RHI::Get()->CreateCommonBuffer(1, true, sizeof(PassConstants));
 		RHI::Get()->AddCommonBuffer(i, "Tmd", MainPassCommonBuffers[i]);
+	}
+
+	MainPassCommonBuffersSun.resize(FRCount);
+	for (int i = 0; i < FRCount; i++)
+	{
+		MainPassCommonBuffersSun[i] = RHI::Get()->CreateCommonBuffer(1, true, sizeof(PassConstants));
+		RHI::Get()->AddCommonBuffer(i, "Tmd", MainPassCommonBuffersSun[i]);
 	}
 }
 
@@ -147,6 +155,15 @@ void RenderScene::UpdateMainPassBuffer(PassConstants NewPasConstants)
 	//std::cout<<"Update CommonBuffer\n";
 }
 
+void RenderScene::UpdateMainPassBufferSun(PassConstants NewPasConstants)
+{
+	std::shared_ptr<void> CameraData = std::make_shared<PassConstants>(NewPasConstants);
+	int Idx = RHI::Get()->GetCurFrameResourceIdx();
+	RHI::Get()->UpdateCommonBuffer(MainPassCommonBuffersSun[Idx], CameraData, 0);
+
+	//std::cout<<"Update CommonBuffer\n";
+}
+
 GPUMeshBuffer* RenderScene::GetMeshBuffer(std::string MeshBufferName)
 {
 	if (GPUMeshBuffers.count(MeshBufferName))
@@ -159,6 +176,11 @@ GPUMeshBuffer* RenderScene::GetMeshBuffer(std::string MeshBufferName)
 GPUCommonBuffer* RenderScene::GetMainPassBuffer(int Idx)
 {
 	return MainPassCommonBuffers[Idx];
+}
+
+GPUCommonBuffer* RenderScene::GetMainPassBufferSun(int Idx)
+{
+	return MainPassCommonBuffersSun[Idx];
 }
 
 GPUTexture* RenderScene::FindGPUTexture(std::string Name)

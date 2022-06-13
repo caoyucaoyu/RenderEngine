@@ -79,6 +79,7 @@ public:
 
 private:
 	void UpdateMainPassBuffer();
+	void UpdateMainPassBufferSun();
 
 private:
 	Camera MainCamera;

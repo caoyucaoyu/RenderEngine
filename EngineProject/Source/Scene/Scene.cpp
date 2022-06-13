@@ -22,6 +22,7 @@ void Scene::Tick()
 	MainLight.Update();
 
 	UpdateMainPassBuffer();
+	UpdateMainPassBufferSun();
 
 	//if (Input::GetKeyState(Key::LM) == KeyState::BtnDown)
 	//{
@@ -126,12 +127,35 @@ void Scene::UpdateMainPassBuffer()
 	//Light
 	NewPasConstants.ambientLight = { 0.25f,0.25f,0.35f,1.0f };
 	NewPasConstants.lights[0].strength = { 1.0f,1.0f,1.0f };
-	NewPasConstants.lights[0].direction = { 1.0f, 0.0f, 0.0f };//¼ÆËã·½Ïò
 	NewPasConstants.lights[0].direction = MainLight.GetSunLightDir();
+
+	NewPasConstants.ShadowTransform = glm::transpose(MainLight.GetVP_N());
 
 	RenderThread* RenderT = RenderThread::Get();
 	Task* task = new Task([=]() {RenderT->GetRenderScene()->UpdateMainPassBuffer(NewPasConstants); });
 	RenderT->AddTask(task);
 
+}
+
+void Scene::UpdateMainPassBufferSun()
+{
+	glm::mat4 VP_Matrix = MainLight.GetProj() * MainLight.GetView();
+	glm::mat4 Po_Matrix = MainLight.GetPosM();
+
+	PassConstants NewPasConstants;
+	//Time
+	NewPasConstants.Time = Engine::Get()->GetTimer()->TotalTime();
+	//Camera
+	NewPasConstants.ViewProj_M = glm::transpose(VP_Matrix);
+	NewPasConstants.CameraPos_M = Po_Matrix;
+	NewPasConstants.CameraPos = MainLight.GetPos();
+	//Light
+	NewPasConstants.ambientLight = { 0.25f,0.25f,0.35f,1.0f };
+	NewPasConstants.lights[0].strength = { 1.0f,1.0f,1.0f };
+	NewPasConstants.lights[0].direction = MainLight.GetSunLightDir();
+
+	RenderThread* RenderT = RenderThread::Get();
+	Task* task = new Task([=]() {RenderT->GetRenderScene()->UpdateMainPassBufferSun(NewPasConstants); });
+	RenderT->AddTask(task);
 }
 

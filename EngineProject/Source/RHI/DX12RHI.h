@@ -135,6 +135,6 @@ private:
 	std::vector<ComPtr<ID3D12PipelineState>> PSOs;
 	void BuildPSO();
 
-	std::array<const CD3DX12_STATIC_SAMPLER_DESC, 6> GetStaticSamplers();
+	std::array<const CD3DX12_STATIC_SAMPLER_DESC, 7> GetStaticSamplers();
 	
 };

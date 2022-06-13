@@ -19,6 +19,8 @@ public:
 private:
 	void HDRPass();
 	void ShadowMapPass();
+	void BloomPass();
+	void ToneMappingPass();
 
 private:
 	int Width = 1280;

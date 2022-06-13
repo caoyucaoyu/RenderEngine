@@ -77,7 +77,7 @@ void ForwardRenderer::ShadowMapPass()
 	RHI::Get()->SetGraphicsPipeline(nullptr, 2);//2 就是PSO【2】ShadowMap的Pipeline
 
 	//RHI::Get()->SetRenderResourceTable(1, MRenderScene->GetMainPassBuffer(CurrentRenderIndex)->GetHandleOffset());
-	RHI::Get()->SetRenderResourceTable(1, MRenderScene->GetMainPassBuffer(CurrentRenderIndex)->GetHandleOffset());
+	RHI::Get()->SetRenderResourceTable(1, MRenderScene->GetMainPassBufferSun(CurrentRenderIndex)->GetHandleOffset());
 
 	auto Primitives = MRenderScene->GetPrimitives();
 	for (auto Primitive : Primitives)
@@ -97,7 +97,6 @@ void ForwardRenderer::ShadowMapPass()
 
 void ForwardRenderer::HDRPass()
 {
-
 	RHI::Get()->SetBackBufferBegin();
 
 	RHI::Get()->SetGraphicsPipeline(nullptr, 0);//1 就是PSO【1】Dynamic的Pipeline
@@ -118,13 +117,25 @@ void ForwardRenderer::HDRPass()
 
 		RHI::Get()->SetRenderResourceTable(3, MRenderScene->FindGPUTexture("Head_diff")->GetHandleOffset());
 		RHI::Get()->SetRenderResourceTable(4, MRenderScene->FindGPUTexture("Head_norm")->GetHandleOffset());
-		RHI::Get()->SetRenderResourceTable(5, MRenderScene->FindGPUTexture("Head_norm")->GetHandleOffset());//深度图用来采样
+		RHI::Get()->SetRenderResourceTable(5, RTShadowMap->GetDepthStencilBuffer()->RenderTargetTexture->GetHandleOffset());//深度图用来采样
 
 		RHI::Get()->DrawIndexedInstanced(Primitive->GetMeshBuffer()->GetIndices().size());
 	}
 
 	RHI::Get()->SetBackBufferEnd();
 }
+
+void ForwardRenderer::BloomPass()
+{
+
+}
+
+void ForwardRenderer::ToneMappingPass()
+{
+
+}
+
+
 
 
 

@@ -88,13 +88,11 @@ struct PassConstants
 	glm::vec3 CameraPos;
 	float Time = 0;
 
-	//ShadowMap Added
+	//ShadowMap Added	
+	glm::mat4 ShadowTransform = MathHelper::GIdentity4x4();
 	glm::vec2 RenderTargetSize = { 0.0f,0.0f };
 	float nearZ = 0.0f;
 	float farZ = 0.0f;
-
-	glm::mat4 ShadowTransform = MathHelper::GIdentity4x4();
-
 };
 
 struct MaterialConstants
